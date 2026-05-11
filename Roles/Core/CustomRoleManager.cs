@@ -902,6 +902,8 @@ public enum CustomRoles
     Rabbit,
     Nimrod,
     Sage,
+    NiceTrapper,
+    Moving,
     //TOH-K
     Gasp,
     VentMaster,

@@ -110,10 +110,9 @@ public sealed class DoubleKiller : RoleBase, IImpostor, IUsePhantomButton
 
         hasUsedPhantom = true;
         float savedKillTimer = Player.killTimer;
-        Vector2 targetPos = nearest.GetTruePosition();
+        Vector2 targetPos = nearest.transform.position;
         CustomRoleManager.OnCheckMurder(Player, nearest, nearest, nearest, true, true, 1, CustomDeathReason.Kill);
 
-        // ★ 死体の位置にワープ（通常キルに見せる）
         SnapToPosition(targetPos);
 
         _ = new LateTask(() =>
@@ -125,7 +124,6 @@ public sealed class DoubleKiller : RoleBase, IImpostor, IUsePhantomButton
         }, 0.2f, "DoubleKillerRestoreCD", true);
     }
 
-    // ★ 位置をSnapToでワープ（全クライアントに送信）
     private void SnapToPosition(Vector2 position)
     {
         Player.NetTransform.SnapTo(position);

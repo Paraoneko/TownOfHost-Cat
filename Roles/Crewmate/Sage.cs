@@ -47,7 +47,6 @@ public sealed class Sage : RoleBase
     float cooldownTimer;
     Vector2 savedPosition;
 
-    // ★ ミニクルーメイトのペットID
     private const string DefaultPetId = "pet_crewmate";
 
     enum OptionName
@@ -70,7 +69,6 @@ public sealed class Sage : RoleBase
 
         if (!AmongUsClient.Instance.AmHost) return;
 
-        // ★ ペットがついていない場合の自動付与処理を強化
         for (int i = 1; i <= 3; i++)
         {
             int delay = i;
@@ -80,14 +78,11 @@ public sealed class Sage : RoleBase
                 {
                     if (Player == null) return;
 
-                    // Data.DefaultOutfit もしくは CurrentOutfit から確認
                     string currentPet = Player.Data?.DefaultOutfit?.PetId ?? Player.CurrentOutfit?.PetId ?? "";
 
-                    // "pet_none" や "None" も「ペットなし」として判定する
                     bool hasPet = !string.IsNullOrEmpty(currentPet) && currentPet.ToLower() != "pet_none" && currentPet.ToLower() != "none";
-                    if (hasPet) return; // 既に何かしらのペットをつけているならスキップ
+                    if (hasPet) return;
 
-                    // 確実に付与するためにRpcSetPetを使用
                     Player.RpcSetPet(DefaultPetId);
                     Logger.Info($"{Player.Data.GetLogPlayerName()} にペット付与: {DefaultPetId} (試行{delay}回目)", "Sage");
                 }
@@ -121,7 +116,7 @@ public sealed class Sage : RoleBase
 
         isBarrierActive = true;
         barrierTimer = 0f;
-        savedPosition = Player.GetTruePosition();
+        savedPosition = Player.transform.position;
 
         Main.AllPlayerSpeed[Player.PlayerId] = Main.MinSpeed;
         Player.MarkDirtySettings();
@@ -187,7 +182,7 @@ public sealed class Sage : RoleBase
 
         barrierTimer += Time.fixedDeltaTime;
 
-        var currentPos = Player.GetTruePosition();
+        var currentPos = Player.transform.position;
         if (Vector2.Distance(currentPos, savedPosition) > 0.02f)
         {
             SnapPlayerToSaved();

@@ -169,6 +169,8 @@
 "Sage","Sage","賢者"
 "Nimrod","Nimrod","ニムロッド"
 "Hitchhiker","Hitchhiker","ヒッチハイカー"
+"Moving","Moving","ムービング"
+"NiceTrapper","NiceTrapper","ナイストラッパー"
 "#CrewmateName"
 
 "# ニュートラル役職"
@@ -1819,6 +1821,12 @@
 "SageBarrierDuration","Barrier Duration","バリア時間"
 "SageBarrierCooldown","Barrier Cooldown","バリアクールダウン"
 "PoisonedBakeryRole77","The probability of the bakery turning into a poisoned bakery.","毒入りパン屋に変化する確率"
+"NiceTrapperMaxTraps","Max Traps","設置可能回数"
+"NiceTrapperPlaceCooldown","Place Cooldown","設置クールタイム"
+"NiceTrapperTrapRange","Trap Range","トラップの当たり判定"
+"NiceTrapperEffectDuration","Effect Duration","加減速効果時間"
+"NiceTrapperSpeedBoost","Speed Boost Multiplier","加速倍率"
+"NiceTrapperSpeedDown","Speed Down Multiplier","減速倍率"
 
 "## Neutral Role Setting"
 "SchrodingerCatExiledTeamChanges","Team Changes When Ejected","吊られた際、陣営が変化する","薛定谔的猫被放逐时会加入其他阵营","薛定諤的貓被丟出時陣營會轉變","Команда меняется после его Изгнания","Time Muda Quando Exilado",""

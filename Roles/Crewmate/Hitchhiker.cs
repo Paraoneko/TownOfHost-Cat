@@ -38,6 +38,7 @@ public sealed class Hitchhiker : RoleBase
 
     public override void OnDestroy()
     {
+        RestoreMySpeed();
         ReleaseTarget();
         pendingTarget = null;
         PetActionManager.Unregister(Player.PlayerId);
@@ -70,6 +71,7 @@ public sealed class Hitchhiker : RoleBase
     private bool targetSpeedUp;
     private float targetSpeedMultiplier;
     private int snapFrame = 0;
+    private bool speedApplied = false;
 
     public static void SetupOptionItem()
     {
@@ -91,16 +93,24 @@ public sealed class Hitchhiker : RoleBase
         pendingTarget = null;
         abilityTimer = 0f;
         petAttachTimer = 0f;
-
+        speedApplied = false;
         Main.AllPlayerSpeed[Player.PlayerId] *= SpeedMultiplier;
+        speedApplied = true;
 
         PetActionManager.Register(Player.PlayerId, OnPetAction);
     }
 
-    // ★ ベントは一切使わない。ApplyGameOptionsでEngineering系のCDをいじらない
+    void RestoreMySpeed()
+    {
+        if (!speedApplied) return;
+        Main.AllPlayerSpeed[Player.PlayerId] /= SpeedMultiplier;
+        speedApplied = false;
+        Player.MarkDirtySettings();
+    }
+
     public override void ApplyGameOptions(IGameOptions opt)
     {
-        AURoleOptions.EngineerCooldown = 0f;
+        AURoleOptions.EngineerCooldown = currentCooldown > 0f ? currentCooldown : CooldownTimerLimit;
         AURoleOptions.EngineerInVentMaxTime = 0f;
     }
 
@@ -114,7 +124,9 @@ public sealed class Hitchhiker : RoleBase
         if (TargetPlayer != null)
         {
             ReleaseTarget();
-            currentCooldown = CooldownTimerLimit; // ★ RpcResetAbilityCooldownは呼ばない
+            currentCooldown = CooldownTimerLimit;
+            Player.MarkDirtySettings();
+            Player.RpcResetAbilityCooldown(Sync: true);
             SendRpc();
             return;
         }
@@ -182,19 +194,32 @@ public sealed class Hitchhiker : RoleBase
         UtilsNotifyRoles.NotifyRoles();
     }
 
+    static bool IsTargetOnRestrictedMove(PlayerControl target)
+    {
+        if (target == null) return false;
+        if (target.MyPhysics.Animations.IsPlayingAnyLadderAnimation()) return true;
+        if (target.onLadder) return true;
+        if ((MapNames)Main.NormalOptions.MapId == MapNames.Airship &&
+            Vector2.Distance(target.GetTruePosition(), new Vector2(7.76f, 8.56f)) <= 1.9f) return true;
+        if (target.inMovingPlat) return true;
+        return false;
+    }
+
     public override void OnFixedUpdate(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!GameStates.IsInTask) return;
 
-        // ★ クールダウンを内部タイマーだけで管理。ベントCDは一切触らない
         if (currentCooldown > 0f)
         {
+            float prev = currentCooldown;
             currentCooldown -= Time.fixedDeltaTime;
-            if (currentCooldown <= 0f)
+            if (currentCooldown <= 0f) currentCooldown = 0f;
+
+            if (Mathf.FloorToInt(prev) != Mathf.FloorToInt(currentCooldown))
             {
-                currentCooldown = 0f;
-                UtilsNotifyRoles.NotifyRoles();
+                Player.MarkDirtySettings();
+                SendRpc();
             }
         }
 
@@ -213,6 +238,8 @@ public sealed class Hitchhiker : RoleBase
                     AttachToPlayer(pendingTarget);
                     pendingTarget = null;
                     currentCooldown = 1f;
+                    Player.MarkDirtySettings();
+                    Player.RpcResetAbilityCooldown(Sync: true);
                     SendRpc();
                 }
             }
@@ -224,17 +251,26 @@ public sealed class Hitchhiker : RoleBase
             {
                 ReleaseTarget();
                 currentCooldown = CooldownTimerLimit;
+                Player.MarkDirtySettings();
+                Player.RpcResetAbilityCooldown(Sync: true);
                 SendRpc();
                 return;
             }
 
             if (DurationLimit > 0f)
             {
-                abilityTimer -= Time.fixedDeltaTime;
+                // ★ ターゲットが梯子/ジップライン/ヌーン使用中はタイマーを止める
+                if (!IsTargetOnRestrictedMove(TargetPlayer))
+                {
+                    abilityTimer -= Time.fixedDeltaTime;
+                }
+
                 if (abilityTimer <= 0f)
                 {
                     ReleaseTarget();
                     currentCooldown = CooldownTimerLimit;
+                    Player.MarkDirtySettings();
+                    Player.RpcResetAbilityCooldown(Sync: true);
                     SendRpc();
                     return;
                 }
@@ -256,6 +292,13 @@ public sealed class Hitchhiker : RoleBase
         }
     }
 
+    // ★ 死亡時に速度を戻す
+    public override void OnMurderPlayerAsTarget(MurderInfo info)
+    {
+        RestoreMySpeed();
+        ReleaseTarget();
+    }
+
     public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -274,6 +317,8 @@ public sealed class Hitchhiker : RoleBase
         if (!AmongUsClient.Instance.AmHost) return;
         currentCooldown = CooldownTimerLimit;
         pendingTarget = null;
+        Player.MarkDirtySettings();
+        Player.RpcResetAbilityCooldown(Sync: true);
         UtilsNotifyRoles.NotifyRoles();
     }
 
@@ -292,7 +337,7 @@ public sealed class Hitchhiker : RoleBase
             return $"{size}<color={color}>乗車準備中...</color>";
 
         if (currentCooldown > 0f)
-            return $"{size}<color=#888888>クールダウン中: {Mathf.CeilToInt(currentCooldown)}s</color>";
+            return $"{size}<color=#888888>クールダウン中</color>";
 
         return $"{size}<color={color}>ペットを撫でる → 近くのプレイヤーに乗る</color>";
     }
@@ -332,12 +377,14 @@ public sealed class Hitchhiker : RoleBase
         using var sender = CreateSender();
         sender.Writer.Write(TargetPlayer?.PlayerId ?? byte.MaxValue);
         sender.Writer.Write(abilityTimer);
+        sender.Writer.Write(currentCooldown);
     }
 
     public override void ReceiveRPC(MessageReader reader)
     {
         byte targetId = reader.ReadByte();
         abilityTimer = reader.ReadSingle();
+        currentCooldown = reader.ReadSingle();
 
         if (targetId == byte.MaxValue)
             TargetPlayer = null;

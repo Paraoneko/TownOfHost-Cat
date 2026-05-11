@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -711,4 +711,4 @@ public static class ClosePanelOnMeetingPatch
 public static class ClosePanelOnGameEndPatch
 {
     public static void Prefix() => RoleGuideButtonPatch.ClosePanel();
-}
+}*/

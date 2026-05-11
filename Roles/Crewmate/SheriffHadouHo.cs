@@ -381,18 +381,23 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
     {
         seen ??= seer;
         if (seen.PlayerId != seer.PlayerId || isForMeeting || !Player.IsAlive()) return "";
+
         string size = isForHud ? "" : "<size=60%>";
-        if (ShotLimit <= 0) return $"{size}<color=#888888>Out of ammo</color>";
-        if (!IsCharging) return $"{size}<color=#f8cd46>Phantom Button -> Charge Fire</color>";
-        return $"{size}<color=#f8cd46>Charging... {(ChargeTime - chargeTimer):F1}s</color>";
+
+        if (ShotLimit <= 0) return $"{size}<color=#888888>弾切れ</color>";
+        if (!IsCharging) return $"{size}<color=#ff0000>ファントムボタン → チャージ発射</color>";
+
+        return $"{size}<color=#ff0000>チャージ中... {(ChargeTime - chargeTimer):F1}s</color>";
     }
 
     public string GetLowerTextOthers(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
         if (seen != seer || isForMeeting || !Player.IsAlive()) return "";
-        if (IsCharging && seer.PlayerId != Player.PlayerId) return $"<color=#f8cd46>Charging... {(int)(ChargeTime - chargeTimer)}s</color>";
-        if (ShowBeamMark && seer.PlayerId != Player.PlayerId) return "<color=#f8cd46>Firing Beam</color>";
+
+        if (IsCharging && seer.PlayerId != Player.PlayerId) return $"\n<color=#ff0000>チャージ中... {(int)(ChargeTime - chargeTimer)}s</color>";
+        if (ShowBeamMark && seer.PlayerId != Player.PlayerId) return "\n<color=#ff0000>ビーム中</color>";
+
         return "";
     }
 
