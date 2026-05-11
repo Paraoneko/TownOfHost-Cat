@@ -180,6 +180,7 @@ namespace TownOfHost
             Color WinColor = __instance.WinText.color;
 
             (CustomWinnerText, CustomWinnerColor, WinText, BackgroundBar, WinColor) = UtilsGameLog.GetWinnerText(WinText, BackgroundBar, WinColor);
+            CustomWinnerText = TownOfHost.Roles.Neutral.BatGirl.NormalizeWinnerText(CustomWinnerText);
 
             WinnerText.text = CustomWinnerText;
             __instance.WinText.text = WinText;

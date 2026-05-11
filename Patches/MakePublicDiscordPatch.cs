@@ -1,0 +1,495 @@
+using System;
+using System.Reflection;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
+using HarmonyLib;
+using InnerNet;
+
+namespace TownOfHost
+{
+    [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.MakePublic))]
+    internal static class MakePublicDiscordBotPatch
+    {
+        private static bool _allowPostfix;
+
+        [HarmonyPrefix]
+        [HarmonyPriority(Priority.Last)]
+        public static bool Prefix()
+        {
+            // If this runs, earlier blockers did not prevent MakePublic.
+            _allowPostfix = true;
+            return true;
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            if (!_allowPostfix) return;
+            _allowPostfix = false;
+            DiscordMatchmakingRelayService.NotifyMadePublic();
+        }
+    }
+
+    [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.FixedUpdate))]
+    internal static class UpdateDiscordMatchmakingRelayPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            DiscordMatchmakingRelayService.Tick();
+        }
+    }
+
+    [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.ExitGame))]
+    internal static class DeleteDiscordMatchmakingOnExitPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            DiscordMatchmakingRelayService.TryDelete("ExitGame");
+        }
+    }
+
+    [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnDisconnected))]
+    internal static class DeleteDiscordMatchmakingOnDisconnectPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix()
+        {
+            DiscordMatchmakingRelayService.TryDelete("OnDisconnected");
+        }
+    }
+
+    [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.StartGame))]
+    internal static class UpdateDiscordMatchmakingOnStartGamePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            DiscordMatchmakingRelayService.RequestImmediateUpdate("StartGame");
+        }
+    }
+
+    internal static class DiscordMatchmakingRelayService
+    {
+        private static readonly HttpClient Client = new() { Timeout = TimeSpan.FromSeconds(3.0) };
+        private static readonly object Sync = new();
+
+        private static string _lastRoomCode = "";
+        private static string _lastMessageId = "";
+        private static string _lastSnapshot = "";
+        private static bool _lobbyPublicObserved;
+        private static long _privateDetectedAtMs;
+        private static bool _activeRecruitment;
+        private static bool _forceUpdateRequested;
+        private static long _nextUpdateAtMs;
+
+        private const int UpdateIntervalMs = 6000;
+
+        public static void NotifyMadePublic()
+        {
+            try
+            {
+                if (!CanSend()) return;
+                if (!TryCollectLobby(out var hostName, out var roomCode, out var state, out var players, out var maxPlayers)) return;
+                var snapshot = $"{hostName}|{roomCode}|{state}|{players}/{maxPlayers}";
+                var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                lock (Sync)
+                {
+                    _activeRecruitment = true;
+                    _lobbyPublicObserved = true;
+                    _privateDetectedAtMs = 0;
+                    _forceUpdateRequested = false;
+                    _nextUpdateAtMs = nowMs + UpdateIntervalMs;
+                    _lastSnapshot = snapshot;
+                }
+
+                SendUpsert(hostName, roomCode, state, players, maxPlayers, "MakePublic");
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e, nameof(DiscordMatchmakingRelayService));
+            }
+        }
+
+        public static void Tick()
+        {
+            try
+            {
+                if (!CanSend()) return;
+
+                lock (Sync)
+                {
+                    if (!_activeRecruitment) return;
+                }
+
+                if (ShouldDeleteBecauseBecamePrivateInLobby())
+                {
+                    TryDelete("MadePrivate");
+                    return;
+                }
+
+                var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var forceUpdate = false;
+                lock (Sync)
+                {
+                    forceUpdate = _forceUpdateRequested;
+                    if (!forceUpdate && nowMs < _nextUpdateAtMs) return;
+                    _forceUpdateRequested = false;
+                    _nextUpdateAtMs = nowMs + UpdateIntervalMs;
+                }
+
+                if (!TryCollectLobby(out var hostName, out var roomCode, out var state, out var players, out var maxPlayers)) return;
+
+                var snapshot = $"{hostName}|{roomCode}|{state}|{players}/{maxPlayers}";
+                lock (Sync)
+                {
+                    if (string.Equals(snapshot, _lastSnapshot, StringComparison.Ordinal)) return;
+                    _lastSnapshot = snapshot;
+                }
+
+                SendUpsert(hostName, roomCode, state, players, maxPlayers, "Tick");
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e, nameof(DiscordMatchmakingRelayService));
+            }
+        }
+
+        public static void TryDelete(string reason)
+        {
+            try
+            {
+                if (Main.IsAndroid()) return;
+
+                var roomCode = GetCurrentRoomCode();
+                if (string.IsNullOrWhiteSpace(roomCode))
+                    roomCode = GetLastRoomCode();
+
+                if (string.IsNullOrWhiteSpace(roomCode)) return;
+
+                lock (Sync)
+                {
+                    _activeRecruitment = false;
+                    _lobbyPublicObserved = false;
+                    _privateDetectedAtMs = 0;
+                    _forceUpdateRequested = false;
+                    _lastSnapshot = "";
+                }
+
+                var messageId = GetLastMessageId(roomCode);
+                SendCore(
+                    action: "delete",
+                    hostName: "Unknown Host",
+                    roomCode: roomCode,
+                    state: "Closed",
+                    players: 0,
+                    maxPlayers: 0,
+                    messageId: messageId,
+                    reason: reason ?? ""
+                );
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e, nameof(DiscordMatchmakingRelayService));
+            }
+        }
+
+        private static void SendUpsert(string hostName, string roomCode, string state, int players, int maxPlayers, string reason)
+        {
+            var messageId = GetLastMessageId(roomCode);
+            SendCore(
+                action: "upsert",
+                hostName: hostName,
+                roomCode: roomCode,
+                state: state,
+                players: players,
+                maxPlayers: maxPlayers,
+                messageId: messageId,
+                reason: reason
+            );
+        }
+
+        private static void SendCore(string action, string hostName, string roomCode, string state, int players, int maxPlayers, string messageId, string reason)
+        {
+            var relayUrl = Main.MatchmakingRelayUrl;
+            var relaySecret = Main.MatchmakingRelaySecret;
+
+            if (string.IsNullOrWhiteSpace(relayUrl) || relayUrl.Equals("none", StringComparison.OrdinalIgnoreCase))
+                return;
+
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    Logger.Info($"Relay send: action={action}, room={roomCode}, state={state}, players={players}/{maxPlayers}, reason={reason}", nameof(DiscordMatchmakingRelayService));
+
+                    using var req = new HttpRequestMessage(HttpMethod.Post, relayUrl);
+                    if (!string.IsNullOrWhiteSpace(relaySecret) && !relaySecret.Equals("none", StringComparison.OrdinalIgnoreCase))
+                        req.Headers.TryAddWithoutValidation("X-Relay-Secret", relaySecret);
+
+                    req.Content = new StringContent(
+                        BuildPayload(action, hostName, roomCode, state, players, maxPlayers, messageId, reason),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    using var res = await Client.SendAsync(req);
+                    var body = await res.Content.ReadAsStringAsync();
+
+                    if (!res.IsSuccessStatusCode)
+                    {
+                        Logger.Warn($"Discord relay failed: {(int)res.StatusCode} {res.StatusCode} / {body}", nameof(DiscordMatchmakingRelayService));
+                        return;
+                    }
+
+                    Logger.Info($"Relay success: action={action}, room={roomCode}, state={state}, reason={reason}", nameof(DiscordMatchmakingRelayService));
+
+                    if (action.Equals("upsert", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var newMessageId = TryReadJsonString(body, "messageId");
+                        if (!string.IsNullOrWhiteSpace(newMessageId))
+                            SetLastRecruitment(roomCode, newMessageId);
+                    }
+                    else if (action.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ClearLastRecruitment(roomCode, messageId);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Exception(ex, nameof(DiscordMatchmakingRelayService));
+                }
+            });
+        }
+
+        private static bool CanSend()
+        {
+            if (Main.IsAndroid()) return false;
+            if (AmongUsClient.Instance == null || !AmongUsClient.Instance.AmHost) return false;
+            return true;
+        }
+
+        public static void RequestImmediateUpdate(string reason)
+        {
+            try
+            {
+                if (!CanSend()) return;
+                lock (Sync)
+                {
+                    if (!_activeRecruitment) return;
+                    _forceUpdateRequested = true;
+                    _nextUpdateAtMs = 0;
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Exception(e, nameof(DiscordMatchmakingRelayService));
+            }
+        }
+
+        private static bool ShouldDeleteBecauseBecamePrivateInLobby()
+        {
+            if (AmongUsClient.Instance != null && AmongUsClient.Instance.IsGameStarted) return false;
+            if (!GameStates.IsLobby) return false;
+            if (GameStates.IsInGame) return false;
+            if (GameStates.IsCountDown) return false;
+            if (!GameStartManager.InstanceExists) return false;
+
+            if (!TryGetLobbyPublicState(out var isPublic)) return false;
+            var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            lock (Sync)
+            {
+                if (isPublic)
+                {
+                    _lobbyPublicObserved = true;
+                    _privateDetectedAtMs = 0;
+                    return false;
+                }
+
+                if (!_lobbyPublicObserved) return false;
+                if (_privateDetectedAtMs == 0)
+                {
+                    _privateDetectedAtMs = nowMs;
+                    return false;
+                }
+
+                if (nowMs - _privateDetectedAtMs < 1500)
+                    return false;
+
+                _lobbyPublicObserved = false;
+                _privateDetectedAtMs = 0;
+                return true;
+            }
+        }
+
+        private static bool TryGetLobbyPublicState(out bool isPublic)
+        {
+            isPublic = false;
+
+            var client = AmongUsClient.Instance;
+            if (client != null && TryReadPublicFlag(client, out isPublic))
+                return true;
+
+            var gsm = GameStartManager.Instance;
+            if (gsm != null && TryReadPublicFlag(gsm, out isPublic))
+                return true;
+
+            return false;
+        }
+
+        private static bool TryReadPublicFlag(object target, out bool value)
+        {
+            value = false;
+            if (target == null) return false;
+
+            const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+            var type = target.GetType();
+            var candidateNames = new[]
+            {
+                "IsGamePublic",
+                "IsPublic",
+                "GamePublic",
+                "Public",
+                "isPublic",
+            };
+
+            foreach (var name in candidateNames)
+            {
+                try
+                {
+                    var prop = type.GetProperty(name, flags);
+                    if (prop != null && prop.PropertyType == typeof(bool))
+                    {
+                        value = (bool)prop.GetValue(target);
+                        return true;
+                    }
+                }
+                catch
+                {
+                }
+
+                try
+                {
+                    var field = type.GetField(name, flags);
+                    if (field != null && field.FieldType == typeof(bool))
+                    {
+                        value = (bool)field.GetValue(target);
+                        return true;
+                    }
+                }
+                catch
+                {
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryCollectLobby(out string hostName, out string roomCode, out string state, out int players, out int maxPlayers)
+        {
+            hostName = PlayerControl.LocalPlayer?.Data?.PlayerName ?? "Unknown Host";
+            roomCode = GetCurrentRoomCode();
+            var gameStarted = AmongUsClient.Instance != null && AmongUsClient.Instance.IsGameStarted;
+            state = gameStarted || GameStates.IsInGame ? "InGame" : (GameStates.IsLobby ? "Lobby" : "Unknown");
+            players = AmongUsClient.Instance?.allClients?.Count ?? 0;
+            maxPlayers = Main.NormalOptions?.MaxPlayers ?? 15;
+            return !string.IsNullOrWhiteSpace(roomCode);
+        }
+
+        private static string BuildPayload(string action, string hostName, string roomCode, string state, int players, int maxPlayers, string messageId, string reason)
+        {
+            var nowUtc = DateTime.UtcNow.ToString("o");
+            return "{"
+                + $"\"action\":\"{EscapeJson(action ?? "upsert")}\","
+                + $"\"hostName\":\"{EscapeJson(hostName)}\","
+                + $"\"roomCode\":\"{EscapeJson(roomCode)}\","
+                + $"\"state\":\"{EscapeJson(state ?? "Unknown")}\","
+                + $"\"players\":{players},"
+                + $"\"maxPlayers\":{maxPlayers},"
+                + $"\"messageId\":\"{EscapeJson(messageId ?? "")}\","
+                + $"\"reason\":\"{EscapeJson(reason ?? "")}\","
+                + $"\"mod\":\"{EscapeJson(Main.ModName)}\","
+                + $"\"forkId\":\"{EscapeJson(Main.ForkId)}\","
+                + $"\"sentAtUtc\":\"{EscapeJson(nowUtc)}\""
+                + "}";
+        }
+
+        private static string TryReadJsonString(string json, string propName)
+        {
+            if (string.IsNullOrWhiteSpace(json) || string.IsNullOrWhiteSpace(propName)) return "";
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty(propName, out var elem)) return "";
+                return elem.ValueKind == JsonValueKind.String ? elem.GetString() ?? "" : "";
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static void SetLastRecruitment(string roomCode, string messageId)
+        {
+            lock (Sync)
+            {
+                _lastRoomCode = roomCode ?? "";
+                _lastMessageId = messageId ?? "";
+            }
+        }
+
+        private static void ClearLastRecruitment(string roomCode, string messageId)
+        {
+            lock (Sync)
+            {
+                if (!string.IsNullOrWhiteSpace(roomCode) && !string.Equals(roomCode, _lastRoomCode, StringComparison.Ordinal)) return;
+                if (!string.IsNullOrWhiteSpace(messageId) && !string.Equals(messageId, _lastMessageId, StringComparison.Ordinal)) return;
+
+                _lastRoomCode = "";
+                _lastMessageId = "";
+            }
+        }
+
+        private static string GetLastRoomCode()
+        {
+            lock (Sync) return _lastRoomCode;
+        }
+
+        private static string GetLastMessageId(string roomCode)
+        {
+            lock (Sync)
+            {
+                if (string.IsNullOrWhiteSpace(roomCode)) return _lastMessageId;
+                if (!string.Equals(roomCode, _lastRoomCode, StringComparison.Ordinal)) return "";
+                return _lastMessageId;
+            }
+        }
+
+        private static string GetCurrentRoomCode()
+        {
+            try
+            {
+                return GameCode.IntToGameName(AmongUsClient.Instance.GameId);
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private static string EscapeJson(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return string.Empty;
+            return s
+                .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("\r", "\\r")
+                .Replace("\n", "\\n")
+                .Replace("\t", "\\t");
+        }
+    }
+}

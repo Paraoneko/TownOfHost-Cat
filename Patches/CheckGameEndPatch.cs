@@ -74,6 +74,7 @@ namespace TownOfHost
 
             // 陰陽師を勝たせる
             Onmyoji.TryTakeOverCrewWin(ref reason);
+            BatGirl.TryTakeOverSoloWin(ref reason);
 
             if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Default)
             {
@@ -337,6 +338,7 @@ namespace TownOfHost
                     winnerList.Add(pc.PlayerId);
                 }
             var (CustomWinnerText, CustomWinnerColor, _, _, _) = UtilsGameLog.GetWinnerText(winnerList: winnerList);
+            CustomWinnerText = BatGirl.NormalizeWinnerText(CustomWinnerText);
             var winnerSize = GetScale(CustomWinnerText.RemoveHtmlTags().Length, 2, 3.3);
             CustomWinnerText = $"<size={winnerSize}>{CustomWinnerText}</size>";
             static double GetScale(int input, double min, double max)

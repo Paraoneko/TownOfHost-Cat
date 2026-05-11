@@ -983,6 +983,7 @@ public enum CustomRoles
     Monika,
     LoversBreaker,
     Suicider,
+    BatGirl,
     //TOH-K
     Remotekiller,
     Chef,
@@ -1046,6 +1047,7 @@ public enum CustomRoles
     Autopsy,
     Revenger,
     Speeding,
+    Damudo,
     Management,
     Opener,
     Powerful,

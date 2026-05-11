@@ -26,6 +26,27 @@ namespace TownOfHost;
 [HarmonyPatch]
 public static class MeetingHudPatch
 {
+    static readonly List<(byte sentto, string title, string text)> postDayMeetingSends = [];
+
+    public static void EnqueuePostDayMeetingMessage(byte sentTo, string text, string title = "")
+    {
+        if (text.RemoveHtmlTags() == "") return;
+        postDayMeetingSends.Add((sentTo, title, text));
+    }
+
+    static void FlushPostDayMeetingMessages()
+    {
+        if (postDayMeetingSends.Count == 0) return;
+
+        foreach (var data in postDayMeetingSends)
+        {
+            Utils.SendMessage(data.text, data.sentto, data.title);
+            StartPatch.meetingsends.Add((data.sentto, data.title, data.text));
+        }
+
+        postDayMeetingSends.Clear();
+    }
+
     [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CheckForEndVoting))]
     class CheckForEndVotingPatch
     {
@@ -99,6 +120,7 @@ public static class MeetingHudPatch
         public static ICollection<(byte sentto, string title, string text)> meetingsends = [];
         public static void Prefix()
         {
+            postDayMeetingSends.Clear();
             Logger.Info($"------------会議開始　day:{UtilsGameLog.day}------------", "Phase");
             GameStates.introDestroyed = true;
             ChatUpdatePatch.DoBlockChat = true;
@@ -281,6 +303,7 @@ public static class MeetingHudPatch
                 Utils.SendMessage(Send, title: Title);
                 meetingsends.Add((byte.MaxValue, Title, Send));
             }
+            FlushPostDayMeetingMessages();
             if (Options.CanSeeTimeLimit.GetBool())
             {
                 string limittext = "";
@@ -572,6 +595,7 @@ public static class MeetingHudPatch
                 }
             }
             StartPatch.meetingsends = [];
+            postDayMeetingSends.Clear();
             MeetingStates.FirstMeeting = false;
             Logger.Info("------------会議終了------------", "Phase");
             if (AmongUsClient.Instance.AmHost)
