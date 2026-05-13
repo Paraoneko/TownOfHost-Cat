@@ -24,6 +24,7 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
             "#00b4eb",
             (1, 3),
             true,
+            from: From.TownOfHost_K,
             countType: CountTypes.Jackal,
             assignInfo: new RoleAssignInfo(CustomRoles.JackalWolf, CustomRoleTypes.Neutral)
             {
