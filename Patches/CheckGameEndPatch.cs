@@ -73,6 +73,7 @@ namespace TownOfHost
             predicate.CheckForEndGame(out reason);
 
             // 陰陽師を勝たせる
+            //Zombie.TryTakeOverCrewWin(ref reason);
             Onmyoji.TryTakeOverCrewWin(ref reason);
             BatGirl.TryTakeOverSoloWin(ref reason);
 

@@ -520,6 +520,7 @@ namespace TownOfHost
         God = CustomRoles.God,
         Tuna = CustomRoles.Tuna,
         Onmyoji = CustomRoles.Onmyoji,
+        Zombie = CustomRoles.Zombie,
         Eater = CustomRoles.Eater,
         Spelunker = CustomRoles.Spelunker,
         Pavlov = CustomRoles.PavlovDog,

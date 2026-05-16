@@ -173,7 +173,7 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
         if (!AmongUsClient.Instance.AmHost) return;
 
         // 莨夊ｭｰ蠕碁≦蟒ｶ豁ｻ繧ｭ繝･繝ｼ縺ｫ蜈･縺｣縺滓凾轤ｹ縺ｧ蜷後ち繝ｼ繝ｳ豁ｻ莠｡縺ｨ縺励※蜈亥叙繧・        if (princeId != byte.MaxValue && Main.AfterMeetingDeathPlayers.ContainsKey(princeId))
-            MarkPrinceDeathThisTurn();
+        MarkPrinceDeathThisTurn();
         if (Main.AfterMeetingDeathPlayers.ContainsKey(Player.PlayerId))
             MarkBatGirlDeathThisTurn();
 
@@ -354,6 +354,11 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
 
     public static bool TryTakeOverSoloWin(ref GameOverReason reason)
     {
+        if (OptionAddWin.GetBool())
+        {
+            return false;
+        }
+
         foreach (var role in Instances.ToArray())
         {
             if (role == null) continue;
@@ -369,7 +374,6 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
 
             CustomWinnerHolder.NeutralWinnerIds.Add(role.Player.PlayerId);
             CustomWinnerHolder.WinnerIds.Add(role.Player.PlayerId);
-            role.AddPrinceAsWinner(addDisplayTag: true);
             reason = GameOverReason.ImpostorsByKill;
             Logger.Info($"TryTakeOverSoloWin success: {role.Player.GetNameWithRole().RemoveHtmlTags()}", "BatGirl");
             return true;
@@ -380,51 +384,57 @@ public sealed class BatGirl : RoleBase, ISelfVoter, IUsePhantomButton, IAddition
 
     public static string NormalizeWinnerText(string text)
     {
-        if (string.IsNullOrEmpty(text)) return text;
-        if (CustomWinnerHolder.WinnerTeam != CustomWinner.BatGirl) return text;
-        if (!CustomWinnerHolder.AdditionalWinnerRoles.Contains(CustomRoles.BatGirl)) return text;
-
-        var roleName = GetString("BatGirl");
-        return text
-            .Replace($"{roleName}&{roleName}", $"{roleName}&王子様")
-            .Replace($"{roleName}＆{roleName}", $"{roleName}＆王子様")
-            .Replace("BatGirl&BatGirl", "BatGirl&Prince")
-            .Replace("BatGirl＆BatGirl", "BatGirl＆Prince");
+        return text;
     }
 
     PlayerControl GetPrince() => princeId == byte.MaxValue ? null : PlayerCatch.GetPlayerById(princeId);
 
-    void AddPrinceAsWinner(bool addDisplayTag)
-    {
-        if (princeId == byte.MaxValue) return;
-        CustomWinnerHolder.WinnerIds.Add(princeId);
-        CustomWinnerHolder.CantWinPlayerIds.Remove(princeId);
-        if (addDisplayTag)
-            CustomWinnerHolder.AdditionalWinnerRoles.Add(CustomRoles.BatGirl);
-    }
-
     public override void CheckWinner(GameOverReason reason)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        Logger.Info($"CheckWinner state: {Player.GetNameWithRole().RemoveHtmlTags()} prince={princeId} pDead={princeDiedThisTurn} bgDead={batGirlDiedThisTurn} sat={soloDeathSatisfied}", "BatGirl");
+        bool hasSelfWinner = CustomWinnerHolder.WinnerIds.Contains(Player.PlayerId);
+        bool hasBatGirlAdditional = CustomWinnerHolder.AdditionalWinnerRoles.Contains(CustomRoles.BatGirl);
+        Logger.Info(
+            $"CheckWinner state: {Player.GetNameWithRole().RemoveHtmlTags()} prince={princeId} pDead={princeDiedThisTurn} bgDead={batGirlDiedThisTurn} sat={soloDeathSatisfied} winner={CustomWinnerHolder.WinnerTeam} hasSelfWinner={hasSelfWinner} hasBatGirlAdditional={hasBatGirlAdditional}",
+            "BatGirl"
+        );
         if (!CanSoloWinNow()) return;
 
-        if (CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.BatGirl, Player.PlayerId, true, CustomRoles.BatGirl))
+        if (OptionAddWin.GetBool())
+        {
+            Logger.Info("CheckWinner skip takeover: AddWin enabled", "BatGirl");
+            return;
+        }
+
+        if (CustomWinnerHolder.WinnerTeam == CustomWinner.BatGirl)
+        {
+            if (!hasSelfWinner)
+                CustomWinnerHolder.WinnerIds.Add(Player.PlayerId);
+            Logger.Info("CheckWinner skip duplicate add-win: WinnerTeam already BatGirl", "BatGirl");
+            return;
+        }
+
+        if (CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.BatGirl, Player.PlayerId, false, CustomRoles.BatGirl))
         {
             CustomWinnerHolder.NeutralWinnerIds.Add(Player.PlayerId);
             CustomWinnerHolder.WinnerIds.Add(Player.PlayerId);
-            AddPrinceAsWinner(addDisplayTag: true);
         }
     }
 
     bool IAdditionalWinner.CheckWin(ref CustomRoles winnerRole)
     {
         if (!OptionAddWin.GetBool()) return false;
+
+        // AddWin ON時は「同ターン死亡(旧solo条件)」でも追加勝利として扱う
+        if (CanSoloWinNow())
+        {
+            winnerRole = CustomRoles.BatGirl;
+            return true;
+        }
+
         if (!Player.IsAlive()) return false;
         var prince = GetPrince();
         if (prince == null || !prince.IsAlive()) return false;
-
-        AddPrinceAsWinner(addDisplayTag: true);
 
         winnerRole = CustomRoles.BatGirl;
         return true;

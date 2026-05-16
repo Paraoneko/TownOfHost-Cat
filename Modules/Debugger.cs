@@ -11,11 +11,10 @@ namespace TownOfHost
 {
     class Webhook
     {
-        public static void Send(string text)
+        public static bool SendToUrl(string text, string webhookUrl)
         {
-            if (Main.IsAndroid()) return;
-            ClientOptionsManager.CheckOptions();
-            if (ClientOptionsManager.WebhookUrl == "none" || !Main.UseWebHook.Value) return;
+            if (Main.IsAndroid()) return false;
+            if (string.IsNullOrWhiteSpace(webhookUrl) || webhookUrl == "none") return false;
             HttpClient httpClient = new();
             Dictionary<string, string> strs = new()
             {
@@ -24,13 +23,23 @@ namespace TownOfHost
             try
             {
                 TaskAwaiter<HttpResponseMessage> awaiter = httpClient.PostAsync(
-                    ClientOptionsManager.WebhookUrl, new FormUrlEncodedContent(strs)).GetAwaiter();
+                    webhookUrl, new FormUrlEncodedContent(strs)).GetAwaiter();
                 awaiter.GetResult();
+                return true;
             }
             catch
             {
                 Logger.Warn("WebHookの送信に失敗", nameof(Webhook));
+                return false;
             }
+        }
+
+        public static void Send(string text)
+        {
+            if (Main.IsAndroid()) return;
+            ClientOptionsManager.CheckOptions();
+            if (ClientOptionsManager.WebhookUrl == "none" || !Main.UseWebHook.Value) return;
+            _ = SendToUrl(text, ClientOptionsManager.WebhookUrl);
         }
         //参考元→https://github.com/Dolly1016/Nebula-Public/
         public static void SendResult(byte[] pngImage)

