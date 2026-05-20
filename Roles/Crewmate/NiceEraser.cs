@@ -22,7 +22,7 @@ public sealed class NiceEraser : RoleBase, ISelfVoter
             SetupOptionItem,
             "nicer",
             "#d0ff00",
-            (8, 8)
+            (1, 5)
         );
 
     private static OptionItem OptionMaxUseCount;

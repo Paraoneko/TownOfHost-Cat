@@ -1260,12 +1260,12 @@ namespace TownOfHost
 
             ObjectOptionitem.Create(1_300_112, "OtherOption", true, null, TabGroup.MainSettings).SetOptionName(() => "Other2").SetColorcode("#4f9bffff");
 
-            OptionCommandSetting = BooleanOptionItem.Create(1_300_114, "CommandSetting", false, TabGroup.MainSettings, true)
+            OptionCommandSetting = BooleanOptionItem.Create(1_300_114, "CommandSetting", true, TabGroup.MainSettings, true)
                 .SetHeader(true)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "コマンド設定");
 
-            OptionCanChangeName = BooleanOptionItem.Create(1_300_130, "CanChangeName", false, TabGroup.MainSettings, true)
+            OptionCanChangeName = BooleanOptionItem.Create(1_300_130, "CanChangeName", true, TabGroup.MainSettings, true)
                 .SetParent(OptionCommandSetting)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "/rename 名前変更を許可");
@@ -1273,14 +1273,14 @@ namespace TownOfHost
             OptionNameCharLimit = IntegerOptionItem.Create(1_300_131, "NameCharLimit", new(1, 100, 1), 10, TabGroup.MainSettings, true)
                 .SetParent(OptionCanChangeName)
                 .SetColorcode("#00c1ff")
-                .SetOptionName(() => "名前の文字数制限");
+                .SetOptionName(() => "名前の文字制限");
 
-            OptionCanUseTpCommand = BooleanOptionItem.Create(1_300_132, "CanUseTpCommand", false, TabGroup.MainSettings, true)
+            OptionCanUseTpCommand = BooleanOptionItem.Create(1_300_132, "CanUseTpCommand", true, TabGroup.MainSettings, true)
                 .SetParent(OptionCommandSetting)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "/tp o,i ルームでのワープを許可");
 
-            OptionCanUsePKOCommand = BooleanOptionItem.Create(1_300_133, "CanUsePKOCommand", false, TabGroup.MainSettings, true)
+            OptionCanUsePKOCommand = BooleanOptionItem.Create(1_300_133, "CanUsePKOCommand", true, TabGroup.MainSettings, true)
                 .SetParent(OptionCommandSetting)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "/pko pkoコマンドを許可");

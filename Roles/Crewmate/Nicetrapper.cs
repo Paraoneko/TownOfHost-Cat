@@ -25,7 +25,7 @@ public sealed class NiceTrapper : RoleBase
             SetupOptionItem,
             "nt",
             "#66ddaa",
-            (6, 3),
+            (1, 8),
             from: From.NebulaontheShip
         );
 

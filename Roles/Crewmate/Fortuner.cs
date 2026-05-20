@@ -24,7 +24,7 @@ public sealed class Fortuner : RoleBase, IKiller
             SetUpOptionItem,
             "fo",
             "#34f098",
-            (1, 3),
+            (1, 0),
             true,
             from: From.TownOfHost_K
         );

@@ -24,7 +24,7 @@ public sealed class NiceGuesser : RoleBase
             SetupOptionItem,
             "ng",
             "#dcf500",
-            (7, 0)
+            (1, 6)
         );
 
     public NiceGuesser(PlayerControl player)

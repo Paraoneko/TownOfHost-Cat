@@ -957,6 +957,7 @@ public enum CustomRoles
     Medium,
     SheriffHadouHo,
     Hitchhiker,
+    NiceLinker,
     //DEBUG only Crewmate
     Analyzer,
     //Neutral
