@@ -74,7 +74,7 @@ namespace TownOfHost
             }
 
             // ★ 会議中(isMeeting)は絶対にジャンボのサイズを適用しない！
-            if (GameStates.IsInGame && !isMeeting && !GameStates.IsMeeting && player != null)
+            if (GameStates.IsInGame && !isMeeting && player != null)
             {
                 string jumboPrefix = TownOfHost.Roles.AddOns.Common.Jumbo.GetNameSizePrefix(player.PlayerId);
                 if (!string.IsNullOrEmpty(jumboPrefix))

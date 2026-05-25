@@ -189,7 +189,7 @@ public sealed class EvilLinker : RoleBase, IImpostor, IUsePhantomButton
                 warpCooldowns.Remove(pid);
         }
 
-        const float warpRange = 0.5f;
+        const float warpRange = 0.1f;
 
         foreach (var pair in linkPairs)
         {

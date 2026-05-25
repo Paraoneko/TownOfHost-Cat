@@ -1,4 +1,4 @@
-/*using AmongUs.GameOptions;
+using AmongUs.GameOptions;
 using Hazel;
 using TownOfHost.Modules;
 using TownOfHost.Patches;
@@ -17,7 +17,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
             CustomRoles.SheriffHadouHo,
             () => RoleTypes.Engineer,
             CustomRoleTypes.Crewmate,
-            160200,
+            260200,
             SetupOptionItem,
             "shh",
             "#f8cd46",
@@ -27,7 +27,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         );
 
     public SheriffHadouHo(PlayerControl player)
-        : base(RoleInfo, player, () => HasTask.False)
+        : base(RoleInfo, player, () => HasTask.True)
     {
         Cooldown = OptionCooldown.GetFloat();
         ChargeTime = OptionChargeTime.GetFloat();
@@ -78,7 +78,6 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
     bool BeamFacingLeft;
     int PlayerColor;
 
-    // ★ モード管理
     bool beamMode;
     float nowcool;
     int LastCooltime;
@@ -124,8 +123,6 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         CustomRoleManager.LowerOthers.Remove(GetLowerTextOthers);
     }
 
-    // ★ タスクモード: ベントCDにクールタイム表示
-    // ★ 波動砲モード: ファントムボタンでビーム
     public override void ApplyGameOptions(IGameOptions opt)
     {
         opt.SetVision(false);
@@ -147,16 +144,13 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         return !beamMode;
     }
 
-    // ★ ファントムボタンは波動砲モード時のみ有効
     bool IUsePhantomButton.IsPhantomRole => beamMode && !IsFiring;
     bool IUsePhantomButton.IsresetAfterKill => false;
     public override bool CanUseAbilityButton() => beamMode && !IsFiring && ShotLimit > 0;
 
-    // ★ AfterMeetingRole: 波動砲モードはPhantom、タスクモードはEngineer
     public override RoleTypes? AfterMeetingRole
         => (beamMode && ShotLimit > 0) ? RoleTypes.Phantom : RoleTypes.Engineer;
 
-    // ★ ペット撫で → モード切り替え
     void OnPetUsed()
     {
         if (!Player.IsAlive()) return;
@@ -169,7 +163,6 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
     }
 
-    // ★ シェリフと同じデシンク：波動砲モード時はインポスターからScientistに見える
     void ApplyModeDesync(bool toBeamMode)
     {
         if (!Player.IsAlive()) return;
@@ -208,7 +201,6 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         }
     }
 
-    // ★ ファントムボタン → チャージ開始
     void IUsePhantomButton.OnClick(ref bool AdjustKillCooldown, ref bool? ResetCooldown)
     {
         AdjustKillCooldown = false;
@@ -283,7 +275,6 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
             return;
         }
 
-        // ★ タスクモード中：ベントCDを秒ごとに更新
         if (!beamMode && !IsFiring && Player.IsAlive() && GameStates.IsInTask)
         {
             if (nowcool > 0) nowcool -= Time.fixedDeltaTime;
@@ -326,6 +317,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         SetRoleTextHeight(true);
         _prevCharging = false; _prevBeamMark = true;
         UtilsNotifyRoles.NotifyRoles(ForceLoop: true);
+        ShotLimit--;
         SendRpc();
         ApplyBeamHit();
 
@@ -334,15 +326,12 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
             ShowBeamMark = false; _prevBeamMark = false;
             SetRoleTextHeight(false);
 
-            // ★ 人外を1人も命中させなかった場合は自爆
-            bool suicide = !HasHitEvil && SelfDestructOnMiss;
-
             UtilsNotifyRoles.NotifyRoles(ForceLoop: true);
             SendRpc();
 
             if (!Player.IsAlive()) { IsFiring = false; return; }
 
-            if (suicide)
+            if (!HasHitEvil)
             {
                 Player.RpcSetColor((byte)PlayerColor);
                 Main.AllPlayerSpeed[Player.PlayerId] = PlayerSpeed;
@@ -385,8 +374,6 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
             CustomRoleManager.OnCheckMurder(Player, target, target, target, true, true, 1, CustomDeathReason.Hit);
             if (isEvil) HasHitEvil = true;
         }
-        ShotLimit--;
-        SendRpc();
     }
 
     public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target)
@@ -529,4 +516,4 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         ShotLimit = reader.ReadInt32();
         beamMode = reader.ReadBoolean();
     }
-}*/
+}

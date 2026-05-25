@@ -113,17 +113,13 @@ namespace TownOfHost.Roles.AddOns.Common
         {
             if (!AmongUsClient.Instance.AmHost) return;
 
-            foreach (var key in DelayTimer.Keys.ToArray())
-            {
-                DelayTimer[key] = 0f;
-            }
-
             if (ResetOnMeeting)
             {
+                foreach (var key in DelayTimer.Keys.ToArray())
+                    DelayTimer[key] = 0f;
+
                 foreach (var key in Progress.Keys.ToArray())
-                {
                     Progress[key] = 0f;
-                }
 
                 UtilsNotifyRoles.NotifyRoles(ForceLoop: true);
             }

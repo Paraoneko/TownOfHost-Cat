@@ -959,6 +959,7 @@ public enum CustomRoles
     SheriffHadouHo,
     Hitchhiker,
     NiceLinker,
+    StepDancer,
     //DEBUG only Crewmate
     Analyzer,
     //Neutral

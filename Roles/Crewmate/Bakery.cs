@@ -1,10 +1,11 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
-using UnityEngine;
 using TownOfHost.Roles.Core;
+using TownOfHost.Roles.Neutral;
+using UnityEngine;
 
 namespace TownOfHost.Roles.Crewmate;
 
@@ -48,8 +49,6 @@ public sealed class Bakery : RoleBase
 
         ObjectOptionitem.Create(RoleInfo, 20, "PoisonedBakeryOption", true, "")
             .SetOptionName(() => "PoisonedBakery Option");
-
-        PoisonedBakery.HideRoleOptions(CustomRoles.PoisonedBakery);
     }
 
     public override void Add()
@@ -193,6 +192,7 @@ public sealed class PoisonedBakery : RoleBase
 
     private static void SetupOptionItem()
     {
+        SoloWinOption.Create(RoleInfo, 9, defo: 50);
         HideRoleOptions(CustomRoles.PoisonedBakery);
     }
 

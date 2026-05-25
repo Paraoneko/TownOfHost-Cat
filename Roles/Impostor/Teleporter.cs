@@ -5,6 +5,8 @@ using TownOfHost.Modules;
 using TownOfHost.Patches;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using TownOfHost.Roles.Impostor;
+using TownOfHost.Roles.Neutral;
 using UnityEngine;
 
 namespace TownOfHost.Roles.Impostor;
@@ -94,7 +96,15 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
         return false;
     }
 
-    // ★ ファントムボタン → テレポート開始
+    static bool IsBeamingOrCharging(PlayerControl pc)
+    {
+        if (pc?.GetRoleClass() is HadouHo hh)
+            return hh.IsCharging || hh.ShowBeamMark;
+        if (pc?.GetRoleClass() is JackalHadouHo jhh)
+            return jhh.IsCharging || jhh.IsSuperCharging || jhh.ShowBeamMark;
+        return false;
+    }
+
     void IUsePhantomButton.OnClick(ref bool AdjustKillCooldown, ref bool? ResetCooldown)
     {
         AdjustKillCooldown = false;
@@ -152,16 +162,17 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
 
         if (destPlayer == null || !destPlayer.IsAlive() || !Player.IsAlive())
         {
-            SendRpc();
-            UtilsNotifyRoles.NotifyRoles();
-            return;
+            SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
         }
 
-        if (IsOnRestrictedMove(destPlayer))
+        if (IsBeamingOrCharging(Player))
         {
-            SendRpc();
-            UtilsNotifyRoles.NotifyRoles();
-            return;
+            SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
+        }
+
+        if (IsOnRestrictedMove(destPlayer) || IsBeamingOrCharging(destPlayer))
+        {
+            SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
         }
 
         var dest = destPlayer.GetTruePosition();
@@ -173,10 +184,11 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
             if (pc.PlayerId == Player.PlayerId) continue;
             if (pc.PlayerId == destPlayer.PlayerId) continue;
             if (IsOnRestrictedMove(pc)) continue;
+            if (IsBeamingOrCharging(pc)) continue;
             pc.RpcSnapToForced(dest);
         }
 
-        UtilsGameLog.AddGameLog("NiceTeleporter",
+        UtilsGameLog.AddGameLog("Teleporter",
             $"{UtilsName.GetPlayerColor(Player)} が全員を {UtilsName.GetPlayerColor(destPlayer)} の元にテレポートさせた");
 
         SendRpc();

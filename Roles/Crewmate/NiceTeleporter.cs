@@ -4,6 +4,8 @@ using Hazel;
 using TownOfHost.Modules;
 using TownOfHost.Patches;
 using TownOfHost.Roles.Core;
+using TownOfHost.Roles.Impostor;
+using TownOfHost.Roles.Neutral;
 using UnityEngine;
 
 namespace TownOfHost.Roles.Crewmate;
@@ -90,6 +92,15 @@ public sealed class NiceTeleporter : RoleBase
         return false;
     }
 
+    static bool IsBeamingOrCharging(PlayerControl pc)
+    {
+        if (pc?.GetRoleClass() is HadouHo hh)
+            return hh.IsCharging || hh.ShowBeamMark;
+        if (pc?.GetRoleClass() is JackalHadouHo jhh)
+            return jhh.IsCharging || jhh.IsSuperCharging || jhh.ShowBeamMark;
+        return false;
+    }
+
     void OnPet()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -156,16 +167,17 @@ public sealed class NiceTeleporter : RoleBase
 
         if (destPlayer == null || !destPlayer.IsAlive() || !Player.IsAlive())
         {
-            SendRpc();
-            UtilsNotifyRoles.NotifyRoles();
-            return;
+            SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
         }
 
-        if (IsOnRestrictedMove(destPlayer))
+        if (IsBeamingOrCharging(Player))
         {
-            SendRpc();
-            UtilsNotifyRoles.NotifyRoles();
-            return;
+            SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
+        }
+
+        if (IsOnRestrictedMove(destPlayer) || IsBeamingOrCharging(destPlayer))
+        {
+            SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
         }
 
         var dest = destPlayer.GetTruePosition();
@@ -177,6 +189,7 @@ public sealed class NiceTeleporter : RoleBase
             if (pc.PlayerId == Player.PlayerId) continue;
             if (pc.PlayerId == destPlayer.PlayerId) continue;
             if (IsOnRestrictedMove(pc)) continue;
+            if (IsBeamingOrCharging(pc)) continue;
             pc.RpcSnapToForced(dest);
         }
 

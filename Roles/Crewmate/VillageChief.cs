@@ -138,6 +138,8 @@ public sealed class VillageChief : RoleBase, IKiller
         foreach (var task in target.Data.Tasks.ToArray())
             target.RpcCompleteTask(task.Id);
 
+        PlayerState.GetByPlayerId(target.PlayerId)?.GetTaskState()?.Update(target);
+
         if (!Utils.RoleSendList.Contains(target.PlayerId))
             Utils.RoleSendList.Add(target.PlayerId);
 

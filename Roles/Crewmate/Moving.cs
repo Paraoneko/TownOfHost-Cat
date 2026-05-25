@@ -119,6 +119,9 @@ public sealed class Moving : RoleBase
         AURoleOptions.EngineerInVentMaxTime = 0f;
     }
 
+    public override bool CanClickUseVentButton => false;
+    public override bool OnEnterVent(PlayerPhysics physics, int ventId) => false;
+
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,
         bool isForMeeting = false, bool isForHud = false)
     {
