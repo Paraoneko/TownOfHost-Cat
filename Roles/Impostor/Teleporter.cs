@@ -9,7 +9,6 @@ using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.Impostor;
 using TownOfHost.Roles.Neutral;
 using UnityEngine;
-
 namespace TownOfHost.Roles.Impostor;
 
 public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
@@ -64,7 +63,7 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
             new(0f, 10f, 1f), 3f, false).SetValueFormat(OptionFormat.Seconds);
     }
 
-    public float CalculateKillCooldown() => Main.AllPlayerKillCooldown.GetValueOrDefault(Player.PlayerId, Main.NormalOptions.KillCooldown);
+    public float CalculateKillCooldown() => Main.NormalOptions.KillCooldown;
     public bool CanUseSabotageButton() => true;
     public bool CanUseImpostorVentButton() => true;
 
@@ -171,7 +170,8 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
             SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
         }
 
-        var dest = destPlayer.GetTruePosition();
+        // ★ 修正：GetTruePosition() から ペンギンと同じく transform.position ベースの取得に変更
+        var dest = (Vector2)destPlayer.transform.position;
 
         Player.RpcSnapToForced(dest);
 
@@ -208,6 +208,9 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
     public override void AfterMeetingTasks()
     {
         if (!AmongUsClient.Instance.AmHost) return;
+
+        Main.AllPlayerKillCooldown[Player.PlayerId] = Main.NormalOptions.KillCooldown;
+
         _ = new LateTask(() =>
         {
             if (!Player.IsAlive()) return;
@@ -221,6 +224,7 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
     {
         seen ??= seer;
         if (seen != seer) return "";
+        if (Is(seer)) return "";
         if (isForMeeting) return "";
         if (!Player.IsAlive()) return "";
         if (pendingTimer < 0f) return "";

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
@@ -407,4 +407,4 @@ public static class MonikaTrashDeathPatch
         if (__instance == null) return;
         Monika.OnPlayerActuallyDied(__instance.PlayerId);
     }
-}
+}*/

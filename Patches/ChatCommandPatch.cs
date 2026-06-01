@@ -165,7 +165,7 @@ namespace TownOfHost
             var canceled = false;
             var cancelVal = "";
 
-            // ★ 追加：ゴミ箱レイヤーの通常チャット（/なし）を秘匿チャット化して送信
+            /*// ★ 追加：ゴミ箱レイヤーの通常チャット（/なし）を秘匿チャット化して送信
             if (GameStates.InGame && !GameStates.IsMeeting && !text.StartsWith("/") && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(PlayerControl.LocalPlayer.PlayerId) && !PlayerControl.LocalPlayer.Is(CustomRoles.Monika))
             {
                 Logger.Info($"{PlayerControl.LocalPlayer.Data.GetLogPlayerName()} : {text}", "TrashChat");
@@ -192,7 +192,7 @@ namespace TownOfHost
                 __instance.freeChatField.textArea.Clear();
                 return false;
             }
-            // ══════════════════════════════════════════════════════════════
+            // ══════════════════════════════════════════════════════════════*/
 
             Logger.Info(text, "SendChat");
             ChatManager.SendMessage(PlayerControl.LocalPlayer, text);
@@ -636,13 +636,15 @@ namespace TownOfHost
                     case "/l":
                     case "/lastresult":
                         canceled = true;
-                        ShowLastResult();
+                        subArgs = args.Length < 2 ? "" : args[1];
+                        ShowLastResult(IsMonochrome: subArgs is "m" or "mo");
                         break;
 
                     case "/kl":
                     case "/killlog":
                         canceled = true;
-                        ShowKillLog();
+                        subArgs = args.Length < 2 ? "" : args[1];
+                        ShowKillLog(IsMonochrome: subArgs is "m" or "mo");
                         break;
                     case "/ach":
                     case "/achievements":
@@ -677,6 +679,7 @@ namespace TownOfHost
                     case "/now":
                         canceled = true;
                         subArgs = args.Length < 2 ? "" : args[1];
+                        var thirdargs = args.Length < 3 ? "" : args[2];
                         switch (subArgs)
                         {
                             case "r":
@@ -688,6 +691,14 @@ namespace TownOfHost
                                     case "mp":
                                     case "m":
                                         ShowActiveRoles(PlayerControl.LocalPlayer.PlayerId);
+                                        break;
+                                    case "mmyplayer":
+                                    case "mmp":
+                                    case "mm":
+                                        ShowActiveRoles(PlayerControl.LocalPlayer.PlayerId, true);
+                                        break;
+                                    case "mo":
+                                        ShowActiveRoles(IsMonochrome: true);
                                         break;
                                     default:
                                         ShowActiveRoles();
@@ -705,7 +716,7 @@ namespace TownOfHost
                                 break;
                             case "w":
                             case "win":
-                                ShowWinSetting();
+                                ShowWinSetting(IsMonochrome: thirdargs is "m" or "mo");
                                 break;
                             case "g":
                             case "guard":
@@ -1221,8 +1232,8 @@ namespace TownOfHost
                                     {
                                         if (pc != null && pc.PlayerId == targetId && pc.IsAlive())
                                         {
-                                           sendplayers.Add(pc);
-                                           break;
+                                            sendplayers.Add(pc);
+                                            break;
                                         }
                                     }
                                 }
@@ -1863,9 +1874,11 @@ namespace TownOfHost
 
             string[] args = text.Split(' ');
             string subArgs = "";
-            if (text.IsSystemMessage() || player.Data.PlayerName.IsSystemMessage()) return;//システムメッセージなら処理しない
+            var senderNameIsSystem = player.Data.PlayerName.IsSystemMessage();
+            // モデレーター名のリッチテキストタグは除外しますよ！
+            if (text.IsSystemMessage() || (senderNameIsSystem && !Moderator.IsModerator(player))) return;//システムメッセージなら処理しない
 
-            // ★ モニカ用ゴミ箱レイヤー専用の秘匿チャット（通常のチャット入力を傍受）
+            /*// ★ モニカ用ゴミ箱レイヤー専用の秘匿チャット（通常のチャット入力を傍受）
             if (!text.StartsWith("/") && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(player.PlayerId) && !player.Is(CustomRoles.Monika))
             {
                 canceled = true;
@@ -1907,7 +1920,7 @@ namespace TownOfHost
 
                 return;
             }
-            // ══════════════════════════════════════════════════════════════
+            // ══════════════════════════════════════════════════════════════*/
 
             if (player.PlayerId != 0)
             {
@@ -1939,12 +1952,14 @@ namespace TownOfHost
                 case "/l":
                 case "/lastresult":
                     canceled = true;
-                    ShowLastResult(player.PlayerId);
+                    subArgs = args.Length < 2 ? "" : args[1];
+                    ShowLastResult(player.PlayerId, IsMonochrome: subArgs is "m" or "mo");
                     break;
                 case "/kl":
                 case "/killlog":
                     canceled = true;
-                    ShowKillLog(player.PlayerId);
+                    subArgs = args.Length < 2 ? "" : args[1];
+                    ShowKillLog(player.PlayerId, IsMonochrome: subArgs is "m" or "mo");
                     break;
                 case "/ach":
                 case "/achievement":
@@ -1955,11 +1970,12 @@ namespace TownOfHost
                 case "/now":
                     canceled = true;
                     subArgs = args.Length < 2 ? "" : args[1];
+                    var thirdargs = args.Length < 3 ? "" : args[2];
                     switch (subArgs)
                     {
                         case "r":
                         case "roles":
-                            ShowActiveRoles(player.PlayerId);
+                            ShowActiveRoles(player.PlayerId, IsMonochrome: thirdargs is "m" or "mo");
                             break;
                         case "set":
                         case "s":
@@ -1968,7 +1984,7 @@ namespace TownOfHost
                             break;
                         case "w":
                         case "win":
-                            ShowWinSetting(player.PlayerId);
+                            ShowWinSetting(player.PlayerId, IsMonochrome: thirdargs is "m" or "mo");
                             break;
                         case "g":
                         case "guard":

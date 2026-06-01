@@ -7,7 +7,6 @@ using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Impostor;
 using TownOfHost.Roles.Neutral;
 using UnityEngine;
-
 namespace TownOfHost.Roles.Crewmate;
 
 public sealed class NiceTeleporter : RoleBase
@@ -180,7 +179,7 @@ public sealed class NiceTeleporter : RoleBase
             SendRpc(); UtilsNotifyRoles.NotifyRoles(); return;
         }
 
-        var dest = destPlayer.GetTruePosition();
+        var dest = (Vector2)destPlayer.transform.position;
 
         Player.RpcSnapToForced(dest);
 
@@ -228,6 +227,7 @@ public sealed class NiceTeleporter : RoleBase
     {
         seen ??= seer;
         if (seen != seer) return "";
+        if (Is(seer)) return "";
         if (isForMeeting) return "";
         if (!Player.IsAlive()) return "";
         if (pendingTimer < 0f) return "";

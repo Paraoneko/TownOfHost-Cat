@@ -59,14 +59,14 @@ namespace TownOfHost
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
         public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
-        public const string PluginVersion = "4.31.15.67";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.31.15.67";
+        public const string PluginVersion = "4.32.16.69";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "4.32.16.69";
         public const string ModVersion = ".1.1";//リリースver用バージョン変更
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
         public static bool DebugVersion = false;
 
-        // サポートされている最低のAmongUsバージョン
+        // サポートされている最低のAmongUsバージョン(Readmeも変える)
         public static readonly string LowestSupportedVersion = "2026.3.31";
         // このバージョンのみで公開ルームを無効にする場合
         public static readonly bool IsPublicAvailableOnThisVersion = false;
@@ -450,6 +450,7 @@ namespace TownOfHost
         StandMaster = CustomRoles.StandMaster,
         Shyboy = CustomRoles.Shyboy,
         Villain = CustomRoles.Villain,
+        Scratcher = CustomRoles.Scratcher,
 
         HASTroll = CustomRoles.HASTroll,
         TaskPlayerB = CustomRoles.TaskPlayerB,

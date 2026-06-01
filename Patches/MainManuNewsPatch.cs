@@ -450,6 +450,47 @@ public class ModNewsHistory
                 };
                 AllModNews.Add(news);
             }
+            {
+                var news = new ModNews
+                {
+                    Number = 100088,
+                    Title = "ペット君いつ戻ってくるんだ(T_T)",
+                    SubTitle = "<color=#FF9631>Town Of Host-Pko v4.32.16.68</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v4.32.16.68</color>",
+                    Text = "・TOHKのアプデに対応\n"
+                    + "・陰陽師の秘匿チャットの翻訳\n"
+                    + "・ナイステレポーターのオプションの翻訳\n"
+                    + "・キューピッドラバーズの翻訳\n"
+                    + "・テレポーターの翻訳のミスの修正\n"
+                    + "・いくつかの第三陣営が勝利できなかったバグの修正\n"
+                    + "・フリーターの小さいバグ修正\n"
+                    + "・その他細かいバグ修正\n"
+                    + "・オポチュニストにオプションの追加\n"
+                    + "・パブロフ陣営の秘匿チャットの追加\n"
+                    + "・フリーターの秘匿チャットの追加\n"
+                    + "・スタンドマスターの秘匿チャットの追加\n"
+                    + "・キューピッドの秘匿チャットの追加\n"
+                    + "・フリーターの役職の表示方法を変更\n"
+                    + "・キューピッドの♥の色の変更、役職の表示方法の変更、その他変更\n"
+                    + "・ニムロッド仕様変更\n"
+                    ,
+                    Date = "2026-6-01"
+                };
+                AllModNews.Add(news);
+            }
+            {
+                var news = new ModNews
+                {
+                    Number = 100089,
+                    Title = "グローバルチャットでの下ネタ、暴言等やめてください:(",
+                    SubTitle = "<color=#FF9631>Town Of Host-Pko v4.32.16.69</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v4.32.16.69</color>",
+                    Text = "・テレポーターのキルクが2倍になるバグの修正\n・テレポーター、ナイステレポーターのロワーテクストが2重で表示されるバグの修正\n・ナイステレポーター、テレポーターのワープで場外にでちゃうバグの修正\n・モデレーターがコマンド使えなかったバグの修正"
+                    ,
+                    Date = "2026-6-01"
+                };
+                AllModNews.Add(news);
+            }
             AnnouncementPopUp.UpdateState = AnnouncementPopUp.AnnounceState.NotStarted;
         }
     }

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
@@ -350,4 +350,4 @@ public sealed class Milkman : RoleBase, IKiller
         text = "配達";
         return true;
     }
-}
+}*/
