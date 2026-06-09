@@ -11,12 +11,32 @@ namespace TownOfHost;
 [HarmonyPatch(typeof(GamePresetsTab))]
 class PresetMenu
 {
+    // 派生役職（常に0に固定したいロール）
+    private static readonly CustomRoles[] DerivedRoles =
+    {
+        CustomRoles.PoisonedBakery,
+        CustomRoles.Tama,
+        CustomRoles.Shikigami,
+        CustomRoles.Stand,
+    };
+
+    // 派生役職を0にするヘルパー
+    private static void ResetDerivedRolesTo0()
+    {
+        foreach (var roleopt in Options.CustomRoleSpawnChances)
+        {
+            if (!DerivedRoles.Contains(roleopt.Key)) continue;
+            if (roleopt.Value.GetValue() != 0)
+                roleopt.Value.SetValue(0, false, false);
+        }
+    }
+
     [HarmonyPatch(nameof(GamePresetsTab.Start)), HarmonyPostfix]
     public static void StartPostfixPatch(GamePresetsTab __instance)
     {
         var AlternateRules = __instance.SecondPresetButton;
         AlternateRules.transform.localScale = new(0.6f, 0.6f);
-        AlternateRules.transform.localPosition = new(-0.638f, 0.8f);//StandardRules
+        AlternateRules.transform.localPosition = new(-0.638f, 0.8f);
         var StandardRules = __instance.StandardPresetButton;
         StandardRules.transform.localScale = new(0.6f, 0.6f);
         StandardRules.transform.localPosition = new(-2.38f, 0.8f, 0);
@@ -75,6 +95,8 @@ class PresetMenu
                         option.Value.SetValue(10, false, false);
                 }
             }
+            //派生役職は0に
+            ResetDerivedRolesTo0();
             OptionItem.SyncAllOptions();
             OptionSaver.Save();
         });
@@ -89,6 +111,8 @@ class PresetMenu
                 if (option.Value.GetValue() is not 10)
                     option.Value.SetValue(10, false, false);
             }
+            //派生役職は0に
+            ResetDerivedRolesTo0();
             OptionItem.SyncAllOptions();
             OptionSaver.Save();
         });
@@ -104,6 +128,27 @@ class PresetMenu
             OptionItem.SyncAllOptions();
             OptionSaver.Save();
         });
+
+        //(毒入りパン屋・弾・式神・スタンド)を0にするプリセット
+        var ResetDerivedRoles = CreatePresetButton(
+            $"<#d4af37>派生役職を削除</color>",
+            new Color32(120, 80, 20, byte.MaxValue),
+            6,
+            () =>
+            {
+                foreach (var roleopt in Options.CustomRoleSpawnChances)
+                {
+                    bool isDerived = roleopt.Key is
+                        CustomRoles.PoisonedBakery or
+                        CustomRoles.Tama or
+                        CustomRoles.Shikigami or
+                        CustomRoles.Stand;
+                    if (isDerived && roleopt.Value.GetValue() != 0)
+                        roleopt.Value.SetValue(0, false, false);
+                }
+                OptionItem.SyncAllOptions();
+                OptionSaver.Save();
+            });
     }
 
     private static PassiveButton CreatePresetButton(string text, Color32 color, int yNum, Action onClick)

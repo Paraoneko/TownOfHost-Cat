@@ -230,7 +230,7 @@ public sealed class Scratcher : RoleBase, IAdditionalWinner
         var lower = $"<size=80%><{RoleInfo.RoleColorCode}>{string.Format(GetString("ScratcherLower"), Scratches, Hits, WinHitCount)}</color></size>";
 
         if (isForMeeting && Player.IsAlive() && Scratches > 0 && ScratchedThisMeeting < MaxScratchPerMeeting)
-            lower += $"\n<size=70%><color={RoleInfo.RoleColorCode}>/cmd st でスクラッチを削る</color></size>";
+            lower += $"\n<size=70%><color={RoleInfo.RoleColorCode}>/cmd sh でスクラッチを削る</color></size>";
 
         return lower;
     }

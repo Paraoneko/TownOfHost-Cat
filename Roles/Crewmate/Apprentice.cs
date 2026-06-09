@@ -64,7 +64,6 @@ public sealed class Apprentice : RoleBase
 
     byte masterPlayerId;
     CustomRoles masterOriginalRole;
-
     bool hasInherited;
     bool isTaskComplete;
 
@@ -94,6 +93,7 @@ public sealed class Apprentice : RoleBase
             var crewCandidates = PlayerCatch.AllPlayerControls
                 .Where(pc => pc.PlayerId != Player.PlayerId
                           && pc.GetCustomRole().GetCustomRoleTypes() == CustomRoleTypes.Crewmate
+                          && !pc.Is(CustomRoles.GM)
                           && pc.IsAlive())
                 .ToArray();
 
@@ -103,7 +103,8 @@ public sealed class Apprentice : RoleBase
             masterPlayerId = master.PlayerId;
             masterOriginalRole = master.GetCustomRole();
 
-            Logger.Info($"[Apprentice] {Player.Data.GetLogPlayerName()} の親方: {master.Data.GetLogPlayerName()} ({masterOriginalRole})", "Apprentice");
+            Logger.Info($"[Apprentice] {Player.Data.GetLogPlayerName()} の親方: " +
+                        $"{master.Data.GetLogPlayerName()} ({masterOriginalRole})", "Apprentice");
             SendRpc();
         }, 3f, "Apprentice.AssignMaster", true);
     }
@@ -151,7 +152,6 @@ public sealed class Apprentice : RoleBase
         hasInherited = true;
 
         var inheritRole = masterOriginalRole;
-
         if (inheritRole == CustomRoles.NotAssigned
             || inheritRole.GetCustomRoleTypes() != CustomRoleTypes.Crewmate)
         {
@@ -198,11 +198,10 @@ public sealed class Apprentice : RoleBase
         int completed = MyTaskState.CompletedTasksCount;
         int total = required <= 0 ? MyTaskState.AllTasksCount : required;
 
-        string taskIcon = isTaskComplete
-            ? "<color=#00ff88>①✓</color>"
-            : $"<color=#888888>①{completed}/{total}</color>";
-        string masterIcon = "<color=#888888>②</color>";
-        return $"<color={RoleInfo.RoleColorCode}>{taskIcon}{masterIcon}</color>";
+        if (isTaskComplete)
+            return $"<color=#00ff88>({completed}/{total}✓)</color>";
+
+        return $"<color=#888888>({completed}/{total})</color>";
     }
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,
@@ -220,7 +219,8 @@ public sealed class Apprentice : RoleBase
         int total = required <= 0 ? MyTaskState.AllTasksCount : required;
 
         if (!isTaskComplete)
-            return $"{size}<color={color}>①タスクを完了させよう ({completed}/{total})</color>";
-        return $"{size}<color={color}>①完了！②親方の死を待て…</color>";
+            return $"{size}<color={color}>タスクを完了させよう ({completed}/{total})</color>";
+
+        return $"{size}<color={color}>準備完了。条件を満たせば能力を継承する。</color>";
     }
 }

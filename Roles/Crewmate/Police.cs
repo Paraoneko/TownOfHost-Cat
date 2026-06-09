@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
@@ -402,4 +402,4 @@ public static class HandcuffedKillBlockPatch
 
         return false; // ★ オリジナルをスキップ（Priority.High で先に実行されるため有効）
     }
-}
+}*/

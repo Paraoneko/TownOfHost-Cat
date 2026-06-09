@@ -1952,12 +1952,22 @@ namespace TownOfHost
                 case "/l":
                 case "/lastresult":
                     canceled = true;
+                    if (!Options.OptionCommandLastresult.GetBool())
+                    {
+                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     subArgs = args.Length < 2 ? "" : args[1];
                     ShowLastResult(player.PlayerId, IsMonochrome: subArgs is "m" or "mo");
                     break;
                 case "/kl":
                 case "/killlog":
                     canceled = true;
+                    if (!Options.OptionCommandKilllog.GetBool())
+                    {
+                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     subArgs = args.Length < 2 ? "" : args[1];
                     ShowKillLog(player.PlayerId, IsMonochrome: subArgs is "m" or "mo");
                     break;
@@ -1975,15 +1985,30 @@ namespace TownOfHost
                     {
                         case "r":
                         case "roles":
+                            if (!Options.OptionCommandNowRole.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             ShowActiveRoles(player.PlayerId, IsMonochrome: thirdargs is "m" or "mo");
                             break;
                         case "set":
                         case "s":
                         case "setting":
+                            if (!Options.OptionCommandNowSet.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             ShowSetting(player.PlayerId);
                             break;
                         case "w":
                         case "win":
+                            if (!Options.OptionCommandNowW.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             ShowWinSetting(player.PlayerId, IsMonochrome: thirdargs is "m" or "mo");
                             break;
                         case "g":
@@ -2003,10 +2028,20 @@ namespace TownOfHost
                     {
                         case "n":
                         case "now":
+                            if (!Options.OptionCommandHNow.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             ShowActiveSettingsHelp(player.PlayerId);
                             break;
                         case "r":
                         case "roles":
+                            if (!Options.OptionCommandHRoles.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             subArgs = args.Length < 3 ? "" : args[2];
                             GetRolesInfo(subArgs, player.PlayerId);
                             break;
@@ -2025,6 +2060,11 @@ namespace TownOfHost
                     if (GameStates.IsInGame)
                     {
                         canceled = true;
+                        if (!Options.OptionCommandMyrole.GetBool())
+                        {
+                            SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                            break;
+                        }
                         var role = player.GetCustomRole();
                         var roleclass = player.GetRoleClass();
                         var ismiss = false;
@@ -2157,7 +2197,7 @@ namespace TownOfHost
                     break;
                 case "/pko":
                     canceled = true;
-                    if (!Options.OptionCanUsePKOCommand.GetBool())
+                    if (!Options.OptionCommandPko.GetBool())
                     {
                         TownOfHost.Utils.SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
                         break;
@@ -2168,7 +2208,7 @@ namespace TownOfHost
                 case "/r":
                 case "/rename":
                     canceled = true;
-                    if (!Options.OptionCanChangeName.GetBool())
+                    if (!Options.OptionCommandRename.GetBool())
                     {
                         SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
                         break;
@@ -2186,6 +2226,11 @@ namespace TownOfHost
                     break;
                 case "/8ball":
                     canceled = true;
+                    if (!Options.OptionCommand8ball.GetBool())
+                    {
+                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     if (args.Length > 1)
                     {
                         string question = string.Join(" ", args.Skip(1));
@@ -2213,6 +2258,11 @@ namespace TownOfHost
                 case "/rule":
                 case "/rl":
                     canceled = true;
+                    if (!Options.OptionCommandRule.GetBool())
+                    {
+                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     if (ChatCommands.RuleText == "")
                         SendMessage("ルールがまだ設定されていません！", player.PlayerId);
                     else
@@ -2269,13 +2319,18 @@ namespace TownOfHost
                 case "/timer":
                 case "/tr":
                     canceled = true;
+                    if (!Options.OptionCommandTimer.GetBool())
+                    {
+                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     if (!GameStates.IsInGame)
                         ShowTimer(player.PlayerId);
                     break;
                 case "/tp":
                     if (!GameStates.IsLobby || args.Length < 1) break;
                     canceled = true;
-                    if (!Options.OptionCanUseTpCommand.GetBool())
+                    if (!Options.OptionCommandTp.GetBool())
                     {
                         SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
                         break;
@@ -2301,6 +2356,11 @@ namespace TownOfHost
                 case "/MeeginInfo":
                 case "/mi":
                     canceled = true;
+                    if (!Options.OptionCommandMeetinginfo.GetBool())
+                    {
+                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                        break;
+                    }
                     if (args.Length < 2)
                     {
                         if (GameStates.InGame)

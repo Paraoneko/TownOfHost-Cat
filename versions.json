@@ -197,5 +197,15 @@
         "Unavailable": false,
         "NotAvailableOnline": false,
         "AnnounceText": "Test Text"
+    },
+    "4.32.17.71": {
+        "Unavailable": false,
+        "NotAvailableOnline": false,
+        "AnnounceText": "Test Text"
+    },
+    "4.32.17.72": {
+        "Unavailable": false,
+        "NotAvailableOnline": false,
+        "AnnounceText": "Test Text"
     }
 }

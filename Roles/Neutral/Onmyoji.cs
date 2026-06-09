@@ -49,7 +49,6 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
 
     public List<byte> ShikigamiIds;
     bool hasCompletedTaskRequirement;
-
     bool nominateMode;
 
     public byte NextShikigamiCandidate;
@@ -57,6 +56,8 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
     float createCooldownTimer;
     float spawnWaitTimer;
     bool SkCanApproach => spawnWaitTimer >= 3f;
+
+    int lastCDDisplay = -1;
 
     enum OptionName
     {
@@ -81,6 +82,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         nearTimer = 0f;
         createCooldownTimer = 0f;
         spawnWaitTimer = -1f;
+        lastCDDisplay = -1;
         MyTaskState.NeedTaskCount = OptionWinTaskCount.GetInt();
     }
 
@@ -96,7 +98,8 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
             .SetValueFormat(OptionFormat.Seconds);
         OptionImpostorVision = BooleanOptionItem.Create(RoleInfo, 13, GeneralOption.ImpostorVision, true, false);
         OptionCanCreateShikigami = BooleanOptionItem.Create(RoleInfo, 14, OptionName.OnmyojiCanCreateShikigami, true, false);
-        OptionCreateShikigamiCooldown = FloatOptionItem.Create(RoleInfo, 15, OptionName.OnmyojiCreateShikigamiCooldown, new(0f, 60f, 2.5f), 20f, false, OptionCanCreateShikigami)
+        OptionCreateShikigamiCooldown = FloatOptionItem.Create(RoleInfo, 15, OptionName.OnmyojiCreateShikigamiCooldown,
+            new(0f, 60f, 2.5f), 20f, false, OptionCanCreateShikigami)
             .SetValueFormat(OptionFormat.Seconds);
         OptionNeedTaskToWin = BooleanOptionItem.Create(RoleInfo, 16, OptionName.OnmyojiNeedTaskToWin, true, false);
         OptionCanHijackCrewWin = BooleanOptionItem.Create(RoleInfo, 17, OptionName.OnmyojiCanHijackCrewWin, true, false);
@@ -123,7 +126,6 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
 
     public bool CanUseSabotageButton() => false;
     public bool CanUseImpostorVentButton() => false;
-
     bool ISelfVoter.CanUseVoted()
         => Player.IsAlive()
         && OptionCanCreateShikigami.GetBool()
@@ -132,6 +134,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
     public override void Add()
     {
         nominateMode = false;
+        lastCDDisplay = -1;
         PetActionManager.Register(Player.PlayerId, OnPetUsed);
     }
 
@@ -264,6 +267,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
             nearTimer = 0f;
             createCooldownTimer = OptionCreateShikigamiCooldown.GetFloat();
             spawnWaitTimer = -1f;
+            lastCDDisplay = -1;
             NameColorManager.RemoveAll(Player.PlayerId);
         }
         RefreshStarReadingTargets();
@@ -271,11 +275,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
 
     public override void OnStartMeeting()
     {
-        if (nominateMode)
-        {
-            nominateMode = false;
-            SendRPC();
-        }
+        if (nominateMode) { nominateMode = false; SendRPC(); }
         NextShikigamiCandidate = byte.MaxValue;
         nearTimer = 0f;
         spawnWaitTimer = -1f;
@@ -287,6 +287,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         spawnWaitTimer = 0f;
         createCooldownTimer = OptionCreateShikigamiCooldown.GetFloat();
         nearTimer = 0f;
+        lastCDDisplay = -1;
 
         if (!AmongUsClient.Instance.AmHost) return;
         if (!Player.IsAlive()) return;
@@ -315,6 +316,18 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         if (spawnWaitTimer >= 0f && spawnWaitTimer < 3f)
             spawnWaitTimer = Mathf.Min(spawnWaitTimer + Time.fixedDeltaTime, 3f);
 
+        var now = Mathf.CeilToInt(createCooldownTimer);
+        if (now != lastCDDisplay)
+        {
+            lastCDDisplay = now;
+
+            if (nominateMode && now <= 0)
+                Player.SetKillCooldown(0.5f);
+
+            if (player != PlayerControl.LocalPlayer)
+                UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: player);
+        }
+
         if (OptionCanCreateShikigami.GetBool() && ShikigamiIds.Count < 1
             && NextShikigamiCandidate != byte.MaxValue && SkCanApproach && createCooldownTimer <= 0f)
         {
@@ -339,15 +352,44 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
                         AddShikigami(target);
                     }
                 }
-                else
-                {
-                    nearTimer = 0f;
-                }
+                else { nearTimer = 0f; }
             }
         }
+    }
 
-        if (player != PlayerControl.LocalPlayer)
-            UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: player);
+    private void ApplyModeDesync(bool toNominateMode)
+    {
+        if (Is(PlayerControl.LocalPlayer)) return;
+        if (!Player.IsAlive()) return;
+
+        var baseRole = (OptionCanUseVent?.GetBool() ?? true) ? RoleTypes.Engineer : RoleTypes.Crewmate;
+
+        foreach (var pc in PlayerCatch.AllAlivePlayerControls)
+        {
+            var role = pc.GetCustomRole();
+            if (role.IsImpostor())
+                pc.RpcSetRoleDesync(
+                    toNominateMode ? RoleTypes.Scientist : role.GetRoleTypes(),
+                    Player.GetClientId());
+            if (Is(pc))
+                pc.RpcSetRoleDesync(
+                    toNominateMode ? RoleTypes.Impostor : baseRole,
+                    Player.GetClientId());
+        }
+
+        if (toNominateMode)
+        {
+            Player.SetKillCooldown(Mathf.Max(createCooldownTimer, 0.1f), delay: true);
+        }
+        else
+        {
+            Player.MarkDirtySettings();
+            _ = new LateTask(() =>
+            {
+                if (!Player.IsAlive() || nominateMode) return;
+                Player.RpcResetAbilityCooldown(Sync: true);
+            }, 0.1f, "Onmyoji.VentReset", true);
+        }
     }
 
     bool IsValidShikigamiTarget(PlayerControl target)
@@ -378,32 +420,10 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         }, 0.1f, "Onmyoji.SetOwner", true);
 
         NameColorManager.Add(Player.PlayerId, target.PlayerId, "#9b59b6");
-
         createCooldownTimer = OptionCreateShikigamiCooldown.GetFloat();
 
         SendRPC();
         _ = new LateTask(() => UtilsNotifyRoles.NotifyRoles(), 0.2f, "Onmyoji.Shikigami", true);
-    }
-
-    private void ApplyModeDesync(bool toNominateMode)
-    {
-        if (Is(PlayerControl.LocalPlayer)) return;
-        if (!Player.IsAlive()) return;
-
-        var baseRole = (OptionCanUseVent?.GetBool() ?? true) ? RoleTypes.Engineer : RoleTypes.Crewmate;
-
-        foreach (var pc in PlayerCatch.AllAlivePlayerControls)
-        {
-            var role = pc.GetCustomRole();
-            if (role.IsImpostor())
-                pc.RpcSetRoleDesync(
-                    toNominateMode ? RoleTypes.Scientist : role.GetRoleTypes(),
-                    Player.GetClientId());
-            if (Is(pc))
-                pc.RpcSetRoleDesync(
-                    toNominateMode ? RoleTypes.Impostor : baseRole,
-                    Player.GetClientId());
-        }
     }
 
     void RefreshStarReadingTargets()
@@ -452,7 +472,8 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
     bool CanWinNow()
     {
         if (!(OptionNeedTaskToWin?.GetBool() ?? false)) return true;
-        return hasCompletedTaskRequirement || MyTaskState.HasCompletedEnoughCountOfTasks(OptionWinTaskCount?.GetInt() ?? 0);
+        return hasCompletedTaskRequirement
+            || MyTaskState.HasCompletedEnoughCountOfTasks(OptionWinTaskCount?.GetInt() ?? 0);
     }
 
     public static bool TryTakeOverCrewWin(ref GameOverReason reason)
@@ -497,7 +518,6 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
             if (!IsStarReadingTarget(seen)) return "";
             return $" <color={UtilsRoleText.GetRoleColorCode(seen.GetCustomRole())}>★</color>";
         }
-
         if (isForMeeting) return "";
 
         var arrows = "";
@@ -518,7 +538,6 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         if (!OptionCanCreateShikigami.GetBool() || ShikigamiIds.Count >= 1) return "";
 
         string size = isForHud ? "" : "<size=60%>";
-        string cd = createCooldownTimer > 0f ? $" (CD:{Mathf.CeilToInt(createCooldownTimer)}s)" : "";
 
         if (nominateMode)
             return $"{size}<color=#9b59b6>【指名モード】キルボタンで式神指定！</color>";
@@ -530,7 +549,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
             if (!SkCanApproach)
                 return $"{size}<color=#9b59b6>候補: {name} (待機中...)</color>";
             if (createCooldownTimer > 0f)
-                return $"{size}<color=#9b59b6>候補: {name}{cd}</color>";
+                return $"{size}<color=#9b59b6>候補: {name} (CD:{Mathf.CeilToInt(createCooldownTimer)}s)</color>";
             float prog = Mathf.Min(nearTimer, 1.5f);
             return $"{size}<color=#9b59b6>{name}に近づき中 {prog:F1}/1.5s</color>";
         }
@@ -538,14 +557,26 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
         if (isForMeeting)
             return $"{size}<color=#9b59b6>自投票→式神候補を選択</color>";
 
-        return $"{size}<color=#9b59b6>ペット→指名モード / 会議自投票→近接指名{cd}</color>";
+        return $"{size}<color=#9b59b6>ペット→指名モード / 会議自投票→近接指名</color>";
     }
 
     public override string GetProgressText(bool comms = false, bool gameLog = false)
     {
         var ready = CanWinNow() ? "#9b59b6" : "#5e5e5e";
-        var modeTag = nominateMode ? " <color=#f5a623>[指名]</color>" : "";
-        return $"<color={ready}>式:{ShikigamiIds.Count}/1</color>{modeTag}";
+
+        var progress = ColorString(
+            ShikigamiIds.Count < 1 ? UnityEngine.ColorUtility.TryParseHtmlString(ready, out var c) ? c : Color.white : Color.gray,
+            $"式:{ShikigamiIds.Count}/1");
+
+        if (!GameStates.CalledMeeting && !gameLog && ShikigamiIds.Count < 1 && OptionCanCreateShikigami.GetBool())
+        {
+            progress += ColorString(Color.yellow,
+                nominateMode
+                    ? $" [指名]<color=#ffffff>({lastCDDisplay})</color>"
+                    : $" [Task]<color=#ffffff>({lastCDDisplay})</color>");
+        }
+
+        return progress;
     }
 
     public void SendRPC()
@@ -592,10 +623,11 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
             CustomRoles.Jackal or CustomRoles.JackalHadouHo or CustomRoles.JackalMafia or CustomRoles.JackalAlien or
             CustomRoles.DoppelGanger or CustomRoles.GrimReaper or CustomRoles.Remotekiller or
             CustomRoles.Egoist or CustomRoles.Eater or CustomRoles.PavlovDog or
-            CustomRoles.Sheriff or CustomRoles.SwitchSheriff or CustomRoles.MeetingSheriff or
+            CustomRoles.Sheriff or CustomRoles.SwitchSheriff or
             CustomRoles.WolfBoy or CustomRoles.JackalWolf or CustomRoles.Stand;
     }
 }
+
 public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -640,10 +672,7 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
         EnsurePetActionRegistered();
     }
 
-    private static void SetupOptionItem()
-    {
-        PavlovDog.HideRoleOptions(CustomRoles.Shikigami);
-    }
+    private static void SetupOptionItem() { PavlovDog.HideRoleOptions(CustomRoles.Shikigami); }
 
     public override void OnSpawn(bool initialState)
     {
@@ -658,29 +687,18 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
             petInputDebounceTimer = 0f;
             deadBodyPositions.Clear();
         }
-
         (this as IUsePhantomButton).Init(Player);
         IUsePhantomButton.IPPlayerKillCooldown[Player.PlayerId] = 0f;
         Player.RpcResetAbilityCooldown();
         EnsurePetActionRegistered();
-
-        if (OwnerId != byte.MaxValue)
-            TargetArrow.Add(Player.PlayerId, OwnerId);
+        if (OwnerId != byte.MaxValue) TargetArrow.Add(Player.PlayerId, OwnerId);
     }
 
     public override void OnDestroy()
     {
-        if (petActionRegistered)
-        {
-            PetActionManager.Unregister(Player.PlayerId);
-            petActionRegistered = false;
-        }
+        if (petActionRegistered) { PetActionManager.Unregister(Player.PlayerId); petActionRegistered = false; }
         ClearDeadBodyArrows();
-        if (OwnerId != byte.MaxValue)
-        {
-            TargetArrow.Remove(Player.PlayerId, OwnerId);
-            NameColorManager.Remove(Player.PlayerId, OwnerId);
-        }
+        if (OwnerId != byte.MaxValue) { TargetArrow.Remove(Player.PlayerId, OwnerId); NameColorManager.Remove(Player.PlayerId, OwnerId); }
     }
 
     public void SetOwner(byte ownerId)
@@ -702,10 +720,7 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     public override void OnFixedUpdate(PlayerControl player)
     {
         EnsurePetActionRegistered();
-
-        if (OwnerId != byte.MaxValue)
-            TargetArrow.Add(Player.PlayerId, OwnerId);
-
+        if (OwnerId != byte.MaxValue) TargetArrow.Add(Player.PlayerId, OwnerId);
         if (!AmongUsClient.Instance.AmHost) return;
         if (!Player.IsAlive()) return;
 
@@ -715,13 +730,9 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
             if (OwnerId == byte.MaxValue)
                 unresolvedOwnerGraceTimer = Mathf.Max(0f, unresolvedOwnerGraceTimer - Time.fixedDeltaTime);
         }
-
         if (ShouldFollowOwnerDeath()) { FollowOwnerDeath(); return; }
-
         HandlePetFallback();
-
-        if (suicideCooldownTimer > 0f)
-            suicideCooldownTimer = Mathf.Max(0f, suicideCooldownTimer - Time.fixedDeltaTime);
+        if (suicideCooldownTimer > 0f) suicideCooldownTimer = Mathf.Max(0f, suicideCooldownTimer - Time.fixedDeltaTime);
     }
 
     public bool? CheckKillFlash(MurderInfo info)
@@ -736,13 +747,7 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     void OnPet()
     {
         if (!AmongUsClient.Instance.AmHost || !Player.IsAlive()) return;
-
-        if (suicideCooldownTimer > 0f)
-        {
-            SendMessage($"<color=#9b59b6>自決クール中: {Mathf.CeilToInt(suicideCooldownTimer)}秒</color>", Player.PlayerId);
-            return;
-        }
-
+        if (suicideCooldownTimer > 0f) { SendMessage($"<color=#9b59b6>自決クール中: {Mathf.CeilToInt(suicideCooldownTimer)}秒</color>", Player.PlayerId); return; }
         suicideCooldownTimer = Onmyoji.GetShikigamiSuicideCooldown();
         var state = PlayerState.GetByPlayerId(Player.PlayerId);
         if (state != null) state.DeathReason = CustomDeathReason.Suicide;
@@ -755,39 +760,22 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     void HandlePetFallback()
     {
         if (GameStates.IsLobby || GameStates.IsMeeting) { wasPetting = Player.petting; return; }
-
-        if (petInputDebounceTimer > 0f)
-            petInputDebounceTimer = Mathf.Max(0f, petInputDebounceTimer - Time.fixedDeltaTime);
-
+        if (petInputDebounceTimer > 0f) petInputDebounceTimer = Mathf.Max(0f, petInputDebounceTimer - Time.fixedDeltaTime);
         var pettingNow = Player.petting;
-        if (pettingNow && !wasPetting && petInputDebounceTimer <= 0f)
-        {
-            petInputDebounceTimer = 0.35f;
-            OnPet();
-        }
+        if (pettingNow && !wasPetting && petInputDebounceTimer <= 0f) { petInputDebounceTimer = 0.35f; OnPet(); }
         wasPetting = pettingNow;
     }
 
     void IUsePhantomButton.OnClick(ref bool AdjustKillCooldown, ref bool? ResetCooldown)
     {
-        AdjustKillCooldown = false;
-        ResetCooldown = false;
-
+        AdjustKillCooldown = false; ResetCooldown = false;
         if (!AmongUsClient.Instance.AmHost || !Player.IsAlive()) return;
         if (OwnerId == byte.MaxValue) TryResolveOwnerFromOnmyoji();
-        if (OwnerId == byte.MaxValue)
-        {
-            SendMessage("<color=#9b59b6>陰陽師が見つかりません。</color>", Player.PlayerId);
-            return;
-        }
-
+        if (OwnerId == byte.MaxValue) { SendMessage("<color=#9b59b6>陰陽師が見つかりません。</color>", Player.PlayerId); return; }
         var owner = GetPlayerById(OwnerId);
         if (owner == null) { SendMessage("<color=#9b59b6>陰陽師が見つかりません。</color>", Player.PlayerId); return; }
-
         isShifted = !isShifted;
-        if (isShifted) Player.RpcShapeshift(owner, false);
-        else Player.RpcShapeshift(Player, false);
-
+        if (isShifted) Player.RpcShapeshift(owner, false); else Player.RpcShapeshift(Player, false);
         ResetCooldown = true;
         SendStateRPC();
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
@@ -799,22 +787,12 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
 
     public override void OnStartMeeting() => ClearDeadBodyArrows();
     public override void OnReportDeadBody(PlayerControl reporter, NetworkedPlayerInfo target) => ClearDeadBodyArrows();
-
-    public override void AfterMeetingTasks()
-    {
-        if (OwnerId != byte.MaxValue)
-            TargetArrow.Add(Player.PlayerId, OwnerId);
-    }
+    public override void AfterMeetingTasks() { if (OwnerId != byte.MaxValue) TargetArrow.Add(Player.PlayerId, OwnerId); }
 
     public override void OnLeftPlayer(PlayerControl player)
     {
         if (player == null) return;
-        if (player.PlayerId == OwnerId)
-        {
-            TargetArrow.Remove(Player.PlayerId, OwnerId);
-            NameColorManager.Remove(Player.PlayerId, OwnerId);
-            OwnerId = byte.MaxValue;
-        }
+        if (player.PlayerId == OwnerId) { TargetArrow.Remove(Player.PlayerId, OwnerId); NameColorManager.Remove(Player.PlayerId, OwnerId); OwnerId = byte.MaxValue; }
         RemoveDeadBodyArrow(player.PlayerId);
     }
 
@@ -822,29 +800,13 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     {
         seen ??= seer;
         if (!Is(seer) || isForMeeting || !Player.IsAlive() || seer.PlayerId != seen.PlayerId) return "";
-
         var result = "";
-
-        if (OwnerId != byte.MaxValue)
-        {
-            var owner = GetPlayerById(OwnerId);
-            if (owner != null && owner.IsAlive())
-                result += $"<color=#9b59b6>{TargetArrow.GetArrows(seer, OwnerId)}</color>";
-        }
-
-        if (deadBodyPositions.Count > 0)
-        {
-            var arrows = "";
-            foreach (var pos in deadBodyPositions.Values)
-                arrows += GetArrow.GetArrows(seer, pos);
-            if (arrows != "") result += $"<color=#8B4513>{arrows}</color>";
-        }
-
+        if (OwnerId != byte.MaxValue) { var owner = GetPlayerById(OwnerId); if (owner != null && owner.IsAlive()) result += $"<color=#9b59b6>{TargetArrow.GetArrows(seer, OwnerId)}</color>"; }
+        if (deadBodyPositions.Count > 0) { var arrows = ""; foreach (var pos in deadBodyPositions.Values) arrows += GetArrow.GetArrows(seer, pos); if (arrows != "") result += $"<color=#8B4513>{arrows}</color>"; }
         return result;
     }
 
-    public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,
-        bool isForMeeting = false, bool isForHud = false)
+    public override string GetLowerText(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false, bool isForHud = false)
     {
         seen ??= seer;
         if (isForMeeting || seer.PlayerId != seen.PlayerId || !Is(seer) || !Player.IsAlive()) return "";
@@ -855,49 +817,26 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     void AddDeadBodyArrow(byte id, Vector2 pos, bool sync = true)
     {
         if (deadBodyPositions.TryGetValue(id, out var old)) GetArrow.Remove(Player.PlayerId, old);
-        deadBodyPositions[id] = pos;
-        GetArrow.Add(Player.PlayerId, pos);
+        deadBodyPositions[id] = pos; GetArrow.Add(Player.PlayerId, pos);
         if (sync) RpcAddDeadBodyArrow(id, pos);
     }
 
     void RemoveDeadBodyArrow(byte id, bool sync = true)
     {
         if (!deadBodyPositions.TryGetValue(id, out var pos)) return;
-        GetArrow.Remove(Player.PlayerId, pos);
-        deadBodyPositions.Remove(id);
+        GetArrow.Remove(Player.PlayerId, pos); deadBodyPositions.Remove(id);
         if (sync) RpcRemoveDeadBodyArrow(id);
     }
 
     void ClearDeadBodyArrows(bool sync = true)
     {
         foreach (var pos in deadBodyPositions.Values) GetArrow.Remove(Player.PlayerId, pos);
-        deadBodyPositions.Clear();
-        if (sync) RpcClearDeadBodyArrows();
+        deadBodyPositions.Clear(); if (sync) RpcClearDeadBodyArrows();
     }
 
-    void RpcAddDeadBodyArrow(byte id, Vector2 pos)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        using var sender = CreateSender();
-        sender.Writer.WritePacked((int)RPCType.AddDeadBodyArrow);
-        sender.Writer.Write(id);
-        NetHelpers.WriteVector2(pos, sender.Writer);
-    }
-
-    void RpcRemoveDeadBodyArrow(byte id)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        using var sender = CreateSender();
-        sender.Writer.WritePacked((int)RPCType.RemoveDeadBodyArrow);
-        sender.Writer.Write(id);
-    }
-
-    void RpcClearDeadBodyArrows()
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        using var sender = CreateSender();
-        sender.Writer.WritePacked((int)RPCType.ClearDeadBodyArrows);
-    }
+    void RpcAddDeadBodyArrow(byte id, Vector2 pos) { if (!AmongUsClient.Instance.AmHost) return; using var s = CreateSender(); s.Writer.WritePacked((int)RPCType.AddDeadBodyArrow); s.Writer.Write(id); NetHelpers.WriteVector2(pos, s.Writer); }
+    void RpcRemoveDeadBodyArrow(byte id) { if (!AmongUsClient.Instance.AmHost) return; using var s = CreateSender(); s.Writer.WritePacked((int)RPCType.RemoveDeadBodyArrow); s.Writer.Write(id); }
+    void RpcClearDeadBodyArrows() { if (!AmongUsClient.Instance.AmHost) return; using var s = CreateSender(); s.Writer.WritePacked((int)RPCType.ClearDeadBodyArrows); }
 
     void SendStateRPC()
     {
@@ -912,20 +851,10 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     {
         switch ((RPCType)reader.ReadPackedInt32())
         {
-            case RPCType.SyncState:
-                OwnerId = reader.ReadByte();
-                isShifted = reader.ReadBoolean();
-                suicideCooldownTimer = reader.ReadSingle();
-                break;
-            case RPCType.AddDeadBodyArrow:
-                AddDeadBodyArrow(reader.ReadByte(), NetHelpers.ReadVector2(reader), sync: false);
-                break;
-            case RPCType.RemoveDeadBodyArrow:
-                RemoveDeadBodyArrow(reader.ReadByte(), sync: false);
-                break;
-            case RPCType.ClearDeadBodyArrows:
-                ClearDeadBodyArrows(sync: false);
-                break;
+            case RPCType.SyncState: OwnerId = reader.ReadByte(); isShifted = reader.ReadBoolean(); suicideCooldownTimer = reader.ReadSingle(); break;
+            case RPCType.AddDeadBodyArrow: AddDeadBodyArrow(reader.ReadByte(), NetHelpers.ReadVector2(reader), sync: false); break;
+            case RPCType.RemoveDeadBodyArrow: RemoveDeadBodyArrow(reader.ReadByte(), sync: false); break;
+            case RPCType.ClearDeadBodyArrows: ClearDeadBodyArrows(sync: false); break;
         }
     }
 
@@ -934,14 +863,12 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
     void EnsurePetActionRegistered()
     {
         if (AmongUsClient.Instance == null || !AmongUsClient.Instance.AmHost || petActionRegistered || Player == null) return;
-        PetActionManager.Register(Player.PlayerId, OnPet);
-        petActionRegistered = true;
+        PetActionManager.Register(Player.PlayerId, OnPet); petActionRegistered = true;
     }
 
     bool ShouldFollowOwnerDeath()
     {
-        if (OwnerId == byte.MaxValue)
-            return unresolvedOwnerGraceTimer <= 0f && !HasOnmyojiLink();
+        if (OwnerId == byte.MaxValue) return unresolvedOwnerGraceTimer <= 0f && !HasOnmyojiLink();
         var owner = GetPlayerById(OwnerId);
         return owner == null || !owner.IsAlive() || !owner.Is(CustomRoles.Onmyoji);
     }
@@ -956,24 +883,7 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
         Player.RpcMurderPlayerV2(Player);
     }
 
-    bool HasOnmyojiLink()
-    {
-        foreach (var pc in AllPlayerControls)
-        {
-            if (pc?.GetRoleClass() is Onmyoji o && o.ShikigamiIds.Contains(Player.PlayerId)) return true;
-        }
-        return false;
-    }
+    bool HasOnmyojiLink() { foreach (var pc in AllPlayerControls) { if (pc?.GetRoleClass() is Onmyoji o && o.ShikigamiIds.Contains(Player.PlayerId)) return true; } return false; }
 
-    void TryResolveOwnerFromOnmyoji()
-    {
-        foreach (var pc in AllPlayerControls)
-        {
-            if (pc?.GetRoleClass() is Onmyoji o && o.ShikigamiIds.Contains(Player.PlayerId))
-            {
-                SetOwner(pc.PlayerId);
-                return;
-            }
-        }
-    }
+    void TryResolveOwnerFromOnmyoji() { foreach (var pc in AllPlayerControls) { if (pc?.GetRoleClass() is Onmyoji o && o.ShikigamiIds.Contains(Player.PlayerId)) { SetOwner(pc.PlayerId); return; } } }
 }

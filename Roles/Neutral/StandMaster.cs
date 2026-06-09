@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
+using UnityEngine;
 using TownOfHost;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.Madmate;
-using UnityEngine;
 using HarmonyLib;
 
 namespace TownOfHost.Roles.Neutral;
@@ -39,7 +39,6 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
     {
         SummonCooldown = OptionSummonCooldown.GetFloat();
         StandStayTime = OptionStandStayTime.GetFloat();
-
         standPlayerId = byte.MaxValue;
         standReturnPos = null;
         standSummoned = false;
@@ -73,7 +72,6 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
             new(2.5f, 60f, 2.5f), 30f, false).SetValueFormat(OptionFormat.Seconds);
         OptionStandStayTime = FloatOptionItem.Create(RoleInfo, 11, OptionName.StandMasterStayTime,
             new(2.5f, 60f, 2.5f), 20f, false).SetValueFormat(OptionFormat.Seconds);
-
         HideRoleOptions(CustomRoles.Stand);
     }
 
@@ -102,14 +100,16 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
         UtilsNotifyRoles.NotifyRoles();
     }
 
-    public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
+    public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen,
+        ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
     {
         addon = false;
         if (standPlayerId != byte.MaxValue && seen.PlayerId == standPlayerId)
             enabled = true;
     }
 
-    public override void OverrideDisplayRoleNameAsSeen(PlayerControl seer, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
+    public override void OverrideDisplayRoleNameAsSeen(PlayerControl seer,
+        ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
     {
         addon = false;
         if (standPlayerId != byte.MaxValue && seer.PlayerId == standPlayerId)
@@ -155,6 +155,18 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
         if (standCreated) return;
         if (target.PlayerId == killer.PlayerId) return;
 
+        CreateStand(target);
+
+        _ = new LateTask(() =>
+        {
+            if (Player.IsAlive()) Player.RpcResetAbilityCooldown();
+        }, 0.1f, "StandMaster.ResetPhantomCD", true);
+    }
+
+    private void CreateStand(PlayerControl target)
+    {
+        if (standCreated) return;
+
         standCreated = true;
         standPlayerId = target.PlayerId;
         standSummoned = false;
@@ -176,12 +188,8 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
         target.MarkDirtySettings();
         SyncState();
 
-        UtilsGameLog.AddGameLog("StandMaster", $"{UtilsName.GetPlayerColor(Player)} が {UtilsName.GetPlayerColor(target)} をスタンドにした");
-
-        _ = new LateTask(() =>
-        {
-            if (Player.IsAlive()) Player.RpcResetAbilityCooldown();
-        }, 0.1f, "StandMaster.ResetPhantomCD", true);
+        UtilsGameLog.AddGameLog("StandMaster",
+            $"{UtilsName.GetPlayerColor(Player)} が {UtilsName.GetPlayerColor(target)} をスタンドにした");
     }
 
     public void OnClick(ref bool AdjustKillCooldown, ref bool? ResetCooldown)
@@ -248,6 +256,7 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
     }
 
     bool skipSwapForThisMeeting;
+
     public override void OnStartMeeting()
     {
         skipSwapForThisMeeting = SatsumatoImo.IsSpecialMeetingNoSwap();
@@ -279,10 +288,6 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
 
         if (!Player.IsAlive())
         {
-            var state = PlayerState.GetByPlayerId(stand.PlayerId);
-            if (state != null) state.DeathReason = CustomDeathReason.FollowingSuicide;
-            stand.SetRealKiller(Player);
-            stand.RpcMurderPlayerV2(stand);
             standCreated = false;
             standPlayerId = byte.MaxValue;
             isRevealed = false;
@@ -361,7 +366,7 @@ public sealed class Stand : RoleBase, ILNKiller
             "st",
             "#8B4513",
             (6, 4),
-            countType: CountTypes.StandMaster,
+            countType: CountTypes.OutOfGame,
             from: From.TownOfHost_Pko
         );
 
@@ -377,7 +382,6 @@ public sealed class Stand : RoleBase, ILNKiller
     }
 
     public byte OwnerId;
-
     bool isFollowingDeath;
 
     public void SetOwner(byte ownerId)
@@ -397,14 +401,16 @@ public sealed class Stand : RoleBase, ILNKiller
         AURoleOptions.PhantomCooldown = StandMaster.StandStayTime;
     }
 
-    public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
+    public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen,
+        ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
     {
         addon = false;
         if (OwnerId != byte.MaxValue && seen.PlayerId == OwnerId)
             enabled = true;
     }
 
-    public override void OverrideDisplayRoleNameAsSeen(PlayerControl seer, ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
+    public override void OverrideDisplayRoleNameAsSeen(PlayerControl seer,
+        ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
     {
         addon = false;
         if (OwnerId != byte.MaxValue && seer.PlayerId == OwnerId)
@@ -430,7 +436,8 @@ public sealed class Stand : RoleBase, ILNKiller
         return true;
     }
 
-    public override bool VotingResults(ref NetworkedPlayerInfo Exiled, ref bool IsTie, Dictionary<byte, int> vote, byte[] mostVotedPlayers, bool ClearAndExile)
+    public override bool VotingResults(ref NetworkedPlayerInfo Exiled, ref bool IsTie,
+        Dictionary<byte, int> vote, byte[] mostVotedPlayers, bool ClearAndExile)
     {
         if (!AmongUsClient.Instance.AmHost) return false;
         if (Exiled == null) return false;
@@ -472,11 +479,13 @@ public sealed class Stand : RoleBase, ILNKiller
         if (!AmongUsClient.Instance.AmHost) return;
         if (player != Player) return;
         if (!Player.IsAlive()) return;
+
+        if (!GameStates.IsInTask) return;
+
         if (!isFollowingDeath && ShouldFollowOwnerDeath())
             FollowOwnerDeath();
     }
 
-    // 後追い死亡すべき状況かどうかを判定
     bool ShouldFollowOwnerDeath()
     {
         if (OwnerId == byte.MaxValue) return false;
@@ -516,7 +525,6 @@ public sealed class Stand : RoleBase, ILNKiller
         OwnerId = reader.ReadByte();
     }
 }
-
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
 public static class StandMasterMurderPatch
 {
@@ -524,11 +532,9 @@ public static class StandMasterMurderPatch
     {
         if (!AmongUsClient.Instance.AmHost) return true;
         if (__instance == null || target == null) return true;
-
         if (__instance.PlayerId == target.PlayerId) return true;
 
         var role = __instance.GetRoleClass();
-        var targetRole = target.GetRoleClass();
 
         if (role is Stand standPlayer)
         {
@@ -547,46 +553,6 @@ public static class StandMasterMurderPatch
                     }, 0.3f, "StandMaster.ReturnAfterKill", true);
                 }
             }
-        }
-        else if (role is StandMaster standMaster)
-        {
-            if (!standMaster.standCreated)
-            {
-                standMaster.standCreated = true;
-                standMaster.standPlayerId = target.PlayerId;
-                standMaster.standSummoned = false;
-                standMaster.standReturnPos = null;
-                standMaster.isRevealed = false;
-
-                if (!Utils.RoleSendList.Contains(target.PlayerId))
-                    Utils.RoleSendList.Add(target.PlayerId);
-
-                target.RpcSetCustomRole(CustomRoles.Stand, log: null);
-                target.RpcSetRole(RoleTypes.Crewmate);
-
-                _ = new LateTask(() =>
-                {
-                    if (target.GetRoleClass() is Stand stand)
-                        stand.SetOwner(standMaster.Player.PlayerId);
-                }, 0.2f, "StandMaster.SetOwner", true);
-
-                target.MarkDirtySettings();
-                standMaster.SyncState();
-                UtilsGameLog.AddGameLog("StandMaster", $"{UtilsName.GetPlayerColor(standMaster.Player)} が {UtilsName.GetPlayerColor(target)} をスタンドにした");
-
-                _ = new LateTask(() =>
-                {
-                    if (standMaster.Player != null && standMaster.Player.IsAlive())
-                        standMaster.Player.RpcResetAbilityCooldown();
-                }, 0.1f, "StandMaster.ResetPhantomCD", true);
-            }
-            return false;
-        }
-
-        if (__instance.GetCustomRole().IsImpostor() && targetRole is Stand standTarget)
-        {
-            var owner = standTarget.GetOwner();
-            if (owner != null && owner.standSummoned) return true;
         }
 
         return true;
