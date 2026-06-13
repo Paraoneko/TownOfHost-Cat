@@ -59,9 +59,9 @@ namespace TownOfHost
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
         public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
-        public const string PluginVersion = "4.32.17.72";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.32.17.72";
-        public const string ModVersion = ".32.17";//リリースver用バージョン変更
+        public const string PluginVersion = "4.33.18.73";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "4.33.18.73";
+        public const string ModVersion = ".33.18";//リリースver用バージョン変更
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
         public static bool DebugVersion = false;
@@ -313,8 +313,10 @@ namespace TownOfHost
             Harmony.PatchAll(Assembly.GetExecutingAssembly());
             Application.quitting += new Action(UtilsOutputLog.SaveNowLog);
             Application.quitting += new Action(SaveStatistics.Save);
+            Application.quitting += new Action(AchievementSaver.Save);
             Statistics.NowStatistics = SaveStatistics.Load();
             //GlobalChatManager.Initialize("wss://catwalk-skimming-lapel.ngrok-free.dev");
+            AchievementSaver.Load();
         }
 
         public static bool IsCs()

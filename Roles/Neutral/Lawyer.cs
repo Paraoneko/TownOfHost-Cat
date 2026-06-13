@@ -11,12 +11,6 @@ using static TownOfHost.Translator;
 
 namespace TownOfHost.Roles.Neutral;
 
-// ══════════════════════════════════════════════════════════════
-// 弁護士 (TOHY移植)
-// インポスター or キル可能ニュートラルを依頼人として擁護する。
-// 依頼人が死亡/追放 → 追跡者へ転職。
-// 依頼人の陣営が勝利した時: 生存→単独勝利 / 死亡→追加勝利。
-// ══════════════════════════════════════════════════════════════
 public sealed class Lawyer : RoleBase
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -50,7 +44,6 @@ public sealed class Lawyer : RoleBase
         CustomRoleManager.MarkOthers.Remove(GetMarkOthers);
     }
 
-    // ─── オプション ──────────────────────────────────────
     static OptionItem OptionHasImpostorVision;
     static OptionItem OptionKnowTargetRole;
     static OptionItem OptionTargetKnows;
@@ -82,7 +75,6 @@ public sealed class Lawyer : RoleBase
             cp.SetHidden(true);
     }
 
-    // ─── 内部状態 ─────────────────────────────────────────
     private static readonly HashSet<Lawyer> Lawyers = new();
     byte targetPlayerId;
     bool changedToPursuer;
@@ -90,7 +82,6 @@ public sealed class Lawyer : RoleBase
     private PlayerControl Target
         => targetPlayerId == byte.MaxValue ? null : GetPlayerById(targetPlayerId);
 
-    // ─── 初期化 ──────────────────────────────────────────
     public override void Add()
     {
         HasImpostorVision = OptionHasImpostorVision.GetBool();
@@ -100,7 +91,6 @@ public sealed class Lawyer : RoleBase
 
         if (!AmongUsClient.Instance.AmHost) return;
 
-        // 依頼人選出: インポスター or キル持ちニュートラル
         var candidates = AllPlayerControls
             .Where(pc => pc.PlayerId != Player.PlayerId
                       && (pc.GetCustomRole().IsImpostor()
@@ -119,7 +109,6 @@ public sealed class Lawyer : RoleBase
 
     public override void ApplyGameOptions(IGameOptions opt) => opt.SetVision(HasImpostorVision);
 
-    // ─── 追放による転職 ──────────────────────────────────
     public override bool VotingResults(ref NetworkedPlayerInfo Exiled, ref bool IsTie,
         Dictionary<byte, int> vote, byte[] mostVotedPlayers, bool ClearAndExile)
     {
@@ -132,7 +121,6 @@ public sealed class Lawyer : RoleBase
         return false;
     }
 
-    // ─── タスク中の死亡検知 ──────────────────────────────
     public override void OnFixedUpdate(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -148,7 +136,6 @@ public sealed class Lawyer : RoleBase
         }
     }
 
-    // ─── 追跡者へ転職 ────────────────────────────────────
     private void ChangeRole()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -163,7 +150,6 @@ public sealed class Lawyer : RoleBase
         UtilsNotifyRoles.NotifyRoles();
     }
 
-    // ─── 勝利判定（ゲーム終了時に呼び出す）─────────────────
     public static void EndGameCheck()
     {
         foreach (var lawyer in Lawyers.ToArray())
@@ -178,19 +164,16 @@ public sealed class Lawyer : RoleBase
 
             if (lawyer.Player.IsAlive())
             {
-                // 生存 → 勝利横取り（単独勝利）
                 if (CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.Lawyer, lawyer.Player.PlayerId, true))
                     CustomWinnerHolder.WinnerIds.Add(lawyer.Player.PlayerId);
             }
             else
             {
-                // 死亡 → 追加勝利
                 CustomWinnerHolder.WinnerIds.Add(lawyer.Player.PlayerId);
             }
         }
     }
 
-    // ─── 表示 ─────────────────────────────────────────────
     public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen,
         ref bool enabled, ref Color roleColor, ref string roleText, ref bool addon)
     {
@@ -235,7 +218,6 @@ public sealed class Lawyer : RoleBase
         return $"{size}<color={RoleInfo.RoleColorCode}>依頼人: {target.Data?.PlayerName ?? "???"}  の勝利と共に勝つ</color>";
     }
 
-    // ─── RPC ─────────────────────────────────────────────
     void SendRpc()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -249,11 +231,6 @@ public sealed class Lawyer : RoleBase
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-// 追跡者 (弁護士の転職後ロール)
-// 依頼人が死亡/追放後に弁護士から変化する。
-// キルをガードし、生存していれば追加勝利。
-// ══════════════════════════════════════════════════════════════
 public sealed class Pursuer : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -274,14 +251,12 @@ public sealed class Pursuer : RoleBase, IAdditionalWinner
 
     public Pursuer(PlayerControl player) : base(RoleInfo, player, () => HasTask.False)
     {
-        // Lawyer から転職した時点での静的設定を引き継ぐ
         guardCount = Lawyer.PursuerGuardNum;
         hasImpostorVision = Lawyer.HasImpostorVision;
     }
 
     static void SetupOptionItem()
     {
-        // 弁護士オプション側に内包されるため個別設定なし
         if (Options.CustomRoleSpawnChances?.TryGetValue(CustomRoles.Pursuer, out var sp) == true)
             sp.SetHidden(true);
         if (Options.CustomRoleCounts?.TryGetValue(CustomRoles.Pursuer, out var cp) == true)
@@ -293,13 +268,12 @@ public sealed class Pursuer : RoleBase, IAdditionalWinner
 
     public override void ApplyGameOptions(IGameOptions opt) => opt.SetVision(hasImpostorVision);
 
-    // ─── キルガード ──────────────────────────────────────
     public override bool OnCheckMurderAsTarget(MurderInfo info)
     {
         if (guardCount <= 0) return true;
 
         (var killer, var target) = info.AttemptTuple;
-        if (killer.GetCustomRole() == CustomRoles.Tairou) return true; // 直接キルはガード不可
+        if (killer.GetCustomRole() == CustomRoles.Tairou) return true;
 
         info.DoKill = false;
         guardCount--;
@@ -313,7 +287,6 @@ public sealed class Pursuer : RoleBase, IAdditionalWinner
         return true;
     }
 
-    // ─── 追加勝利: 生存していれば勝つ ────────────────────
     bool IAdditionalWinner.CheckWin(ref CustomRoles winnerRole) => Player.IsAlive();
 
     public override string GetProgressText(bool comms = false, bool GameLog = false)
@@ -328,7 +301,6 @@ public sealed class Pursuer : RoleBase, IAdditionalWinner
         return $"{size}<color={RoleInfo.RoleColorCode}>ガード残り {guardCount} 回  生存で追加勝利</color>";
     }
 
-    // ─── RPC ─────────────────────────────────────────────
     void SendRpc()
     {
         using var sender = CreateSender();

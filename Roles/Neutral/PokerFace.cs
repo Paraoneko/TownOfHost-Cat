@@ -42,7 +42,6 @@ public sealed class PokerFace : RoleBase
     {
     }
 
-    // ── オプション ──────────────────────────────────────────────────
     static OptionItem OptionAdditionalWin;
     static OptionItem OptionCanVent;
     static OptionItem OptionAddOns;
@@ -58,12 +57,9 @@ public sealed class PokerFace : RoleBase
 
     private static void SetupOptionItem()
     {
-        // 追加勝利が OFF のときだけ有効（追加勝利 ON なら優先度は無意味）
         OptionAdditionalWin = BooleanOptionItem.Create(
             RoleInfo, 10, OptionName.PokerFaceAdditionalWin, false, false);
 
-        // SoloWinOption は int ではなく TOH-P 内部の勝利優先度システムで管理
-        // 追加勝利 ON のときは実質無視される
         SoloWinOption.Create(RoleInfo, 11, defo: 15);
 
         OptionCanVent = BooleanOptionItem.Create(
@@ -71,7 +67,6 @@ public sealed class PokerFace : RoleBase
 
         OptionAddOns = BooleanOptionItem.Create(
             RoleInfo, 13, OptionName.PokerFaceAddOns, false, false);
-        // OptionAddOns が ON のときだけ属性が実際に適用されるよう Add() で制御する
         RoleAddAddons.Create(RoleInfo, 14, NeutralKiller: false);
     }
 
@@ -81,7 +76,6 @@ public sealed class PokerFace : RoleBase
         CanVent = OptionCanVent.GetBool();
     }
 
-    // ── ベント設定 ──────────────────────────────────────────────────
     public override void ApplyGameOptions(IGameOptions opt)
     {
         if (!CanVent) return;
@@ -91,8 +85,6 @@ public sealed class PokerFace : RoleBase
 
     public override bool CanClickUseVentButton => CanVent;
 
-    // ── 仲間の認識 ─────────────────────────────────────────────────
-    // 同じポーカーフェイスのプレイヤー同士のみ役職名を見せる
     public override void OverrideDisplayRoleNameAsSeer(
         PlayerControl seen, ref bool enabled, ref Color roleColor,
         ref string roleText, ref bool addon)
@@ -109,7 +101,6 @@ public sealed class PokerFace : RoleBase
             enabled = true;
     }
 
-    // 仲間の名前に♦マークを表示（自分 → 他の仲間のみ）
     public override string GetMark(PlayerControl seer, PlayerControl seen = null,
         bool isForMeeting = false)
     {
@@ -117,13 +108,11 @@ public sealed class PokerFace : RoleBase
         if (!Is(seer)) return "";
         if (seen.PlayerId == seer.PlayerId) return "";
         if (!seen.Is(CustomRoles.PokerFace)) return "";
-        // 生存 → 金色♦、死亡 → グレー×
         return seen.IsAlive()
             ? $" <color={RoleInfo.RoleColorCode}>♦</color>"
             : " <color=#888888>×</color>";
     }
 
-    // ── 勝利判定 ────────────────────────────────────────────────────
     public override void CheckWinner(GameOverReason reason)
     {
         if (!Player.IsAlive()) return;
@@ -131,22 +120,18 @@ public sealed class PokerFace : RoleBase
         var allPF = AllPlayerControls.Where(pc => pc.Is(CustomRoles.PokerFace)).ToList();
         int groupSize = allPF.Count;
 
-        // 3人未満は判定しない（設定ミス防止）
         if (groupSize < 3) return;
 
-        // 生存しているポーカーフェイスが自分1人だけ → 勝利
         int aliveCount = allPF.Count(pc => pc.IsAlive());
         if (aliveCount != 1) return;
 
         if (AdditionalWin)
         {
-            // 追加勝利: 既存の勝者に乗る
             CustomWinnerHolder.NeutralWinnerIds.Add(Player.PlayerId);
             CustomWinnerHolder.WinnerIds.Add(Player.PlayerId);
         }
         else
         {
-            // 単独勝利（SoloWinOption の優先度で他の中立役職と比較）
             if (CustomWinnerHolder.ResetAndSetAndChWinner(
                 CustomWinner.PokerFace, Player.PlayerId, true))
             {
@@ -156,8 +141,6 @@ public sealed class PokerFace : RoleBase
         }
     }
 
-    // ── 表示 ────────────────────────────────────────────────────────
-    // 生存している仲間の人数を右上に表示
     public override string GetProgressText(bool comms = false, bool GameLog = false)
     {
         var allPF = AllPlayerControls.Where(pc => pc.Is(CustomRoles.PokerFace)).ToList();

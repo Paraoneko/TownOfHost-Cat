@@ -14,7 +14,7 @@ TOH-Pkoで起きたバグは本家や他MODには報告しないでまずはTOH-
 [TOHKはこちら](https://github.com/KYMario/TownOfHost-K)<br>
 
 ## リリース
-AmongUsバージョン : **17.0.0**~<br>
+AmongUsバージョン : **17.3.0**~<br>
 
 **最新版は[こちら](https://github.com/satokazoku/TownOfHost-Pko/releases/latest)**<br>
 過去バージョンは[こちら](https://github.com/satokazoku/TownOfHost-Pko/releases)<br>

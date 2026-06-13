@@ -11,16 +11,6 @@ using static TownOfHost.Translator;
 
 namespace TownOfHost.Roles.Neutral;
 
-/// <summary>
-/// 海賊 (Pirate) — TownOfHostY 移植
-/// キルボタンで一人を「一味」に指定する。
-/// LimitTurn 以内に一味を作らないと自殺。
-/// 一味がタスクを進めることで各種能力が解放される。
-/// 一味のタスク 25% → 海賊がベント可
-/// 一味のタスク 50% → 海賊がキル可、一味もキル可
-/// 一味のタスク 75% → 海賊にバフ属性付与
-/// 一味のタスク100% → 一味がインポスターを識別
-/// </summary>
 public sealed class Pirate : RoleBase, IKiller
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -53,7 +43,6 @@ public sealed class Pirate : RoleBase, IKiller
         CanMadmateBeGang = OptionCanMadmateBeGang.GetBool();
         CanNeutralBeGang = OptionCanNeutralBeGang.GetBool();
 
-        // バフ属性を決定（0=ランダム、1以降=指定）
         int sel = OptionBuffAddonTarget.GetValue();
         grantAddonRole = sel == 0
             ? BuffAddonRoles[IRandom.Instance.Next(BuffAddonRoles.Length)]
@@ -93,7 +82,6 @@ public sealed class Pirate : RoleBase, IKiller
         PirateBuffAddonTarget,
     }
 
-    // バフ属性プール（フォーチュナーの DefaltAddon を参考に）
     public static readonly CustomRoles[] BuffAddonRoles =
     [
         CustomRoles.Autopsy,
@@ -137,15 +125,12 @@ public sealed class Pirate : RoleBase, IKiller
     public PlayerControl GetGang() =>
         gangPlayerId == byte.MaxValue ? null : GetPlayerById(gangPlayerId);
 
-    // ── IKiller ─────────────────────────────────────────────────
     public float CalculateKillCooldown() => KillCooldown_;
 
     public bool CanUseKillButton()
     {
         if (!Player.IsAlive()) return false;
-        // 未指名: 指名ボタンとして使う
         if (!isMadeGang) return true;
-        // 指名済み: 一味 50% 以上でキル有効
         return (GetGang()?.GetRoleClass() as Gang)?.CanKill ?? false;
     }
 
@@ -154,7 +139,6 @@ public sealed class Pirate : RoleBase, IKiller
     public bool CanUseImpostorVentButton()
     {
         if (!isMadeGang) return false;
-        // 一味 25% 以上でベント有効
         return (GetGang()?.GetRoleClass() as Gang)?.CanVent ?? false;
     }
 
@@ -175,7 +159,6 @@ public sealed class Pirate : RoleBase, IKiller
 
         if (!isMadeGang)
         {
-            // ★ 初回: 一味の指名
             info.DoKill = false;
             if (!CanBeGang(target))
             {
@@ -186,7 +169,6 @@ public sealed class Pirate : RoleBase, IKiller
             return;
         }
 
-        // ★ 2回目以降: 通常キル（DoKill=true のまま）
         killer.ResetKillCooldown();
         killer.SetKillCooldown();
     }
@@ -231,7 +213,6 @@ public sealed class Pirate : RoleBase, IKiller
         if (!AmongUsClient.Instance.AmHost) return;
         if (!Player.IsAlive()) return;
 
-        // ターン超過で一味を作れなかったら自殺
         if (!isMadeGang && turnNumber > LimitTurn)
         {
             MeetingHudPatch.TryAddAfterMeetingDeathPlayers(CustomDeathReason.Suicide, Player.PlayerId);
@@ -239,7 +220,6 @@ public sealed class Pirate : RoleBase, IKiller
         }
     }
 
-    // 海賊+一味が生存していれば乗っ取り勝利
     public override void CheckWinner(GameOverReason reason)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -292,16 +272,6 @@ public sealed class Pirate : RoleBase, IKiller
     }
 }
 
-// ─────────────────────────────────────────────────────────────────
-
-/// <summary>
-/// 一味 (Gang) — 海賊が生成する従属役職
-/// タスクを完了することで海賊・自身に段階的な能力が解放される。
-///   25% → 自身がベント可（エンジニアデシンク）
-///   50% → 自身がキル可（インポスターデシンク）
-///   75% → 海賊にバフ属性付与
-///  100% → 自身がインポスター識別可（NameColor）
-/// </summary>
 public sealed class Gang : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -373,13 +343,11 @@ public sealed class Gang : RoleBase, IAdditionalWinner
     public Pirate GetOwner() =>
         OwnerId == byte.MaxValue ? null : GetPlayerById(OwnerId)?.GetRoleClass() as Pirate;
 
-    // ── タスク完了で段階的に能力解放 ────────────────────────────
     public override bool OnCompleteTask(uint taskid)
     {
         if (!AmongUsClient.Instance.AmHost) return true;
         int pct = TaskPercent;
 
-        // 25% → ベント解放（エンジニアデシンク）
         if (!CanVent && pct >= 25)
         {
             CanVent = true;
@@ -387,19 +355,16 @@ public sealed class Gang : RoleBase, IAdditionalWinner
             Utils.SendMessage(GetString("GangVentUnlocked"), Player.PlayerId);
         }
 
-        // 50% → キル解放（インポスターデシンク）
         if (!CanKill && pct >= 50)
         {
             CanKill = true;
             Player.RpcSetRoleDesync(RoleTypes.Impostor, Player.GetClientId());
-            // インポスター視点: 一味がScientistに見える（キルされないように）
             foreach (var imp in AllAlivePlayerControls.Where(p => p.GetCustomRole().IsImpostor()))
                 imp.RpcSetRoleDesync(RoleTypes.Scientist, Player.GetClientId());
             Player.SetKillCooldown();
             Utils.SendMessage(GetString("GangKillUnlocked"), Player.PlayerId);
         }
 
-        // 75% → 海賊にバフ属性付与
         if (!hasGrantedAddon && pct >= 75)
         {
             hasGrantedAddon = true;
@@ -415,7 +380,6 @@ public sealed class Gang : RoleBase, IAdditionalWinner
             }
         }
 
-        // 100% → インポスターが見える（NameColorManager）
         if (!hasSeenImpostors && MyTaskState.IsTaskFinished)
         {
             hasSeenImpostors = true;
@@ -429,7 +393,6 @@ public sealed class Gang : RoleBase, IAdditionalWinner
         return true;
     }
 
-    // 会議後に能力ロールデシンクを再適用
     public override void AfterMeetingTasks()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -449,19 +412,16 @@ public sealed class Gang : RoleBase, IAdditionalWinner
         Player.MarkDirtySettings();
     }
 
-    // ── IAdditionalWinner ────────────────────────────────────────
     public bool CheckWin(ref CustomRoles winnerRole)
     {
         if (OwnerId == byte.MaxValue) return false;
         return CustomWinnerHolder.WinnerIds.Contains(OwnerId);
     }
 
-    // ── MarkOthers: 双方向の関係をマーク ─────────────────────────
     public static string GetMarkOthers(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
 
-        // 海賊視点: 一味のステータス表示
         if (seer.GetRoleClass() is Pirate pirate && pirate.gangPlayerId == seen.PlayerId)
         {
             var g = seen.GetRoleClass() as Gang;
@@ -474,7 +434,6 @@ public sealed class Gang : RoleBase, IAdditionalWinner
             return marks != "" ? $" {marks}" : "";
         }
 
-        // 一味視点: 海賊に★マーク
         if (seer.GetRoleClass() is Gang gang && gang.OwnerId == seen.PlayerId)
             return $" <color={RoleInfo.RoleColorCode}>★</color>";
 

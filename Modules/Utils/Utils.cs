@@ -760,7 +760,7 @@ namespace TownOfHost
             foreach (var role in KillLv10)
             {
                 string infotext = "";
-                if (role is CustomRoles.Shyboy && Shyboy.OptionShyDieBom.GetBool() is false) continue;
+                //if (role is CustomRoles.Shyboy && Shyboy.OptionShyDieBom.GetBool() is false) continue;
                 if (role is CustomRoles.Shyboy or CustomRoles.Limiter) infotext = $"({GetString("DeathReason.Bombed")})";
                 if (role.IsEnable())
                 {

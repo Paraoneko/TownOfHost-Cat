@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
@@ -10,12 +10,6 @@ using static TownOfHost.Translator;
 
 namespace TownOfHost.Roles.Neutral;
 
-// ══════════════════════════════════════════════════════════════
-// 決闘者 (TOHY移植)
-// 設定ターン内に宿敵を決める（投票は全視点で見えない）。
-// 宿敵が死亡し自分が生存 → 追加勝利。
-// 設定ターン内に決定しないと自爆（マドンナ方式）。
-// ══════════════════════════════════════════════════════════════
 public sealed class Duelist : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -49,7 +43,6 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
         CustomRoleManager.MarkOthers.Remove(GetMarkOthers);
     }
 
-    // ─── オプション ───────────────────────────────────────
     static OptionItem OptionMeetingLimit;
     public static int MeetingLimit;
 
@@ -57,14 +50,12 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
 
     static void SetupOptionItem()
     {
-        // ★ マドンナの limit と同じ考え方: 何ターン目まで宿敵を決められるか
         OptionMeetingLimit = IntegerOptionItem.Create(
             RoleInfo, 10, OptionName.DuelistMeetingLimit,
             new(1, 10, 1), 1, false)
             .SetValueFormat(OptionFormat.day);
     }
 
-    // ─── 内部状態 ─────────────────────────────────────────
     public static readonly HashSet<Duelist> Duelists = new();
     public byte archenemyPlayerId;
     bool hasChosenArchenemy;
@@ -77,23 +68,20 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
         MeetingLimit = OptionMeetingLimit.GetInt();
     }
 
-    // ─── 投票インターセプト（宿敵未決定の間は常に有効） ─────
     public override bool CheckVoteAsVoter(byte votedForId, PlayerControl voter)
     {
         if (!Is(voter) || !Player.IsAlive()) return true;
-        if (hasChosenArchenemy) return true; // 決定済みなら通常投票
+        if (hasChosenArchenemy) return true;
 
-        // スキップ or 自投票 → 今ターンはパス（ターン消費は AfterMeetingTasks で判定）
         if (votedForId == Player.PlayerId || votedForId >= 253)
         {
             int left = MeetingLimit - UtilsGameLog.day;
             SendMessage(
                 $"<color={RoleInfo.RoleColorCode}>宿敵を決めませんでした。残り {left} ターン</color>",
                 Player.PlayerId);
-            return false; // 投票を隠す
+            return false;
         }
 
-        // 有効な相手を宿敵に設定
         var target = GetPlayerById(votedForId);
         if (target == null || !target.IsAlive()) return true;
 
@@ -117,17 +105,15 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
             Player.PlayerId);
 
         UtilsNotifyRoles.NotifyRoles();
-        return false; // 投票を隠す
+        return false;
     }
 
-    // ─── ★ マドンナ方式: ターン超過で自爆 ────────────────
     public override void AfterMeetingTasks()
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if (hasChosenArchenemy) return;    // 決定済みならスキップ
+        if (hasChosenArchenemy) return;
         if (!Player.IsAlive()) return;
 
-        // Madonna: limit <= UtilsGameLog.day で自爆
         if (MeetingLimit > UtilsGameLog.day) return;
 
         _ = new LateTask(() =>
@@ -142,14 +128,12 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
         }, 0.1f, "Duelist.Suicide", true);
     }
 
-    // ─── 追加勝利: 生存 かつ 宿敵が死亡 ─────────────────
     bool IAdditionalWinner.CheckWin(ref CustomRoles winnerRole)
     {
         var ae = Archenemy;
         return Player.IsAlive() && ae != null && !ae.IsAlive();
     }
 
-    // ─── 表示 ─────────────────────────────────────────────
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
@@ -168,7 +152,6 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
         return "";
     }
 
-    // ★ マドンナ風: 未決定なら (day/limit) 表示
     public override string GetProgressText(bool comms = false, bool GameLog = false)
     {
         if (!hasChosenArchenemy)
@@ -213,7 +196,6 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
         return $"{size}<color={RoleInfo.RoleColorCode}>宿敵: {aeName} {status}</color>";
     }
 
-    // ─── RPC ─────────────────────────────────────────────
     void SendRpc()
     {
         using var sender = CreateSender();
@@ -228,10 +210,6 @@ public sealed class Duelist : RoleBase, IAdditionalWinner
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-// 宿敵 (決闘者によって指定される)
-// 決闘者が死亡し自分が生存 → 追加勝利。
-// ══════════════════════════════════════════════════════════════
 public sealed class Archenemy : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -324,4 +302,4 @@ public sealed class Archenemy : RoleBase, IAdditionalWinner
     {
         duelistPlayerId = reader.ReadByte();
     }
-}
+}*/

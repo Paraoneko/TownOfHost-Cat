@@ -11,10 +11,8 @@ using static TownOfHost.Utils;
 
 namespace TownOfHost.Roles.Neutral;
 
-// ─── 共有状態（チームメンバー登録・能力発動条件） ─────────────────────
 internal static class ThreePigsData
 {
-    // 全豚プレイヤーID（最大3人）
     static readonly List<byte> members = new();
     public static IReadOnlyList<byte> Members => members;
 
@@ -23,11 +21,9 @@ internal static class ThreePigsData
         if (!members.Contains(id)) members.Add(id);
     }
 
-    /// <summary>2人が同一チームか</summary>
     public static bool IsTeammate(byte a, byte b)
         => a != b && members.Contains(a) && members.Contains(b);
 
-    /// <summary>タスク達成条件を満たすか（達成数 >= 全体 * percent%）</summary>
     public static bool IsTaskConditionMet(RoleBase role, int percent)
     {
         var state = role.MyTaskState;
@@ -40,9 +36,6 @@ internal static class ThreePigsData
     public static void Init() => members.Clear();
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  1番目の仔豚 — タスクN%達成後、定期的にフラッシュ（警戒通知）
-// ─────────────────────────────────────────────────────────────────────
 public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -63,7 +56,6 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
             tab: TabGroup.Combinations,
             assignInfo: new RoleAssignInfo(CustomRoles.TheFirstLittlePig, CustomRoleTypes.Neutral)
             {
-                // ★ Driver/Braid 方式: 1ユニット = 3人まとめ割り当て
                 AssignCountRule = new(1, 1, 1),
                 AssignUnitRoles = new CustomRoles[3]
                 {
@@ -88,7 +80,6 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
         CustomRoleManager.MarkOthers.Remove(GetMarkOthers);
     }
 
-    // ── オプション（Pig1 が全体の設定を持つ） ─────────────────────────
     // Pig1
     public static OptionItem OptionPig1TaskPercent;
     public static OptionItem OptionPig1FlashInterval;
@@ -162,7 +153,6 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
 
     public override void OnSpawn(bool initialState = false)
     {
-        // チームメンバーの名前色を遅延設定
         _ = new LateTask(() =>
         {
             foreach (var id in ThreePigsData.Members)
@@ -191,22 +181,17 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
         if (flashTimer <= 0f)
         {
             flashTimer = Pig1FlashInterval;
-            // ★ 警戒フラッシュ: SNR の ShowFlash はローカル演出のみだが
-            //    TOH-P では全員キルフラッシュ + 本人に通知で代替
             Utils.AllPlayerKillFlash();
             SendMessage(GetString("TheFirstLittlePigFlash"), Player.PlayerId);
         }
     }
 
-    // ─── 追加勝利 ───────────────────────────────────────────────────
-    // インポスター勝利時以外で生存 → 追加勝利
     bool IAdditionalWinner.CheckWin(ref CustomRoles winnerRole)
     {
         if (CustomWinnerHolder.WinnerTeam == CustomWinner.Impostor) return false;
         return Player.IsAlive();
     }
 
-    // ─── 味方表示 ────────────────────────────────────────────────────
     public override string GetMark(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
@@ -221,7 +206,7 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
     {
         seen ??= seer;
         if (!seer.Is(CustomRoles.TheFirstLittlePig)) return "";
-        return ""; // GetMark で処理済み
+        return "";
     }
 
     public override void OverrideDisplayRoleNameAsSeer(PlayerControl seen,
@@ -254,9 +239,6 @@ public sealed class TheFirstLittlePig : RoleBase, IAdditionalWinner
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  2番目の仔豚 — タスクN%達成後、N回までキルガード
-// ─────────────────────────────────────────────────────────────────────
 public sealed class TheSecondLittlePig : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -267,7 +249,7 @@ public sealed class TheSecondLittlePig : RoleBase, IAdditionalWinner
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Neutral,
             570600,
-            null,   // オプションは TheFirstLittlePig 側で定義
+            null,
             "sp",
             "#ff637b",
             (7, 5),
@@ -310,7 +292,6 @@ public sealed class TheSecondLittlePig : RoleBase, IAdditionalWinner
         }, 2f, "ThreePigs.P2.NameColor", true);
     }
 
-    // ─── ガード ──────────────────────────────────────────────────────
     public override bool OnCheckMurderAsTarget(MurderInfo info)
     {
         if (remainGuards <= 0) return true;
@@ -352,7 +333,6 @@ public sealed class TheSecondLittlePig : RoleBase, IAdditionalWinner
     public static string GetMarkOthers(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
-        // 他の豚が2番目の豚を見るとき
         if (seer.PlayerId == seen.PlayerId) return "";
         if (!seer.Is(CustomRoles.TheFirstLittlePig) && !seer.Is(CustomRoles.TheThirdLittlePig)) return "";
         if (!ThreePigsData.IsTeammate(seer.PlayerId, seen.PlayerId)) return "";
@@ -403,9 +383,6 @@ public sealed class TheSecondLittlePig : RoleBase, IAdditionalWinner
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────
-//  3番目の仔豚 — タスクN%達成後、N回までキルをカウンター（返し討ち）
-// ─────────────────────────────────────────────────────────────────────
 public sealed class TheThirdLittlePig : RoleBase, IAdditionalWinner
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -459,7 +436,6 @@ public sealed class TheThirdLittlePig : RoleBase, IAdditionalWinner
         }, 2f, "ThreePigs.P3.NameColor", true);
     }
 
-    // ─── カウンター ──────────────────────────────────────────────────
     public override bool OnCheckMurderAsTarget(MurderInfo info)
     {
         if (remainCounters <= 0) return true;
@@ -469,12 +445,10 @@ public sealed class TheThirdLittlePig : RoleBase, IAdditionalWinner
         remainCounters--;
         info.DoKill = false;
 
-        // ガード演出
         killer.RpcProtectedMurderPlayer(target);
         target.RpcProtectedMurderPlayer(target);
         killer.ResetKillCooldown();
 
-        // ★ カウンターキル（攻撃者を返り討ち）
         if (AmongUsClient.Instance.AmHost && killer.IsAlive())
         {
             var state = PlayerState.GetByPlayerId(killer.PlayerId);
