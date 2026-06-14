@@ -93,7 +93,9 @@ public sealed class Magician : RoleBase, IImpostor, IUsePhantomButton
     public override void AfterMeetingTasks()
     {
         if (ResetKillCount) HaveKillCount = 0;
-        if (ResetMagicTarget) MagicTarget.Clear();
+        if (ResetMagicTarget) MagicTarget.Clear(); //↓死亡している対象を削除
+        else MagicTarget.RemoveAll(id => PlayerState.GetByPlayerId(id).IsDead);
+
         //クールダウンリセット
         if (Maximum <= MagicCount && Maximum > 0)
             MagicCooldown = 999;
