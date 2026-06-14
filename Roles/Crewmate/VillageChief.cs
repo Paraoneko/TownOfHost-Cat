@@ -21,7 +21,7 @@ public sealed class VillageChief : RoleBase, IKiller, ISelfVoter
             CustomRoles.VillageChief,
             () => RoleTypes.Engineer,
             CustomRoleTypes.Crewmate,
-            160000,
+            36700,
             SetupOptionItem,
             "vc",
             "#f5a623",

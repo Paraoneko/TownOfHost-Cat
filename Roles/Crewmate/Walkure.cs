@@ -20,7 +20,7 @@ public sealed class Walkure : RoleBase, ISelfVoter, IKiller
             CustomRoles.Walkure,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            24900,
+            36900,
             SetupOptionItem,
             "wk",
             "#78d7ff",

@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -343,4 +343,4 @@ public sealed class Shyboy : RoleBase
         achievements.Add(1, sp1);
         achievements.Add(2, l1);
     }
-}
+}*/

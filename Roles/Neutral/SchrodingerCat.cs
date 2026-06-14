@@ -24,7 +24,7 @@ public sealed class SchrodingerCat : RoleBase, IAdditionalWinner, IDeathReasonSe
             CustomRoles.SchrodingerCat,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Neutral,
-            15600,
+            54100,
             SetupOptionItem,
             "sc",
             "#696969",

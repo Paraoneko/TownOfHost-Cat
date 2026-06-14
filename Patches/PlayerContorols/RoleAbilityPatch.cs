@@ -11,6 +11,7 @@ using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.Crewmate;
 using TownOfHost.Roles.Ghost;
 using TownOfHost.Roles.Impostor;
+using TownOfHost.Roles.Madmate;
 using UnityEngine;
 
 using TownOfHost.Roles.Neutral;
@@ -496,7 +497,7 @@ namespace TownOfHost
 
                 //マッドでベント移動できない設定なら矢印を消す
                 if ((!roleClass?.CanVentMoving(__instance, id) ?? false) ||
-                    (user.GetCustomRole().IsMadmate() && !Options.MadmateCanMovedByVent.GetBool()))
+                    (SatsumatoImo.UsesMadmateCommonSettings(user) && !Options.MadmateCanMovedByVent.GetBool()))
                 {
                     if (!MadBool && user.PlayerId == PlayerControl.LocalPlayer.PlayerId)
                         MadBool = true;

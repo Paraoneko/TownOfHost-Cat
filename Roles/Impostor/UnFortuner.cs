@@ -21,7 +21,7 @@ public sealed class UnFortuner : RoleBase, IImpostor, IUsePhantomButton
             CustomRoles.UnFortuner,
             () => RoleTypes.Phantom,
             CustomRoleTypes.Impostor,
-            24500,
+            7900,
             SetupOptionItem,
             "Uf",
             OptionSort: (6, 11),

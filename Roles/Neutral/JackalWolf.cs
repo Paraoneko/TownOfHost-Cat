@@ -18,7 +18,7 @@ public sealed class JackalWolf : RoleBase, ILNKiller, IUsePhantomButton, IDouble
             CustomRoles.JackalWolf,
             () => OptionHaveRole.GetRole().GetRoleInfo()?.BaseRoleType?.Invoke() ?? RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
-            24700,
+            52500,
             SetupOptionItem,
             "Jaw",
             "#00b4eb",

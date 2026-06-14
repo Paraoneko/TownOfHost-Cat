@@ -18,7 +18,7 @@ public sealed class MMArcher : RoleBase, IKiller, IUsePhantomButton
             CustomRoles.MMArcher,
             () => RoleTypes.Phantom,
             CustomRoleTypes.Crewmate,
-            24000,
+            33000,
             SetUpOptionItem,
             "MMar",
             "#30b6ef",

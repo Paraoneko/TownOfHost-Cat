@@ -20,7 +20,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
             CustomRoles.JackalHadouHo,
             () => RoleTypes.Phantom,
             CustomRoleTypes.Neutral,
-            326400,
+            52300,
             SetUpOptionItem,
             "jhh",
             "#00b4eb",
@@ -228,6 +228,23 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
     public override void OnDestroy()
     {
         PetActionManager.Unregister(Player.PlayerId);
+        CustomRoleManager.LowerOthers.Remove(GetLowerTextOthers);
+
+        if (IsCharging || IsSuperCharging || ShowBeamMark || IsFiring)
+        {
+            Main.AllPlayerSpeed[Player.PlayerId] = PlayerSpeed;
+            Player.MarkDirtySettings();
+            if (AmongUsClient.Instance.AmHost)
+            {
+                Player.SyncSettings();
+                Player.RpcSetColor((byte)PlayerColor);
+            }
+            IsCharging = false;
+            IsSuperCharging = false;
+            ShowBeamMark = false;
+            IsFiring = false;
+            SetRoleTextHeight(false);
+        }
     }
 
     private void OnPetUsed()
@@ -925,7 +942,7 @@ public sealed class Tama : RoleBase, IKiller
             CustomRoles.Tama,
             () => RoleTypes.Impostor,
             CustomRoleTypes.Neutral,
-            326600,
+            54900,
             SetupOptionItem,
             "tm",
             "#00b4eb",

@@ -23,7 +23,7 @@ public sealed class JackalAlien : RoleBase, IMeetingTimeAlterable, ILNKiller, IS
                 CustomRoles.JackalAlien,
                 () => OptionCanMakeSidekick.GetBool() ? RoleTypes.Phantom : RoleTypes.Impostor,
                 CustomRoleTypes.Neutral,
-                13000,
+                52000,
                 SetupOptionItem,
                 "JA",
                 "#00b4eb",

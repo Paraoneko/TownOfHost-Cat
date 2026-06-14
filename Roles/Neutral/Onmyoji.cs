@@ -24,7 +24,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
             CustomRoles.Onmyoji,
             () => (OptionCanUseVent?.GetBool() ?? true) ? RoleTypes.Engineer : RoleTypes.Crewmate,
             CustomRoleTypes.Neutral,
-            80200,
+            53300,
             SetupOptionItem,
             "oy",
             "#9b59b6",
@@ -74,7 +74,7 @@ public sealed class Onmyoji : RoleBase, IKiller, ISelfVoter
     }
 
     public Onmyoji(PlayerControl player)
-        : base(RoleInfo, player, () => HasTask.True)
+        : base(RoleInfo, player, () => HasTask.ForRecompute)
     {
         ShikigamiIds = new();
         hasCompletedTaskRequirement = !(OptionNeedTaskToWin?.GetBool() ?? false);
@@ -639,7 +639,7 @@ public sealed class Shikigami : RoleBase, IUsePhantomButton, IKillFlashSeeable
             CustomRoles.Shikigami,
             () => RoleTypes.Phantom,
             CustomRoleTypes.Neutral,
-            30100,
+            54300,
             SetupOptionItem,
             "sk",
             "#9b59b6",

@@ -19,7 +19,7 @@ public sealed class Sniper : RoleBase, IImpostor
             CustomRoles.Sniper,
             () => RoleTypes.Shapeshifter,
             CustomRoleTypes.Impostor,
-            6200,
+            7100,
             SetupOptionItem,
             "snp",
             OptionSort: (3, 10),

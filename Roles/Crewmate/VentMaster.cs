@@ -13,7 +13,7 @@ public sealed class VentMaster : RoleBase
             CustomRoles.VentMaster,
             () => CanUseVent.GetBool() ? RoleTypes.Engineer : RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            12600,
+            36500,
             SetUpOptionItem,
             "vm",
             "#ff6666",

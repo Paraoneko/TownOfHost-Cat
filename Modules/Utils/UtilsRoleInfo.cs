@@ -311,6 +311,7 @@ namespace TownOfHost
 
                 //クルーメイト
                 "ぽんこつ占い師" or "ポンコツ占い師" => GetString("PonkotuTeller"),
+                "あやしい占い師" or "怪しい占い師" or "suspiciousteller" or "suspiciousfortuneteller" or "ayashiiteller" => GetString("SuspiciousTeller"),
                 "エンジニア" => GetString("Engineer"),
                 "科学者" => GetString("Scientist"),
                 "トラッカー" => GetString("Tracker"),

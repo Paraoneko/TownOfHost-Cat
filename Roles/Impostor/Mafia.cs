@@ -16,7 +16,7 @@ public sealed class Mafia : RoleBase, IImpostor, IUsePhantomButton
             CustomRoles.Mafia,
             () => CanmakeSidekickMadMate.GetBool() && Options.CanMakeMadmateCount.GetInt() != 0 ? RoleTypes.Phantom : RoleTypes.Impostor,
             CustomRoleTypes.Impostor,
-            6400,
+            5300,
             SetupCustomOption,
             "mf",
             OptionSort: (6, 8),

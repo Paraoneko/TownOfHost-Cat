@@ -20,7 +20,7 @@ public sealed class Fortuner : RoleBase, IKiller
             CustomRoles.Fortuner,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            24100,
+            31500,
             SetUpOptionItem,
             "fo",
             "#34f098",

@@ -16,7 +16,7 @@ public sealed class DoubleKiller : RoleBase, IImpostor, IUsePhantomButton
             CustomRoles.DoubleKiller,
             () => RoleTypes.Phantom,
             CustomRoleTypes.Impostor,
-            26300,
+            3400,
             SetUpOptionItem,
             "dk",
             OptionSort: (3, 13),

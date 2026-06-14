@@ -19,7 +19,7 @@ namespace TownOfHost.Roles.Neutral
                 CustomRoles.JackalMafia,
                 () => OptionCanMakeSidekick.GetBool() ? RoleTypes.Phantom : RoleTypes.Impostor,
                 CustomRoleTypes.Neutral,
-                21400,
+                52400,
                 SetupOptionItem,
                 "jm",
                 "#00b4eb",

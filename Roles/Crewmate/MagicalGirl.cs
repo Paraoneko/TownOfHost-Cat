@@ -23,7 +23,7 @@ public sealed class MagicalGirl : RoleBase, ISelfVoter, IKiller, IUsePhantomButt
             CustomRoles.MagicalGirl,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            5400033,
+            32400,
             SetupOptionItem,
             "mg",
             "#ff66cc",

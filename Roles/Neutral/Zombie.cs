@@ -17,7 +17,7 @@ public sealed class Zombie : RoleBase
             CustomRoles.Zombie,
             () => RoleTypes.Engineer,
             CustomRoleTypes.Neutral,
-            30200,
+            55500,
             SetupOptionItem,
             "zb",
             "#6f8f4d",

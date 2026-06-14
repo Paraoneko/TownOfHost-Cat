@@ -67,7 +67,7 @@ namespace TownOfHost
                     var otherrole = Options.CustomRoleSpawnChances.Where(r => !r.Key.IsImpostor() && !r.Key.IsCrewmate() && !r.Key.IsMadmate() && !r.Key.IsNeutral()).ToArray();
                     var addoncheck = false;
                     foreach (var kvp in impostorrole.AddRangeToArray(madmaterole).AddRangeToArray(crewmaterole).AddRangeToArray(neutralrole).AddRangeToArray(otherrole))
-                        if (kvp.Value.Tag is CustomOptionTags.Role or CustomOptionTags.All && kvp.Value.GetBool()) //スタンダードか全てのゲームモードで表示する役職
+                        if (kvp.Value.Tag is CustomOptionTags.Role or CustomOptionTags.All && Options.GetRoleChance(kvp.Key) > 0) //スタンダードか全てのゲームモードで表示する役職
                         {
                             var role = kvp.Key;
                             if (role.IsCombinationRole() || SlotRoleAssign.IsSeted(role)) continue;
@@ -186,11 +186,13 @@ namespace TownOfHost
                 nameAndValue(Options.EnableGM);
                 //いっくらなんでもこれが重すぎる！
                 //30役職を上回ったらこの処理をスキップ
-                if (Options.CustomRoleSpawnChances.Count(op => op.Value.GetBool()) < 30)
+                if (Options.CustomRoleSpawnChances.Count(op => Options.GetRoleChance(op.Key) > 0) < 30)
                 {
                     foreach (var kvp in Options.CustomRoleSpawnChances)
                     {
                         AddRoleOption(kvp);
+
+                        if (!kvp.Key.IsEnable()) continue;
 
                         var addrole = kvp.Key.GetRoleInfo()?.AddHaveRole?.Invoke();
                         if (addrole is not null and not CustomRoles.NotAssigned)

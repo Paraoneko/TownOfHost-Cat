@@ -494,7 +494,7 @@ namespace TownOfHost
 
             // IDeathReasonSeeable未対応役職はこちら
             return check ||
-            (seer.Is(CustomRoleTypes.Madmate) && Options.MadmateCanSeeDeathReason.GetBool())
+            (SatsumatoImo.UsesMadmateCommonSettings(seer) && Options.MadmateCanSeeDeathReason.GetBool())
             || (seer.Is(CustomRoles.Autopsy) && (!Utils.IsActive(SystemTypes.Comms) || Autopsy.CanUseActiveComms.GetBool()));
         }
         public static string GetRoleDesc(this PlayerControl player, bool InfoLong = false)

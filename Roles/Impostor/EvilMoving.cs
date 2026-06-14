@@ -17,7 +17,7 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
             CustomRoles.EvilMoving,
             () => RoleTypes.Phantom,
             CustomRoleTypes.Impostor,
-            126500,
+            4300,
             SetupOptionItem,
             "emv",
             OptionSort: (2, 10),
@@ -35,10 +35,7 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
     static OptionItem OptionTeleportCooldown;
     static float TeleportCooldown;
 
-    enum OptionName
-    {
-        EvilMovingTeleportCooldown,
-    }
+    enum OptionName { EvilMovingTeleportCooldown }
 
     Vector2? markedPos;
     bool hasMarked;
@@ -53,8 +50,10 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
     public float CalculateKillCooldown() => Main.NormalOptions.KillCooldown;
     public bool CanUseSabotageButton() => true;
     public bool CanUseImpostorVentButton() => true;
+
     bool IUsePhantomButton.IsPhantomRole => true;
     bool IUsePhantomButton.IsresetAfterKill => false;
+    bool IUsePhantomButton.UseOneclickButton => true;
 
     public override void OnSpawn(bool initialState = false)
     {
@@ -74,9 +73,18 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
     {
         PetActionManager.Unregister(Player.PlayerId);
     }
+
     public override void ApplyGameOptions(IGameOptions opt)
     {
         AURoleOptions.PhantomCooldown = cooldownLeft > 0f ? cooldownLeft : 0.1f;
+    }
+
+    public override void AfterMeetingTasks()
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (!Player.IsAlive()) return;
+
+        Player.RpcResetAbilityCooldown(Sync: true);
     }
 
     void OnPet()
@@ -92,9 +100,7 @@ public sealed class EvilMoving : RoleBase, IImpostor, IUsePhantomButton
             Player.RpcResetAbilityCooldown(Sync: true);
             SendRpc();
             UtilsNotifyRoles.NotifyRoles(OnlyMeName: true);
-            Utils.SendMessage(
-                $"<color=#ff4444>ワープ先を設定しました！</color>",
-                Player.PlayerId);
+            Utils.SendMessage("<color=#ff4444>ワープ先を設定しました！</color>", Player.PlayerId);
             return;
         }
 

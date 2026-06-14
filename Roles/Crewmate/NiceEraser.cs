@@ -18,7 +18,7 @@ public sealed class NiceEraser : RoleBase, ISelfVoter
             CustomRoles.NiceEraser,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            97240,
+            33300,
             SetupOptionItem,
             "nicer",
             "#d0ff00",

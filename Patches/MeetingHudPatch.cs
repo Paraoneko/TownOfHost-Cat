@@ -17,6 +17,7 @@ using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.AddOns.Impostor;
 using TownOfHost.Roles.AddOns.Neutral;
 using TownOfHost.Roles.AddOns.Common;
+using TownOfHost.Roles.Madmate;
 using static TownOfHost.Translator;
 using TownOfHost.Modules.ChatManager;
 using System;
@@ -693,7 +694,7 @@ public static class MeetingHudPatch
             {
                 var role = exiledplayer.GetCustomRole();
                 var isMadmate =
-                    role.IsMadmate() ||
+                    SatsumatoImo.UsesMadmateCommonSettings(role) ||
                     // マッド属性化時に削除
                     (MagicalGirl.TryGetEffectiveRole<SchrodingerCat>(exiledplayer, out var schrodingerCat) && schrodingerCat.AmMadmate);
                 foreach (var candidate in PlayerCatch.AllAlivePlayerControls)

@@ -61,11 +61,11 @@ namespace TownOfHost
         public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
         public const string BepInExPluginVersion = "4.32.17+73";
         public const string PluginVersion = "4.32.17.73";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.32.17.73<sub>.1</sub>";
-        public const string ModVersion = ".17.73";//リリースver用バージョン変更
+        public const string PluginShowVersion = "4.32.17.73";
+        public const string ModVersion = ".17.73";//リリースver用バージョン変更dc9b79
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
-        public static bool DebugVersion = true;
+        public static bool DebugVersion = false;
 
         // サポートされている最低のAmongUsバージョン(Readmeも変える)
         public static readonly string LowestSupportedVersion = "2026.3.31";
@@ -314,8 +314,10 @@ namespace TownOfHost
             Harmony.PatchAll(Assembly.GetExecutingAssembly());
             Application.quitting += new Action(UtilsOutputLog.SaveNowLog);
             Application.quitting += new Action(SaveStatistics.Save);
+            Application.quitting += new Action(AchievementSaver.Save);
             Statistics.NowStatistics = SaveStatistics.Load();
             //GlobalChatManager.Initialize("wss://catwalk-skimming-lapel.ngrok-free.dev");
+            AchievementSaver.Load();
         }
 
         public static bool IsCs()
@@ -453,6 +455,9 @@ namespace TownOfHost
         Shyboy = CustomRoles.Shyboy,
         Villain = CustomRoles.Villain,
         Scratcher = CustomRoles.Scratcher,
+        PokerFace = CustomRoles.PokerFace,
+        Lawyer = CustomRoles.Lawyer,
+        Pirate = CustomRoles.Pirate,
 
         HASTroll = CustomRoles.HASTroll,
         TaskPlayerB = CustomRoles.TaskPlayerB,
@@ -495,6 +500,8 @@ namespace TownOfHost
         AssassinandMerlin,
         DriverandBraid,
         FoolandNue,
-        VegaandAltair
+        VegaandAltair,
+        PokerFace,
+        TheThreeLittlePigs
     }
 }

@@ -9,6 +9,7 @@ using AmongUs.GameOptions;
 using TownOfHost.Modules;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using TownOfHost.Roles.Madmate;
 using static TownOfHost.ExtendedPlayerControl;
 
 using static TownOfHost.Translator;
@@ -48,7 +49,7 @@ namespace TownOfHost
                 if (!SuddenDeathMode.NowSuddenDeathMode) NameColorManager.RemoveAll(player.PlayerId);
 
                 //マッドメイトの最初からの内通
-                if (role.IsMadmate() && Options.MadCanSeeImpostor.GetBool())
+                if (SatsumatoImo.CanSeeImpostorNameColor(role))
                 {
                     if (PlayerCatch.AllPlayerFirstTypes.Any(x => x.Value is CustomRoleTypes.Impostor))
                         foreach (var imp in PlayerCatch.AllPlayerFirstTypes.Where(x => x.Value is CustomRoleTypes.Impostor))

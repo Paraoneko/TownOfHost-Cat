@@ -822,6 +822,7 @@ public enum CustomRoles
     Minimalist,
     Evolver,
     Conjurer,
+    Swooper,
     //TOH-K
     Bomber,
     TeleportKiller,
@@ -916,6 +917,7 @@ public enum CustomRoles
     SatsumatoImoC,
     SatsumatoImoM,
     NiceTeleporter,
+    NiceRedRidingHood,
     //TOH-K
     Gasp,
     VentMaster,
@@ -1002,6 +1004,17 @@ public enum CustomRoles
     Monika,
     LoversBreaker,
     Suicider,
+    PokerFace,
+    Ogre,
+    Lawyer,
+    Pursuer,
+    Duelist,
+    Archenemy,
+    Pirate,
+    Gang,
+    TheFirstLittlePig,
+    TheSecondLittlePig,
+    TheThirdLittlePig,
     //TOH-K
     Remotekiller,
     Chef,
@@ -1053,6 +1066,7 @@ public enum CustomRoles
     Altair,
     MagicalGirl,
     Walkure,
+    SuspiciousTeller,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,

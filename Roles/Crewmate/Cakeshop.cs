@@ -20,7 +20,7 @@ public sealed class Cakeshop : RoleBase, INekomata
             CustomRoles.Cakeshop,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            21200,
+            30800,
             null,
             "cs",
             "#aacbff",
