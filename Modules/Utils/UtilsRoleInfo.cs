@@ -94,6 +94,8 @@ namespace TownOfHost
                 roleCommands.Add(CustomRoles.Slacker, "sl");
                 roleCommands.Add(CustomRoles.Stamina, "st");
                 roleCommands.Add(CustomRoles.Jumbo, "J");
+                roleCommands.Add(CustomRoles.Securer, "Su");
+                roleCommands.Add(CustomRoles.Sealer, "Sea");
                 roleCommands.Add(CustomRoles.Clumsy, "lb");
                 roleCommands.Add(CustomRoles.Elector, "El");
                 roleCommands.Add(CustomRoles.Amnesia, "am");
@@ -311,6 +313,7 @@ namespace TownOfHost
 
                 //クルーメイト
                 "ぽんこつ占い師" or "ポンコツ占い師" => GetString("PonkotuTeller"),
+                "あやしい占い師" or "怪しい占い師" or "suspiciousteller" or "suspiciousfortuneteller" or "ayashiiteller" => GetString("SuspiciousTeller"),
                 "エンジニア" => GetString("Engineer"),
                 "科学者" => GetString("Scientist"),
                 "トラッカー" => GetString("Tracker"),

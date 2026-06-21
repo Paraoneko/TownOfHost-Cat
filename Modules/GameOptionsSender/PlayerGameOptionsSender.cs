@@ -13,6 +13,7 @@ using TownOfHost.Roles.Ghost;
 using static TownOfHost.Options;
 using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.AddOns.Common;
+using TownOfHost.Roles.Madmate;
 using TownOfHost.Roles.Vanilla;
 
 namespace TownOfHost.Modules
@@ -187,12 +188,15 @@ namespace TownOfHost.Modules
                         AURoleOptions.ShapeshifterDuration = DefaultShapeshiftDuration.GetFloat();
                         break;
                     case CustomRoleTypes.Madmate:
-                        AURoleOptions.EngineerCooldown = MadmateVentCooldown.GetFloat();
-                        AURoleOptions.EngineerInVentMaxTime = MadmateVentMaxTime.GetFloat();
-                        HasLithing |= MadmateHasLighting.GetBool();
-                        HasMoon |= MadmateHasMoon.GetBool();
-                        if (MadmateCanSeeOtherVotes.GetBool())
-                            opt.SetBool(BoolOptionNames.AnonymousVotes, false);
+                        if (SatsumatoImo.UsesMadmateCommonSettings(role))
+                        {
+                            AURoleOptions.EngineerCooldown = MadmateVentCooldown.GetFloat();
+                            AURoleOptions.EngineerInVentMaxTime = MadmateVentMaxTime.GetFloat();
+                            HasLithing |= MadmateHasLighting.GetBool();
+                            HasMoon |= MadmateHasMoon.GetBool();
+                            if (MadmateCanSeeOtherVotes.GetBool())
+                                opt.SetBool(BoolOptionNames.AnonymousVotes, false);
+                        }
                         break;
                 }
                 if (role is CustomRoles.Egoist)
@@ -336,7 +340,7 @@ namespace TownOfHost.Modules
                             case CustomRoles.LastNeutral: HaveWatching |= LastImpostor.GiveWatching.GetBool(); break;
                         }
                     }
-                    if (role.IsMadmate() && MadmateCanSeeOtherVotes.GetBool()) HaveWatching = true;
+                    if (SatsumatoImo.UsesMadmateCommonSettings(role) && MadmateCanSeeOtherVotes.GetBool()) HaveWatching = true;
                 }
 
                 if (HaveWatching) opt.SetBool(BoolOptionNames.AnonymousVotes, false);

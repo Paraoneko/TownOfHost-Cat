@@ -18,6 +18,7 @@ using TownOfHost.Roles.AddOns.Common;
 using TownOfHost.Roles.AddOns.Impostor;
 using TownOfHost.Roles.AddOns.Neutral;
 using TownOfHost.Roles.Ghost;
+using TownOfHost.Roles.Madmate;
 using static TownOfHost.Translator;
 using static TownOfHost.UtilsRoleText;
 using TownOfHost.Patches;
@@ -153,7 +154,7 @@ namespace TownOfHost
             return check || seer.GetCustomRole() switch
             {
                 // IKillFlashSeeable未適用役職はここに書く
-                _ => (seer.Is(CustomRoleTypes.Madmate) && Options.MadmateCanSeeKillFlash.GetBool())
+                _ => (SatsumatoImo.UsesMadmateCommonSettings(seer) && Options.MadmateCanSeeKillFlash.GetBool())
                 || (seer.Is(CustomRoles.Seeing) && (!IsActive(SystemTypes.Comms) || Seeing.OptionCanSeeActiveComms.GetBool()))
             };
         }

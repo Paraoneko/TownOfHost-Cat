@@ -19,7 +19,7 @@ using static Unity.Services.LevelPlay.LevelPlayBannerPosition;
 [assembly: AssemblyInformationalVersionAttribute(TownOfHost.Main.PluginVersion)]
 namespace TownOfHost
 {
-    [BepInPlugin(PluginGuid, "Town Of Host-Pko", PluginVersion)]
+    [BepInPlugin(PluginGuid, "Town Of Host-Pko", BepInExPluginVersion)]
     [BepInIncompatibility("jp.ykundesu.supernewrolesnext")]
     [BepInIncompatibility("jp.ykundesu.supernewroles")]
     [BepInIncompatibility("me.yukieiji.extremeroles")]
@@ -59,9 +59,10 @@ namespace TownOfHost
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
         public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
-        public const string PluginVersion = "4.33.18.73";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.33.18.73";
-        public const string ModVersion = ".33.18";//リリースver用バージョン変更
+        public const string BepInExPluginVersion = "4.32.17+73";
+        public const string PluginVersion = "4.32.17.73";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "4.32.17.73";
+        public const string ModVersion = ".17.73";//リリースver用バージョン変更dc9b79
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
         public static bool DebugVersion = false;

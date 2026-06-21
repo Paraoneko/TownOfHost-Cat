@@ -272,6 +272,7 @@ namespace TownOfHost
         public static bool CanUseImpostorVentButton(this PlayerControl pc)
         {
             if (!pc.IsAlive()) return false;
+            if (Sealer.BlocksVent(pc)) return false;
 
             if (pc.Is(CustomRoles.Amnesia) && !pc.Is(CustomRoleTypes.Impostor)) return false;
 
@@ -283,6 +284,7 @@ namespace TownOfHost
         {
             if (Options.CurrentGameMode is CustomGameMode.SuddenDeath or CustomGameMode.MurderMystery) return false;
             if (pc.GetPlayerState() is null) return false;
+            if (Securer.BlocksSabotage(pc)) return false;
             if (pc.Is(CustomRoles.DemonicSupporter)) return true;
             if (pc.Is(CustomRoles.Amnesia) && !pc.Is(CustomRoleTypes.Impostor)) return false;
             if (GameStates.IsMeeting) return false;
@@ -494,7 +496,7 @@ namespace TownOfHost
 
             // IDeathReasonSeeable未対応役職はこちら
             return check ||
-            (seer.Is(CustomRoleTypes.Madmate) && Options.MadmateCanSeeDeathReason.GetBool())
+            (SatsumatoImo.UsesMadmateCommonSettings(seer) && Options.MadmateCanSeeDeathReason.GetBool())
             || (seer.Is(CustomRoles.Autopsy) && (!Utils.IsActive(SystemTypes.Comms) || Autopsy.CanUseActiveComms.GetBool()));
         }
         public static string GetRoleDesc(this PlayerControl player, bool InfoLong = false)
@@ -574,7 +576,10 @@ namespace TownOfHost
                 Main.HostKill.TryAdd(target.PlayerId, State.DeathReason);
             }
             if (!(AntiBlackout.IsCached || GameStates.CalledMeeting || GameStates.ExiledAnimate))
+            {
                 Twins.TwinsSuicide();
+                Triplets.TripletsSuicide();
+            }
 
             if (Options.GhostIgnoreTasks.GetBool())
             {

@@ -56,7 +56,7 @@ namespace TownOfHost
             Main.DebugSendAmout.Value = false;
             Main.DebugTours.Value = false;
             Main.ShowDistance.Value = false;
-            Main.DebugChatopen.Value  =false;
+            Main.DebugChatopen.Value = false;
 #endif
             //taskOptionsLoad = Task.Run(Load);
             try
@@ -530,6 +530,8 @@ namespace TownOfHost
         public static OptionItem OptionAutoStartLimitAnother;
         public static OptionItem OptionAutoReturnRoom;
         public static OptionItem OptionAutoReturnRoomGM;
+        public static OptionItem OptionAutoForceEndOnDisconnect;
+        public static OptionItem OptionAutoForceEndDisconnectCount;
         public static OptionItem OptionStreamerSetting;
         public static OptionItem OptionGMAutoChat;
         public static OptionItem OptionGMAutoPossess;
@@ -822,6 +824,7 @@ namespace TownOfHost
             ObjectOptionitem.Create(1_000_115, "Group-Addon", true, null, TabGroup.Combinations).SetOptionName(() => "Combi Add-on").SetColor(ModColors.AddonsColor).SetTag(CustomOptionTags.Role);
             Faction.SetUpOption();
             Twins.SetUpTwinsOptions();
+            Triplets.SetUpTripletsOptions();
             Lovers.SetLoversOptions();
             GhostRoleCore.SetupCustomOptionAddonAndIsGhostRole();
 
@@ -1427,6 +1430,15 @@ namespace TownOfHost
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "GMの場合のみ自動で部屋に戻る");
 
+            OptionAutoForceEndOnDisconnect = BooleanOptionItem.Create(1_300_261, "AutoForceEndOnDisconnect", false, TabGroup.MainSettings, true)
+                .SetParent(OptionAutoFunction)
+                .SetColorcode("#00c1ff");
+
+            OptionAutoForceEndDisconnectCount = IntegerOptionItem.Create(1_300_262, "AutoForceEndDisconnectCount", new(1, 14, 1), 1, TabGroup.MainSettings, true)
+                .SetParent(OptionAutoForceEndOnDisconnect)
+                .SetColorcode("#00c1ff")
+                .SetValueFormat(OptionFormat.Players);
+
             OptionStreamerSetting = BooleanOptionItem.Create(1_300_270, "StreamerSetting", false, TabGroup.MainSettings, true)
                 .SetParent(OptionAutoFunction)
                 .SetColorcode("#00c1ff")
@@ -1468,7 +1480,7 @@ namespace TownOfHost
                       .SetOptionName(() => "タスクターン中のチャットを表示");
 
             OptionGameChatNormalChat = BooleanOptionItem.Create(1_300_360, "GameChatNormalChat", false, TabGroup.MainSettings, true)
-                　　　.SetParent(OptionGameChatSetting)
+                .SetParent(OptionGameChatSetting)
                       .SetColorcode("#00c1ff")
                       .SetOptionName(() => "通常チャットを有効にする");
 
@@ -1481,7 +1493,7 @@ namespace TownOfHost
                       .SetParent(OptionGameChatNormalNearChat)
                       .SetColorcode("#00c1ff")
                       .SetOptionName(() => "近チャの範囲");
-              
+
             OptionGameChatHideChat = BooleanOptionItem.Create(1_300_390, "GameChatHideChat", false, TabGroup.MainSettings, true)
                       .SetParent(OptionGameChatSetting)
                       .SetHeader(true)

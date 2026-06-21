@@ -190,7 +190,6 @@
     },
     "4.32.160": {
         "Unavailable": false,
-<<<<<<< HEAD
         "NotAvailableOnline": false,
         "AnnounceText": "Test Text"
     },
@@ -208,12 +207,14 @@
         "Unavailable": false,
         "NotAvailableOnline": false,
         "AnnounceText": "Test Text"
-=======
-        "NotAvailableOnline": false
+    },
+    "4.32.17.73": {
+        "Unavailable": false,
+        "NotAvailableOnline": false,
+        "AnnounceText": "～debug版～"
     },
     "51.14.32.43": {
         "Unavailable": false,
         "NotAvailableOnline": false
->>>>>>> b14311f574ba942b148e9b2055dedfea0b671870
     }
 }

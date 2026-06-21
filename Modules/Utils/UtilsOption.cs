@@ -156,7 +156,7 @@ namespace TownOfHost
                         if (role.IsImpostor()) mark = "Ⓘ";
                         if (role.IsNeutral()) mark = "Ⓝ";
                         if (role.IsMadmate()) mark = "Ⓜ";
-                        if (role.IsAddOn() || role is CustomRoles.Amanojaku or CustomRoles.Twins) mark = "Ⓐ";
+                        if (role.IsAddOn() || role is CustomRoles.Amanojaku or CustomRoles.Twins or CustomRoles.Triplets) mark = "Ⓐ";
                         if (role.IsGhostRole()) mark = "Ⓖ";
                         if (role.IsLovers()) mark = "Ⓛ";
 
@@ -492,6 +492,8 @@ namespace TownOfHost
                         case "GiveStamina": continue;
                         case "GiveJumbo": continue;
                         case "GiveSunglasses": continue;
+                        case "GiveSecurer": continue;
+                        case "GiveSealer": continue;
                         default: if (getbool) continue; break;
                     }
                 }
@@ -712,6 +714,8 @@ namespace TownOfHost
             if (player.Is(CustomRoles.Clumsy)) SendMessage(GetAddonsHelp(CustomRoles.Clumsy), player.PlayerId, AddRoleInfoTitle);
             if (player.Is(CustomRoles.Slacker)) SendMessage(GetAddonsHelp(CustomRoles.Slacker), player.PlayerId, AddRoleInfoTitle);
             if (player.Is(CustomRoles.Sunglasses)) SendMessage(GetAddonsHelp(CustomRoles.Sunglasses), player.PlayerId, AddRoleInfoTitle);
+            if (player.Is(CustomRoles.Securer)) SendMessage(GetAddonsHelp(CustomRoles.Securer), player.PlayerId, AddRoleInfoTitle);
+            if (player.Is(CustomRoles.Sealer)) SendMessage(GetAddonsHelp(CustomRoles.Sealer), player.PlayerId, AddRoleInfoTitle);
 
             //第三
             var lover = player.GetLoverRole();
@@ -722,6 +726,7 @@ namespace TownOfHost
             if (player.Is(CustomRoles.Workhorse)) SendMessage(GetAddonsHelp(CustomRoles.Workhorse), player.PlayerId, AddRoleInfoTitle);
             if (player.Is(CustomRoles.OneWolf)) SendMessage(GetAddonsHelp(CustomRoles.OneWolf), player.PlayerId, AddRoleInfoTitle);
             if (player.Is(CustomRoles.Twins)) SendMessage(GetAddonsHelp(CustomRoles.Twins), player.PlayerId, AddRoleInfoTitle);
+            if (player.Is(CustomRoles.Triplets)) SendMessage(GetAddonsHelp(CustomRoles.Triplets), player.PlayerId, AddRoleInfoTitle);
 
             GetGhostRolesInfo(player);
         }
@@ -735,13 +740,14 @@ namespace TownOfHost
         }
         public static string GetAddonsHelp(CustomRoles role)
         {
-            if (!(role.IsAddOn() || role.IsGhostRole() || role.IsLovers() || role is CustomRoles.Amanojaku || role is CustomRoles.Twins)) return "";
+            if (!(role.IsAddOn() || role.IsGhostRole() || role.IsLovers() || role is CustomRoles.Amanojaku || role is CustomRoles.Twins || role is CustomRoles.Triplets)) return "";
             var text = "";
             var juncture = "<line-height=2.0pic><size=150%>";
 
             return (text += juncture) + (role switch
             {
                 CustomRoles.Twins => AddonInfo(role, ""),
+                CustomRoles.Triplets => AddonInfo(role, ""),
                 //バフ
                 CustomRoles.Guesser => AddonInfo(role, "∮", From.TheOtherRoles),
                 CustomRoles.Serial => AddonInfo(role, "∂"),
@@ -774,6 +780,8 @@ namespace TownOfHost
                 CustomRoles.Slacker => AddonInfo(role, "ＳＬ"),
                 CustomRoles.Stamina => AddonInfo(role, "ＳＴ"),
                 CustomRoles.Jumbo => AddonInfo(role, "Ｊ"),
+                CustomRoles.Securer => AddonInfo(role, "ＳＵ"),
+                CustomRoles.Sealer => AddonInfo(role, "ＳＥ"),
                 CustomRoles.News => AddonInfo(role, "Ｎ"),
                 CustomRoles.Sunglasses => AddonInfo(role, "Ｓ", From.TheOtherRoles),
                 //第三属性
@@ -836,7 +844,7 @@ namespace TownOfHost
                 var chance = subRole.GetChance();
                 var count = subRole.GetCount();
                 if (chance == 0) continue;
-                if (subRole.IsAddOn() || subRole is CustomRoles.Amanojaku or CustomRoles.Twins) a += count;
+                if (subRole.IsAddOn() || subRole is CustomRoles.Amanojaku or CustomRoles.Twins or CustomRoles.Triplets) a += count;
                 if (subRole.IsLovers() && !loverch.Contains(subRole)) l++;
                 if (subRole.IsGhostRole()) g += count;
                 if (!loverch.Contains(subRole)) loverch.Add(subRole);
@@ -886,7 +894,7 @@ namespace TownOfHost
                 var chance = subRole.GetChance();
                 var count = subRole.GetCount();
                 if (chance == 0) continue;
-                if (subRole.IsAddOn() || subRole is CustomRoles.Amanojaku or CustomRoles.Twins) a += count;
+                if (subRole.IsAddOn() || subRole is CustomRoles.Amanojaku or CustomRoles.Twins or CustomRoles.Triplets) a += count;
                 if (subRole.IsLovers() && !loverch.Contains(subRole)) l++;
                 if (subRole.IsGhostRole()) g += count;
                 if (!loverch.Contains(subRole)) loverch.Add(subRole);

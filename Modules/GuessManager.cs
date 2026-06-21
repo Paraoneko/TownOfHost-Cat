@@ -257,6 +257,13 @@ public static class GuessManager
 
     private static bool CheckTargetRoles(PlayerControl target, CustomRoles role)
     {
+        if (MagicalGirl.IsMatchedGuess(target, role)) return false;
+        if (role is CustomRoles.SatsumatoImo
+            && target.GetCustomRole() is CustomRoles.SatsumatoImoC or CustomRoles.SatsumatoImoM)
+        {
+            return false;
+        }
+
         bool result = !target.Is(role);
 
         switch (target.GetCustomRole())
@@ -634,7 +641,7 @@ public static class GuessManager
     {
         var roleaddon = RoleAddAddons.GetRoleAddon(pc.GetCustomRole(), out var data, pc, subrole: CustomRoles.Guesser);
 
-        if (guessrole is CustomRoles.Snitch && target.AllTasksCompleted())
+        if (IsTaskDoneSnitchGuess(target, guessrole))
         {
             var CanGuessSnich = Guesser.ICanGuessTaskDoneSnitch.GetBool();
             if (roleaddon && data.GiveGuesser.GetBool()) CanGuessSnich = data.ICanGuessTaskDoneSnitch.GetBool();
@@ -688,7 +695,7 @@ public static class GuessManager
         var roleaddon = RoleAddAddons.GetRoleAddon(pc.GetCustomRole(), out var data, pc, subrole: CustomRoles.Guesser);
 
         //スニッチを撃ちぬけるか
-        if (guessrole is CustomRoles.Snitch && target.AllTasksCompleted())
+        if (IsTaskDoneSnitchGuess(target, guessrole))
         {
             var CanGuessSnich = Guesser.NCanGuessTaskDoneSnitch.GetBool();
             if (roleaddon && data.GiveGuesser.GetBool()) CanGuessSnich = data.ICanGuessTaskDoneSnitch.GetBool();
@@ -729,7 +736,7 @@ public static class GuessManager
     {
         var roleaddon = RoleAddAddons.GetRoleAddon(pc.GetCustomRole(), out var data, pc, subrole: CustomRoles.Guesser);
 
-        if (guessrole is CustomRoles.Snitch && target.AllTasksCompleted())
+        if (IsTaskDoneSnitchGuess(target, guessrole))
         {
             var CanGuessSnich = Guesser.MCanGuessTaskDoneSnitch.GetBool();
             if (roleaddon && data.GiveGuesser.GetBool()) CanGuessSnich = data.ICanGuessTaskDoneSnitch.GetBool();
@@ -812,5 +819,12 @@ public static class GuessManager
             }
         }
         return false;
+    }
+
+    private static bool IsTaskDoneSnitchGuess(PlayerControl target, CustomRoles guessrole)
+    {
+        if (!target.AllTasksCompleted()) return false;
+        if (guessrole is CustomRoles.Snitch) return true;
+        return target.Is(CustomRoles.Snitch) && MagicalGirl.IsMatchedGuess(target, guessrole);
     }
 }
