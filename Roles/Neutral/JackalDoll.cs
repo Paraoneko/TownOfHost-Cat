@@ -39,8 +39,10 @@ public sealed class JackalDoll : RoleBase
         BossAndSidekicks.Clear();
         CanPromotion = false;
         ExiledPlayerInfo = null;
+        ApplyJackalKillerCount();
     }
     static OptionItem OptionJackaldieMode;
+    static OptionItem OptionCountAsJackalKiller;
     static OptionItem OptionChangeRole;
     static OptionItem OptionSideKickMaxmim;
     static OptionItem CanVent;
@@ -50,7 +52,7 @@ public sealed class JackalDoll : RoleBase
     static NetworkedPlayerInfo ExiledPlayerInfo;
     enum Option
     {
-        JackaldolldieMode, JackaldollRoleChe, SideKickJackaldollMacCount
+        JackaldolldieMode, JackaldollCountAsJackalKiller, JackaldollRoleChe, SideKickJackaldollMacCount
     }
     enum Diemode
     {
@@ -92,6 +94,7 @@ public sealed class JackalDoll : RoleBase
         var cRolesString = ChangeRoles.Select(x => x.ToString()).ToArray();
         OptionSideKickMaxmim = IntegerOptionItem.Create(RoleInfo, 9, Option.SideKickJackaldollMacCount, new(0, 15, 1), 1, false);
         OptionJackaldieMode = StringOptionItem.Create(RoleInfo, 10, Option.JackaldolldieMode, EnumHelper.GetAllNames<Diemode>(), 0, false);
+        OptionCountAsJackalKiller = BooleanOptionItem.Create(RoleInfo, 11, Option.JackaldollCountAsJackalKiller, false, false);
         OptionChangeRole = StringOptionItem.Create(RoleInfo, 15, Option.JackaldollRoleChe, cRolesString, 3, false)
         .SetEnabled(() => OptionJackaldieMode.GetValue() is 2);
         CanVent = BooleanOptionItem.Create(RoleInfo, 16, GeneralOption.CanVent, false, false);
@@ -99,6 +102,12 @@ public sealed class JackalDoll : RoleBase
         VentIntime = FloatOptionItem.Create(RoleInfo, 18, GeneralOption.EngineerInVentCooldown, new(0f, 180f, 0.5f), 0f, false, CanVent).SetZeroNotation(OptionZeroNotation.Infinity).SetValueFormat(OptionFormat.Seconds);
         CanVentMove = BooleanOptionItem.Create(RoleInfo, 19, "MadmateCanMovedByVent", false, false, CanVent);
         RoleAddAddons.Create(RoleInfo, 20, MadMate: true);
+    }
+    public static bool CountAsJackalKiller => OptionCountAsJackalKiller?.GetBool() == true;
+    private void ApplyJackalKillerCount()
+    {
+        if (CountAsJackalKiller)
+            MyState.SetCountType(CountTypes.Jackal);
     }
     public override bool CanVentMoving(PlayerPhysics physics, int ventId) => CanVentMove.GetBool();
     public override void ApplyGameOptions(IGameOptions opt)
@@ -115,6 +124,8 @@ public sealed class JackalDoll : RoleBase
         }
 
         var state = PlayerState.GetByPlayerId(doll.PlayerId);
+        if (CountAsJackalKiller)
+            state.SetCountType(CountTypes.Jackal);
 
         if (owner.Is(CustomRoles.Jackal))
         {
@@ -263,6 +274,7 @@ public sealed class JackalDoll : RoleBase
     }
     public override void OnFixedUpdate(PlayerControl player)
     {
+        ApplyJackalKillerCount();
         if (!player.IsAlive()) return;
         if (!AmongUsClient.Instance.AmHost) return;
         if (GameStates.ExiledAnimate || AntiBlackout.IsSet) return;

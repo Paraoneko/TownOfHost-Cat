@@ -15,10 +15,11 @@ public sealed class BlackCat : RoleBase, INekomata
             CustomRoles.BlackCat,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Madmate,
-            21500,
+            22500,
             SetupOptionItems,
             "bc",
-            OptionSort: (2, 3)
+            OptionSort: (2, 3),
+            from: From.SuperNewRoles
         );
 
     public BlackCat(PlayerControl player)
