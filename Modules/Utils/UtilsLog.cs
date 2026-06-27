@@ -40,6 +40,16 @@ namespace TownOfHost
             if (PlayerControl.LocalPlayer != null)
                 SendMessage(GetString("Message.LogsSavedInLogsFolder"));
         }
+        public static byte[] ReadCurrentLog()
+        {
+            if (Main.IsAndroid()) return Array.Empty<byte>();
+
+            var logPath = $"{Environment.CurrentDirectory}/BepInEx/LogOutput.log";
+            using var input = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var output = new MemoryStream();
+            input.CopyTo(output);
+            return output.ToArray();
+        }
         public static void SaveNowLog()
         {
             if (Main.IsAndroid()) return;
@@ -416,6 +426,13 @@ namespace TownOfHost
                 SendMessage(GetString("CantUse.killlog"), PlayerId);
                 return;
             }
+
+            var send = BuildKillLogText(IsMonochrome);
+            if (!string.IsNullOrEmpty(send))
+                SendMessage(send, PlayerId, checkl: true, setsize: true);
+        }
+        public static string BuildKillLogText(bool IsMonochrome = false)
+        {
             var mes = new StringBuilder();
             mes.Append($"{GetString("GameLog")}\n{gamelog}");
             var last = GameLog.Values.LastOrDefault();
@@ -448,11 +465,10 @@ namespace TownOfHost
                     var send = mes.ToString() + "\n\n" + $"{Star}{meg}{Star}".Color(winnerColor);
 
                     if (Options.ExChatMonochrome.GetBool() || IsMonochrome) send = send.RemoveColorTags();
-                    SendMessage(send.RemoveDeltext("<b>").RemoveDeltext("</b>"), PlayerId, checkl: true, setsize: true);
-                    break;
+                    return send.RemoveDeltext("<b>").RemoveDeltext("</b>");
                 }
             }
-            //SendMessage(/*EndGamePatch.KillLog*/, PlayerId);
+            return "";
         }
         public static void ShowAchievement(byte playerid)
         {
