@@ -217,6 +217,7 @@ namespace TownOfHost
                 case CustomWinner.MadonnaLovers: barColor = GetRoleColor(CustomRoles.MadonnaLovers); break;
                 case CustomWinner.CupidLovers: barColor = GetRoleColor(CustomRoles.CupidLovers); break;
                 case CustomWinner.OneLove: CustomWinnerText = ColorString(GetRoleColor(CustomRoles.OneLove), GetString("OneLoveWin")); barColor = GetRoleColor(CustomRoles.OneLove); break;
+                case CustomWinner.God: CustomWinnerText = GetString("GodWinText"); barColor = GetRoleColor(CustomRoles.God); break;
                 case CustomWinner.MilkyWay: var MilkyWayColor = StringHelper.CodeColor(Roles.Neutral.Vega.TeamColor); CustomWinnerText = ColorString(MilkyWayColor, GetString("TeamMilkyWay")); barColor = MilkyWayColor; break;
                 case CustomWinner.TaskPlayerB:
                     if (winnerList.Count is 0) break;
@@ -322,7 +323,7 @@ namespace TownOfHost
                 {
                     AdditionalWinnerText.Append('＆').Append(ColorString(GetRoleColor(role), GetRoleName(role)));
                 }
-            if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Draw and not CustomWinner.None and not CustomWinner.OneLove && !SuddenDeathMode.NowSuddenDeathMode)
+            if (CustomWinnerHolder.WinnerTeam is not CustomWinner.Draw and not CustomWinner.None and not CustomWinner.OneLove and not CustomWinner.God && !SuddenDeathMode.NowSuddenDeathMode)
             {
                 CustomWinnerText = $"<{CustomWinnerColor}>{CustomWinnerText}{AdditionalWinnerText}{GetString("Win")}</color>";
             }
@@ -452,6 +453,7 @@ namespace TownOfHost
 
                     switch (CustomWinnerHolder.WinnerTeam)
                     {
+                        case CustomWinner.God: meg = GetString("GodWinText"); break;
                         case CustomWinner.Draw: meg = GetString("ForceEnd"); break;
                         case CustomWinner.None: meg = GetString("EveryoneDied"); break;
                         case CustomWinner.SuddenDeathRed: meg = GetString("SuddenDeathRed"); winnerColor = ModColors.Red; break;
