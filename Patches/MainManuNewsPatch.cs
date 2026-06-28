@@ -577,6 +577,34 @@ public class ModNewsHistory
                 };
                 AllModNews.Add(news);
             }
+            {
+                var news = new ModNews
+                {
+                    Number = 100095,
+                    Title = "中型アップデート..?",
+                    SubTitle = "<color=#FF9631>●TOH-Pko v4.32.17.85</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v4.32.17.85</color>",
+                    Text = "めんどくさいので雑だけど許してね。覚えてるのだけ書く\n"
+                    + "・<size=3>新役職～</size>\n"
+                    + "・<#ff1919>Ⓘ ビギナーインポスター</color>\n"
+                    + "<size=3>追加された機能</size>\n"
+                    + "ジャッカルドールにキラー判定にする設定\n"
+                    + "↑の子設定として昇格設定がONのときのみキラー判定にする設定\n"
+                    + "コマンド可否設定を許可じゃなくて禁止制に変更\n"
+                    + "常時ゲッサーコマンドのやり方表示\n"
+                    + "ペットパッチ復活\n"
+                    + "投票により自殺願望者とモイラの一時封印\n"
+                    + "神勝利時のテキストを神降臨に変更\n"
+                    + "自動でロビーに戻る機能で戻るまでの時間を5sに変更\n"
+                    + "テレポーターファントムボタンでキルク10sになるバグ修正　\n"
+                    + "神が廃村時勝利するバグ修正\n"
+                    + "マッチメイキング機能の変更\n"
+                    + "ウェブフック機能の変更\n"
+                    ,
+                    Date = "2026-6-28"
+                };
+                AllModNews.Add(news);
+            }
             AnnouncementPopUp.UpdateState = AnnouncementPopUp.AnnounceState.NotStarted;
         }
     }
