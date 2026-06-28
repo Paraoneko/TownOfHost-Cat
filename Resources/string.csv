@@ -2072,6 +2072,7 @@
 "JackaldollRoleChe","Chenge Role","変更先の役職"
 "JackaldolldieMode","Jackal Team All Die Mode","ご主人全滅時のモード"
 "JackaldollCountAsJackalKiller","Treat as a killer","キラー判定にする"
+"JackaldollCountAsKillerOnlyWhenPromotionEnabled","Only count as a killer when promotion is enabled","昇格設定がONのときのみキラー判定にする"
 "JackalSidekickPromotion","SideKick Jackal","サイドキックが昇格する"
 "SideKickJackaldollMacCount","SideKick Max Count","サイドキックの最大数"
 "JackalHadouHoChargeTime","Normal beam charge time","通常ビームチャージ時間"
