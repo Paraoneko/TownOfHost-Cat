@@ -122,6 +122,7 @@ namespace TownOfHost
 
                     var enabled = true;
                     var parent = option.Parent;
+                    var childOption = option;
                     var opt = option.OptionBehaviour.LabelBackground;
                     var isroleoption = option.CustomRole is not CustomRoles.NotAssigned;
                     /*if (isroleoption && rolebutton.TryGetValue(option.CustomRole, out var button))
@@ -157,7 +158,8 @@ namespace TownOfHost
                     while (parent != null && enabled)
                     {
                         i++;
-                        enabled = parent.CustomRole is not CustomRoles.NotAssigned || parent.GetBool() || (parent.CustomRole.IsAddOn() && option.Name is not "%roleTypes%Maximum" and not "Maximum" and not "FixedRole");
+                        enabled = parent.CustomRole is not CustomRoles.NotAssigned || childOption.IsParentValueEnabledForDisplay() || (parent.CustomRole.IsAddOn() && option.Name is not "%roleTypes%Maximum" and not "Maximum" and not "FixedRole");
+                        childOption = parent;
                         parent = parent.Parent;
                     }
                     if (i > 0 && option.Name != "Maximum")
@@ -238,10 +240,12 @@ namespace TownOfHost
                     var hi = 0;
                     var henabled = AmongUsClient.Instance.AmHost && !option.IsHiddenOn(Options.CurrentGameMode);
                     var heparent = option.Parent;
+                    var headerChildOption = option;
                     while (heparent != null && henabled)
                     {
                         hi++;
-                        henabled = option.Name == "RoleOption" || heparent.CustomRole is not CustomRoles.NotAssigned || heparent.GetBool() || (heparent.CustomRole.IsAddOn() && option.Name is not "%roleTypes%Maximum" and not "Maximum" and not "FixedRole");
+                        henabled = option.Name == "RoleOption" || heparent.CustomRole is not CustomRoles.NotAssigned || headerChildOption.IsParentValueEnabledForDisplay() || (heparent.CustomRole.IsAddOn() && option.Name is not "%roleTypes%Maximum" and not "Maximum" and not "FixedRole");
+                        headerChildOption = heparent;
                         heparent = heparent.Parent;
                     }
                     if (option.Name == "RoleOption")
@@ -308,10 +312,12 @@ namespace TownOfHost
                             var hi = 0;
                             var henabled = AmongUsClient.Instance.AmHost && !option.IsHiddenOn(Options.CurrentGameMode);
                             var heparent = option.Parent;
-                            while (option.Parent != null && henabled)
+                            var headerChildOption = option;
+                            while (heparent != null && henabled)
                             {
                                 hi++;
-                                henabled = heparent.GetBool();
+                                henabled = headerChildOption.IsParentValueEnabledForDisplay();
+                                headerChildOption = heparent;
                                 heparent = heparent.Parent;
                             }
                             option.OptionHedder.gameObject.SetActive(henabled);
@@ -389,7 +395,7 @@ namespace TownOfHost
                                 if (OptionShower.Checkenabled(option.Parent) is false or null)
                                 {
                                     var v = OptionShower.Checkenabled(option.Parent);
-                                    enabled = v is not null && option.Parent.GetBool();
+                                    enabled = v is not null && option.IsParentValueEnabledForDisplay();
                                 }
                         }
                         if (!Event.CheckRole(option.CustomRole))
@@ -427,10 +433,12 @@ namespace TownOfHost
                     RectTransform titleTextRect = titleText.GetComponent<RectTransform>();
 
                     var i = 0;
+                    var childOption = option;
                     while (parent != null && enabled)
                     {
                         i++;
-                        enabled = parent.GetBool();
+                        enabled = childOption.IsParentValueEnabledForDisplay();
+                        childOption = parent;
                         parent = parent.Parent;
                     }
 
