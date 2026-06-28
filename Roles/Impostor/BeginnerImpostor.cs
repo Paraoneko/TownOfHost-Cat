@@ -22,13 +22,12 @@ public sealed class BeginnerImpostor : RoleBase, IImpostor, IUsePhantomButton
             126800,
             SetupOptionItem,
             "bi",
-            "#ff6b35",
+            "#ff1919",
             OptionSort: (4, 6),
             assignInfo: new RoleAssignInfo(CustomRoles.BeginnerImpostor, CustomRoleTypes.Impostor)
             {
                 AssignCountRule = new(1, 1, 1)
-            },
-            from: From.TownOfHost_Pko
+            }
         );
 
     private static OptionItem OptionDummyCount;
