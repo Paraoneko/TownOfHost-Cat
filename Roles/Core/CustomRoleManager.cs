@@ -1059,6 +1059,7 @@ public enum CustomRoles
     Stand,
     Villain,
     Scratcher,
+    HappyJester,
     //DEBUG only Neutral.
     //HideAndSeek
     HASFox,

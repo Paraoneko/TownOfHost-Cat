@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -8,9 +9,9 @@ using TownOfHost.Modules;
 
 namespace TownOfHost.Patches;
 
-public sealed class LobbyTitleDummy : CustomNetObject
+public sealed class テスト用PatchLobbyTitleDummy : CustomNetObject
 {
-    private static LobbyTitleDummy _instance;
+    private static テスト用PatchLobbyTitleDummy _instance;
 
     private static readonly Vector2 SpawnPosition = new(0f, 10f);
 
@@ -85,7 +86,7 @@ public sealed class LobbyTitleDummy : CustomNetObject
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (_instance != null) return;
-        _instance = new LobbyTitleDummy();
+        _instance = new テスト用PatchLobbyTitleDummy();
         _instance.SpawnInLobby(SpawnPosition);
     }
 
@@ -116,13 +117,14 @@ internal static class LobbyTitleSpawnPatch
     public static void Postfix()
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        LobbyTitleDummy.ResetInstance();
-        _ = new LateTask(LobbyTitleDummy.Spawn, 0.8f, "LobbyTitle.Spawn", true);
+        テスト用PatchLobbyTitleDummy.ResetInstance();
+        _ = new LateTask(テスト用PatchLobbyTitleDummy.Spawn, 0.8f, "LobbyTitle.Spawn", true);
     }
 }
 
 [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.OnDestroy))]
 internal static class LobbyTitleDespawnPatch
 {
-    public static void Prefix() => LobbyTitleDummy.DespawnInstance();
+    public static void Prefix() => テスト用PatchLobbyTitleDummy.DespawnInstance();
 }
+*/

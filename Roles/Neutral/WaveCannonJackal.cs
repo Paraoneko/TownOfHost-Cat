@@ -854,7 +854,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
         string sB = fl ? star + blank : blank + star;
         string lB = fl ? finalBeam + sB : sB + finalBeam;
 
-        string hugeBlank = "<alpha=#00>" + new string('　', IsSuperBeam ? 3 : 10) + "</alpha>";
+        string hugeBlank = "<alpha=#00>" + new string('　', IsSuperBeam ? 1 : 10) + "</alpha>";
 
         string ls;
         if (IsSuperBeam)

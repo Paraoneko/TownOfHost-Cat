@@ -274,6 +274,7 @@
 "Gang","Gang","一味"
 "PokerFace","PokerFace","ポーカーフェイス"
 "TheThreeLittlePigs","TheThreeLittlePigs","三匹の子豚"
+"HappyJester","HappyJester","ハッピージェスター"
 "#NeutralName"
 
 "#コンビネーション役職"
@@ -649,6 +650,7 @@
 "PoisonedBakeryInfo","","美味しい毒パンはいかが？"
 "VillainInfo","","偽りの平穏を打ち砕き、本性を現せ"
 "ScratcherInfo","Scratch and win","人生はギャンブルzoy"
+"HappyJesterInfo","","追放されてみんなでハッピーエンドを迎えよう"
 "#NeutralInfo"
 
 "# HideAndSeek"
@@ -959,6 +961,7 @@
 "VillainInfoLong","Villain is a hidden third-faction role that disguises itself as Crew. When all killer factions are eliminated it transforms and gains a Kill button.","ヴィランは潜伏する第三陣営。キル陣営が全滅すると変化し、キルボタンを持つ。"
 "ScratcherInfoLong","Each time you finish a task you earn scratch tickets.\n\nIn a meeting you can scratch tickets by self-voting (vote for yourself). Each scratch consumes one ticket and rolls for a hit at the set probability; the result and remaining tickets are shown by message.\n\nGet the set number of hits to hijack the game and win alone.","タスクを終わらせる度にスクラッチを入手する。\n会議でコマンド/shでスクラッチを削ることができ、当たったかどうかがメッセージで表示される。\n設定した枚数の当たりを引くと単独勝利。"
 "MoiraInfoLong","[Neutral] Crewmate replacement\n\nMoira can alter the fates of others by swapping two players' roles.\n\nDuring a meeting, self-vote to enter [Fate Change Mode].\nThen vote for your 1st target, then vote for your 2nd target.\nAt the end of the meeting, the two targets will have their roles swapped.\n\nYou have a limited number of swaps.\nOnce all swaps are used, your identity is revealed to everyone.\nIf you survive to the end after using all your swaps, you win!\n\nSwapped roles are permanent — they are NOT reverted even if Moira dies.\n\nIf [Swap Votes] is ON:\nVotes cast on your two targets will be counted for the other target instead.","モイラは2人のプレイヤーの役職を入れ替えることができる。\n\n会議中に自分自身に投票すると【運命改変モード】に入る。\n次に1人目のターゲットに投票し、さらに2人目のターゲットに投票する。\n会議終了時に、その2人の役職が入れ替わる。\n\n改変回数には上限がある。\n全ての改変を使い切ると、モイラの正体が全員に公開される。\n全改変を使い切り、試合終了後に生存していると単独勝利！ない。"
+"HappyJesterInfoLong","","会議で追放された時にプレイヤー全員が勝利できる。\n追放されず試合が終了orキルされると敗北。\nこの役職には勝利優先度がなく必ずこの役職が勝利を優先される。\n※勝利画面でジェスター勝利と出るのは仕様です。"
 "#NeutralInfoLong"
 
 "# ImpostorDescInfos"
@@ -2250,6 +2253,7 @@
 "MoiraSwapAnnounce","A sudden feeling of distortion....\nNothing happens....\nNo, something is happening\nSuch a feeling remains\n\nTarget1: {0}\nTarget2: {1}","突然、体が歪む感覚が....\n何も起こらない....\nいや、何かは起きている\nそんな感覚を覚える\n\n対象1: {0}\n対象2: {1}"
 "MoiraRevealed","{0} has used all fate swaps. Their identity is now revealed!","{0} の運命改変が全て使われた。正体が明らかになった！"
 "MoiraExiledRevert","Moira has been eliminated. All fate swaps have been undone.","モイラが排除された。全ての運命改変が解除された。"
+"HappyJesterRequireTask","Require Task Completion","タスク完了で勝利"
 
 "## Unit Role Setting"
 "BraidKillCooldown","Bread Task Complete Driver Killcool","ブレイドが全タスク完了時のキルクール"
@@ -2881,10 +2885,16 @@
 "FpsLimitRemoval","Fps Limit Removal","FPSの制限を解除する"
 "AutoSaveScreenShot","Auto Save ScreenShot","試合結果のスクショを自動保存する"
 "PreloadMapAssets","Preload Map Assets","事前にマップアセットを読み込む"
+"SettingUIStyleVertical","Vertical Tabs","タブを左に縦並びにする(未完成)"
+"SettingUIStyleRoleGrid","Role Grid","役職表示をグリッドにする(未完成)"
+
 "StreamList","HopeList","参加希望者リスト"
 
 "HideSomeFriendCodesInfo","Hides the friend codes of crew in the lobby \n(from your perspective only)","ロビーにいるクルーのフレンドコード等を非表示にします\n※自身の画面のみ"
 "PreloadMapAssetsInfo","Loads maps on launch / lobby join.\nMay reduce game start loading time.\nRejoin lobby to apply.","ゲーム起動時/ロビー参加時 にマップを読み込みます\nこれによりゲーム開始時のロードが早くなる可能性があります\n※適応にはロビーへの再参加が必要です"
+"SettingUIStyleVerticalInfo","","設定タブを画面左に縦並びで配置します\n※適用には設定画面を開き直してください"
+"SettingUIStyleRoleGridInfo","","役職をSアイコングリッドで表示し、役職ごとのサブメニューに切り替えます\n※適用には設定画面を開き直してください"
+
 
 "## ヘルプテキスト"
 

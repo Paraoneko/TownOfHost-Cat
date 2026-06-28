@@ -249,7 +249,7 @@ namespace TownOfHost
                         var chm = option.OptionHedder.GetComponent<CategoryHeaderMasked>();
                         chm.Background.color = UtilsRoleText.GetRoleColor(NowRoleTab);
                         chm.Title.text = NowRoleTab.IsBuffAddon() || NowRoleTab.IsDebuffAddon() || NowRoleTab.IsLovers() ||
-                        NowRoleTab is CustomRoles.Amanojaku or CustomRoles.Twins or CustomRoles.Triplets ? "<b>Assign Setting</b>" : "<b>Role Setting</b>";
+                        NowRoleTab is CustomRoles.Amanojaku or CustomRoles.Twins ? "<b>Assign Setting</b>" : "<b>Role Setting</b>";
                         if (NowRoleTab.IsCombinationRole()) chm.Title.text = $"<b>{NowRoleTab} Setting</b>";
                         if (henabled) offset -= -0.23f;
                     }
@@ -291,6 +291,20 @@ namespace TownOfHost
                 float numItems = __instance.Children.Count;
                 var offset = 2.7f;
                 var y = 0.713f;
+
+                // ===== SNR風 役職グリッド表示用 =====
+                // 役職選択行(役職トップ行)をグリッド配置するか
+                bool roleGrid = Main.SettingUIStyleRoleGrid?.Value == true;
+                // 1行に並べる役職数
+                const int RoleGridColumns = 3;
+                // グリッドのセル幅(X方向)
+                const float RoleGridCellWidth = 2.0f;
+                // グリッドの1行の高さ(Y方向)
+                const float RoleGridRowHeight = 0.5f;
+                // グリッドの左端X基準
+                const float RoleGridStartX = -0.95f;
+                // これまでに配置した役職グリッドセル数
+                int roleGridCount = 0;
 
                 foreach (var option in OptionItem.AllOptions)
                 {
@@ -465,20 +479,43 @@ namespace TownOfHost
                     }
 
                     option.OptionBehaviour.gameObject.SetActive(enabled);
+                    // この行が「役職選択行(役職トップ行)」かどうか
+                    var isRoleSelectorRow = roleGrid && isroleoption && option.Parent == null
+                        && rolebutton.ContainsKey(option.CustomRole);
                     if (enabled)
                     {
                         opt.color = color;
                         opt.size = size;
-                        offset -= option.IsHeader ? 0.68f : 0.45f;
-                        option.OptionBehaviour.transform.localPosition = new Vector3(
-                            option.OptionBehaviour.transform.localPosition.x,//0.952f,
-                            offset - 1.5f,//y,
-                            option.OptionBehaviour.transform.localPosition.z);//-120f);
-                        y -= option.IsHeader ? 0.68f : 0.45f;
-
-                        if (option.IsHeader)
+                        if (isRoleSelectorRow)
                         {
-                            numItems += 0.5f;
+                            // SNR風グリッド配置: 役職選択行を複数列で並べる
+                            int col = roleGridCount % RoleGridColumns;
+                            roleGridCount++;
+                            // 行頭(新しい行)に来たときだけ縦方向offsetを1段下げる
+                            if (col == 0)
+                            {
+                                offset -= RoleGridRowHeight;
+                                y -= RoleGridRowHeight;
+                            }
+                            opt.size = new Vector2(RoleGridCellWidth - 0.15f, 0.62f);
+                            option.OptionBehaviour.transform.localPosition = new Vector3(
+                                RoleGridStartX + (col * RoleGridCellWidth),
+                                offset - 1.5f,
+                                option.OptionBehaviour.transform.localPosition.z);
+                        }
+                        else
+                        {
+                            offset -= option.IsHeader ? 0.68f : 0.45f;
+                            option.OptionBehaviour.transform.localPosition = new Vector3(
+                                option.OptionBehaviour.transform.localPosition.x,//0.952f,
+                                offset - 1.5f,//y,
+                                option.OptionBehaviour.transform.localPosition.z);//-120f);
+                            y -= option.IsHeader ? 0.68f : 0.45f;
+
+                            if (option.IsHeader)
+                            {
+                                numItems += 0.5f;
+                            }
                         }
                     }
                     else

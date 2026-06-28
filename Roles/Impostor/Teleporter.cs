@@ -232,7 +232,7 @@ public sealed class Teleporter : RoleBase, IImpostor, IUsePhantomButton
         var dest = PlayerCatch.GetPlayerById(destPlayerId);
         string destName = dest != null ? UtilsName.GetPlayerColor(dest, true) : "???";
         int sec = Mathf.CeilToInt(pendingTimer);
-        return $"\\n<color=#ff4500>{destName} の元に {sec}秒後テレポートします！</color>";
+        return $"\n<color=#ff4500>{destName} の元に {sec}秒後テレポートします！</color>";
     }
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,

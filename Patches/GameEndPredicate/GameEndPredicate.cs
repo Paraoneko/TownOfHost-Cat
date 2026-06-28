@@ -9,12 +9,12 @@ namespace TownOfHost;
 
 public abstract class GameEndPredicate
 {
-    /// <summary>ゲームの終了条件をチェックし、CustomWinnerHolderに値を格納します。</summary>
-    /// <params name="reason">バニラのゲーム終了処理に使用するGameOverReason</params>
-    /// <returns>ゲーム終了の条件を満たしているかどうか</returns>
+    /// <summary>繧ｲ繝ｼ繝縺ｮ邨ゆｺ・擅莉ｶ繧偵メ繧ｧ繝・け縺励，ustomWinnerHolder縺ｫ蛟､繧呈ｼ邏阪＠縺ｾ縺吶・/summary>
+    /// <params name="reason">繝舌ル繝ｩ縺ｮ繧ｲ繝ｼ繝邨ゆｺ・・逅・↓菴ｿ逕ｨ縺吶ｋGameOverReason</params>
+    /// <returns>繧ｲ繝ｼ繝邨ゆｺ・・譚｡莉ｶ繧呈ｺ縺溘＠縺ｦ縺・ｋ縺九←縺・°</returns>
     public abstract bool CheckForEndGame(out GameOverReason reason);
 
-    /// <summary>GameData.TotalTasksとCompletedTasksをもとにタスク勝利が可能かを判定します。</summary>
+    /// <summary>GameData.TotalTasks縺ｨCompletedTasks繧偵ｂ縺ｨ縺ｫ繧ｿ繧ｹ繧ｯ蜍晏茜縺悟庄閭ｽ縺九ｒ蛻､螳壹＠縺ｾ縺吶・/summary>
     public virtual bool CheckGameEndByTask(out GameOverReason reason)
     {
         reason = GameOverReason.ImpostorsByKill;
@@ -28,21 +28,21 @@ public abstract class GameEndPredicate
         }
         return false;
     }
-    /// <summary>ShipStatus.Systems内の要素をもとにサボタージュ勝利が可能かを判定します。</summary>
+    /// <summary>ShipStatus.Systems蜀・・隕∫ｴ繧偵ｂ縺ｨ縺ｫ繧ｵ繝懊ち繝ｼ繧ｸ繝･蜍晏茜縺悟庄閭ｽ縺九ｒ蛻､螳壹＠縺ｾ縺吶・/summary>
     public virtual bool CheckGameEndBySabotage(out GameOverReason reason)
     {
         reason = GameOverReason.ImpostorsByKill;
         if (ShipStatus.Instance.Systems == null) return false;
         if (GameStates.IsMeeting) return false;
 
-        // TryGetValueは使用不可
+        // TryGetValue縺ｯ菴ｿ逕ｨ荳榊庄
         var systems = ShipStatus.Instance.Systems;
         LifeSuppSystemType LifeSupp;
-        if (systems.ContainsKey(SystemTypes.LifeSupp) && // サボタージュ存在確認
-            (LifeSupp = systems[SystemTypes.LifeSupp].TryCast<LifeSuppSystemType>()) != null && // キャスト可能確認
-            LifeSupp.Countdown < 0f) // タイムアップ確認
+        if (systems.ContainsKey(SystemTypes.LifeSupp) && // 繧ｵ繝懊ち繝ｼ繧ｸ繝･蟄伜惠遒ｺ隱・
+            (LifeSupp = systems[SystemTypes.LifeSupp].TryCast<LifeSuppSystemType>()) != null && // 繧ｭ繝｣繧ｹ繝亥庄閭ｽ遒ｺ隱・
+            LifeSupp.Countdown < 0f) // 繧ｿ繧､繝繧｢繝・・遒ｺ隱・
         {
-            // 酸素サボタージュ
+            // 驟ｸ邏繧ｵ繝懊ち繝ｼ繧ｸ繝･
             if (Options.ChangeSabotageWinRole.GetBool())
             {
                 var pc = PlayerCatch.GetPlayerById(Main.LastSab);
@@ -144,9 +144,9 @@ public abstract class GameEndPredicate
         else if (systems.ContainsKey(SystemTypes.Laboratory)) sys = systems[SystemTypes.Laboratory];
         else if (systems.ContainsKey(SystemTypes.HeliSabotage)) sys = systems[SystemTypes.HeliSabotage];
         ICriticalSabotage critical;
-        if (sys != null && // サボタージュ存在確認
-            (critical = sys.TryCast<ICriticalSabotage>()) != null && // キャスト可能確認
-            critical.Countdown < 0f) // タイムアップ確認
+        if (sys != null && // 繧ｵ繝懊ち繝ｼ繧ｸ繝･蟄伜惠遒ｺ隱・
+            (critical = sys.TryCast<ICriticalSabotage>()) != null && // 繧ｭ繝｣繧ｹ繝亥庄閭ｽ遒ｺ隱・
+            critical.Countdown < 0f) // 繧ｿ繧､繝繧｢繝・・遒ｺ隱・
         {
             if (Options.CurrentGameMode is CustomGameMode.SuddenDeath or CustomGameMode.MurderMystery)
             {
@@ -157,7 +157,7 @@ public abstract class GameEndPredicate
                 critical.ClearSabotage();
                 return true;
             }
-            // リアクターサボタージュ
+            // 繝ｪ繧｢繧ｯ繧ｿ繝ｼ繧ｵ繝懊ち繝ｼ繧ｸ繝･
             if (Options.ChangeSabotageWinRole.GetBool())
             {
                 var pc = PlayerCatch.GetPlayerById(Main.LastSab);

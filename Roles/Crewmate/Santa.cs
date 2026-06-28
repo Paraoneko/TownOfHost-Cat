@@ -6,6 +6,7 @@ using Hazel;
 using TownOfHost.Patches;
 using TownOfHost.Roles.Core;
 using TownOfHost.Roles.Core.Interfaces;
+using UnityEngine;
 using static TownOfHost.Translator;
 
 namespace TownOfHost.Roles.Crewmate;
@@ -38,11 +39,12 @@ public sealed class Santa : RoleBase, IKiller
         giftMode = false;
         giftCount = 0;
         tasksCompleted = false;
+        nowcool = KillCooldown;
+        LastCooltime = (int)nowcool;
     }
 
     static OptionItem OptKillCooldown;
     static float KillCooldown;
-
     static OptionItem OptBalancerRate;
     static OptionItem OptSheriffRate;
     static OptionItem OptLighterRate;
@@ -56,74 +58,32 @@ public sealed class Santa : RoleBase, IKiller
     bool giftMode;
     int giftCount;
     bool tasksCompleted;
-
-    private enum OptionName
-    {
-        SantaGiftRateBalancer,
-        SantaGiftRateSheriff,
-        SantaGiftRateLighter,
-        SantaGiftRateUltraStar,
-        SantaGiftRateExpress,
-        SantaGiftRateNiceGuesser,
-        SantaGiftLimit,
-        SantaCanGiftLovers,
-        SantaCanGiftMadmate,
-    }
+    float nowcool;
+    int LastCooltime;
 
     private static readonly Dictionary<byte, int> RememberedColorByPlayerId = new();
 
+    private enum OptionName
+    {
+        SantaGiftRateBalancer, SantaGiftRateSheriff,
+        SantaGiftRateLighter, SantaGiftRateUltraStar,
+        SantaGiftRateExpress, SantaGiftRateNiceGuesser,
+        SantaGiftLimit, SantaCanGiftLovers,
+        SantaCanGiftMadmate,
+    }
+
     private static void SetupOptionItem()
     {
-        OptBalancerRate = IntegerOptionItem.Create(
-            RoleInfo, 11, OptionName.SantaGiftRateBalancer,
-            new(0, 100, 5), 20, false
-        ).SetValueFormat(OptionFormat.Percent);
-
-        OptSheriffRate = IntegerOptionItem.Create(
-            RoleInfo, 12, OptionName.SantaGiftRateSheriff,
-            new(0, 100, 5), 20, false
-        ).SetValueFormat(OptionFormat.Percent);
-
-        OptLighterRate = IntegerOptionItem.Create(
-            RoleInfo, 13, OptionName.SantaGiftRateLighter,
-            new(0, 100, 5), 20, false
-        ).SetValueFormat(OptionFormat.Percent);
-
-        OptUltraStarRate = IntegerOptionItem.Create(
-            RoleInfo, 14, OptionName.SantaGiftRateUltraStar,
-            new(0, 100, 5), 20, false
-        ).SetValueFormat(OptionFormat.Percent);
-
-        OptExpressRate = IntegerOptionItem.Create(
-            RoleInfo, 15, OptionName.SantaGiftRateExpress,
-            new(0, 100, 5), 20, false
-        ).SetValueFormat(OptionFormat.Percent);
-
-        OptNiceGuesserRate = IntegerOptionItem.Create(
-            RoleInfo, 16, OptionName.SantaGiftRateNiceGuesser,
-            new(0, 100, 5), 20, false
-        ).SetValueFormat(OptionFormat.Percent);
-
-        OptKillCooldown = FloatOptionItem.Create(
-            RoleInfo, 10, "SantaKillCooldown",
-            new(0.5f, 60f, 0.5f), 25f, false
-        ).SetValueFormat(OptionFormat.Seconds);
-
-        OptGiftLimit = IntegerOptionItem.Create(
-            RoleInfo, 17, OptionName.SantaGiftLimit,
-            new(1, 100, 1), 15, false
-        ).SetValueFormat(OptionFormat.Times);
-
-        OptCanGiftLovers = BooleanOptionItem.Create(
-            RoleInfo, 18, OptionName.SantaCanGiftLovers,
-            false, false
-        );
-
-        OptCanGiftMadmate = BooleanOptionItem.Create(
-            RoleInfo, 19, OptionName.SantaCanGiftMadmate,
-            false, false
-        );
-
+        OptBalancerRate = IntegerOptionItem.Create(RoleInfo, 11, OptionName.SantaGiftRateBalancer, new(0, 100, 5), 20, false).SetValueFormat(OptionFormat.Percent);
+        OptSheriffRate = IntegerOptionItem.Create(RoleInfo, 12, OptionName.SantaGiftRateSheriff, new(0, 100, 5), 20, false).SetValueFormat(OptionFormat.Percent);
+        OptLighterRate = IntegerOptionItem.Create(RoleInfo, 13, OptionName.SantaGiftRateLighter, new(0, 100, 5), 20, false).SetValueFormat(OptionFormat.Percent);
+        OptUltraStarRate = IntegerOptionItem.Create(RoleInfo, 14, OptionName.SantaGiftRateUltraStar, new(0, 100, 5), 20, false).SetValueFormat(OptionFormat.Percent);
+        OptExpressRate = IntegerOptionItem.Create(RoleInfo, 15, OptionName.SantaGiftRateExpress, new(0, 100, 5), 20, false).SetValueFormat(OptionFormat.Percent);
+        OptNiceGuesserRate = IntegerOptionItem.Create(RoleInfo, 16, OptionName.SantaGiftRateNiceGuesser, new(0, 100, 5), 20, false).SetValueFormat(OptionFormat.Percent);
+        OptKillCooldown = FloatOptionItem.Create(RoleInfo, 10, "SantaKillCooldown", new(0.5f, 60f, 0.5f), 25f, false).SetValueFormat(OptionFormat.Seconds);
+        OptGiftLimit = IntegerOptionItem.Create(RoleInfo, 17, OptionName.SantaGiftLimit, new(1, 100, 1), 15, false).SetValueFormat(OptionFormat.Times);
+        OptCanGiftLovers = BooleanOptionItem.Create(RoleInfo, 18, OptionName.SantaCanGiftLovers, false, false);
+        OptCanGiftMadmate = BooleanOptionItem.Create(RoleInfo, 19, OptionName.SantaCanGiftMadmate, false, false);
         OverrideTasksData.Create(RoleInfo, 20);
     }
 
@@ -133,6 +93,8 @@ public sealed class Santa : RoleBase, IKiller
         giftCount = 0;
         tasksCompleted = false;
         KillCooldown = OptKillCooldown.GetFloat();
+        nowcool = KillCooldown;
+        LastCooltime = (int)nowcool;
         PetActionManager.Register(Player.PlayerId, OnPetUsed);
     }
 
@@ -144,11 +106,24 @@ public sealed class Santa : RoleBase, IKiller
     private void OnPetUsed()
     {
         if (!Player.IsAlive()) return;
-
         if (tasksCompleted) return;
 
-        giftMode = !giftMode;
-        ApplyModeDesync(giftMode);
+        bool switching = !giftMode;
+
+        if (switching)
+        {
+            giftMode = true;
+            ApplyModeDesync(true);
+            Player.SetKillCooldown(Mathf.Max(nowcool, 0.1f), delay: true);
+        }
+        else
+        {
+            nowcool = Player.killTimer;
+            giftMode = false;
+            ApplyModeDesync(false);
+        }
+
+        LastCooltime = (int)nowcool;
         SendRPC();
         UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: Player);
     }
@@ -157,7 +132,6 @@ public sealed class Santa : RoleBase, IKiller
     {
         if (!AmongUsClient.Instance.AmHost) return true;
         if (tasksCompleted) return true;
-
         if (!MyTaskState.IsTaskFinished) return true;
 
         tasksCompleted = true;
@@ -166,6 +140,7 @@ public sealed class Santa : RoleBase, IKiller
         {
             giftMode = true;
             ApplyModeDesync(true);
+            Player.SetKillCooldown(Mathf.Max(nowcool, 0.1f), delay: true);
         }
 
         SendRPC();
@@ -173,8 +148,37 @@ public sealed class Santa : RoleBase, IKiller
         Utils.SendMessage(
             $"<color={RoleInfo.RoleColorCode}>全タスク完了！ずっとギフトモードになります。</color>",
             Player.PlayerId);
-
         return true;
+    }
+
+    public override void OnFixedUpdate(PlayerControl player)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (GameStates.CalledMeeting || GameStates.Intro) return;
+        if (!player.IsAlive()) return;
+
+        if (giftMode)
+        {
+            nowcool = player.killTimer;
+        }
+        else
+        {
+            if (nowcool > 0)
+                nowcool -= Time.fixedDeltaTime;
+            else
+                nowcool = 0;
+        }
+
+        var now = (int)nowcool;
+        if (now == LastCooltime) return;
+
+        LastCooltime = now;
+
+        if (!giftMode && now <= 0)
+            player.SetKillCooldown(0.5f, delay: true);
+
+        if (player != PlayerControl.LocalPlayer)
+            UtilsNotifyRoles.NotifyRoles(OnlyMeName: true, SpecifySeer: player);
     }
 
     private void ApplyModeDesync(bool toGiftMode)
@@ -199,6 +203,7 @@ public sealed class Santa : RoleBase, IKiller
         sender.Writer.Write(giftMode);
         sender.Writer.Write(giftCount);
         sender.Writer.Write(tasksCompleted);
+        sender.Writer.Write(nowcool);
     }
 
     public override void ReceiveRPC(MessageReader reader)
@@ -206,6 +211,8 @@ public sealed class Santa : RoleBase, IKiller
         giftMode = reader.ReadBoolean();
         giftCount = reader.ReadInt32();
         tasksCompleted = reader.ReadBoolean();
+        nowcool = reader.ReadSingle();
+        LastCooltime = (int)nowcool;
     }
 
     public float CalculateKillCooldown() => KillCooldown;
@@ -229,8 +236,11 @@ public sealed class Santa : RoleBase, IKiller
         if (!Player.IsAlive()) return;
         _ = new LateTask(() =>
         {
+            nowcool = KillCooldown;
+            LastCooltime = (int)nowcool;
             ApplyModeDesync(giftMode);
             Player.RpcResetAbilityCooldown();
+            SendRPC();
         }, Main.LagTime, "Reset-Santa");
     }
 
@@ -260,21 +270,15 @@ public sealed class Santa : RoleBase, IKiller
     private static CustomRoles RollGiftRole(CustomRoles[] giftRoles)
     {
         var weightedRoles = giftRoles
-            .Select(role =>
-            {
-                var weight = GetGiftRate(role);
-                if (weight < 0) weight = 0;
-                if (weight > 100) weight = 100;
-                return (Role: role, Weight: weight);
-            })
+            .Select(r => (Role: r, Weight: Mathf.Clamp(GetGiftRate(r), 0, 100)))
             .Where(x => x.Weight > 0)
             .ToArray();
 
         if (weightedRoles.Length == 0)
             return giftRoles[IRandom.Instance.Next(giftRoles.Length)];
 
-        var totalWeight = weightedRoles.Sum(x => x.Weight);
-        var roll = IRandom.Instance.Next(totalWeight);
+        var total = weightedRoles.Sum(x => x.Weight);
+        var roll = IRandom.Instance.Next(total);
         var acc = 0;
 
         foreach (var entry in weightedRoles)
@@ -282,8 +286,7 @@ public sealed class Santa : RoleBase, IKiller
             acc += entry.Weight;
             if (roll < acc) return entry.Role;
         }
-
-        return weightedRoles[weightedRoles.Length - 1].Role;
+        return weightedRoles[^1].Role;
     }
 
     public void OnCheckMurderAsKiller(MurderInfo info)
@@ -311,15 +314,8 @@ public sealed class Santa : RoleBase, IKiller
         var limit = OptGiftLimit?.GetInt() ?? 3;
         if (limit > 0 && giftCount >= limit) return;
 
-        CustomRoles[] giftRoles =
-        {
-            CustomRoles.Balancer,
-            CustomRoles.Sheriff,
-            CustomRoles.Lighter,
-            CustomRoles.UltraStar,
-            CustomRoles.Express,
-            CustomRoles.NiceGuesser,
-        };
+        CustomRoles[] giftRoles = { CustomRoles.Balancer, CustomRoles.Sheriff, CustomRoles.Lighter,
+                                    CustomRoles.UltraStar, CustomRoles.Express, CustomRoles.NiceGuesser };
 
         var role = RollGiftRole(giftRoles);
         var beforeRole = target.GetCustomRole();
@@ -338,8 +334,7 @@ public sealed class Santa : RoleBase, IKiller
 
         target.RpcSetCustomRole(role, log: null);
 
-        if (beforeRole == CustomRoles.UltraStar &&
-            role != CustomRoles.UltraStar &&
+        if (beforeRole == CustomRoles.UltraStar && role != CustomRoles.UltraStar &&
             RememberedColorByPlayerId.TryGetValue(target.PlayerId, out var originalColorId))
         {
             target.RpcSetColor((byte)originalColorId);
@@ -352,14 +347,16 @@ public sealed class Santa : RoleBase, IKiller
             field?.SetValue(null, true);
         }
 
-        if (resetExpressSpeed)
-            UtilsOption.MarkEveryoneDirtySettings();
+        if (resetExpressSpeed) UtilsOption.MarkEveryoneDirtySettings();
 
         giftCount++;
+
+        nowcool = KillCooldown;
+        LastCooltime = (int)nowcool;
         SendRPC();
 
         killer.ResetKillCooldown();
-        killer.SetKillCooldown();
+        killer.SetKillCooldown(KillCooldown);
         killer.RpcResetAbilityCooldown();
 
         _ = new LateTask(() => UtilsNotifyRoles.NotifyRoles(ForceLoop: true), 0.2f, "Santa Gift");
@@ -367,14 +364,25 @@ public sealed class Santa : RoleBase, IKiller
 
     public override string GetProgressText(bool comms = false, bool GameLog = false)
     {
-        if (!giftMode) return "";
         var limit = OptGiftLimit?.GetInt() ?? 3;
-        if (tasksCompleted)
-            return limit == 0
-                ? $"<color={RoleInfo.RoleColorCode}>({giftCount}) ∞</color>"
-                : $"<color={RoleInfo.RoleColorCode}>({giftCount}/{limit}) ∞</color>";
-        if (limit == 0) return $"<color={RoleInfo.RoleColorCode}>({giftCount})</color>";
-        return $"<color={RoleInfo.RoleColorCode}>({giftCount}/{limit})</color>";
+
+        string countText = tasksCompleted
+            ? (limit == 0 ? $"({giftCount}) ∞" : $"({giftCount}/{limit}) ∞")
+            : (limit == 0 ? $"({giftCount})" : $"({giftCount}/{limit})");
+
+        var progress = $"<color={RoleInfo.RoleColorCode}>{countText}</color>";
+
+        if (!GameStates.CalledMeeting && !GameLog)
+        {
+            progress += Utils.ColorString(
+                giftMode ? new Color(1f, 0.7f, 0.7f) : Color.gray,
+                giftMode
+                    ? $" [Gift]<color=#ffffff>({LastCooltime})</color>"
+                    : $" [Task]<color=#ffffff>({LastCooltime})</color>"
+            );
+        }
+
+        return progress;
     }
 
     public bool OverrideKillButtonText(out string text)
