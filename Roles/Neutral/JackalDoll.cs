@@ -106,8 +106,7 @@ public sealed class JackalDoll : RoleBase
     public static bool CountAsJackalKiller => OptionCountAsJackalKiller?.GetBool() == true;
     private void ApplyJackalKillerCount()
     {
-        if (CountAsJackalKiller)
-            MyState.SetCountType(CountTypes.Jackal);
+        MyState.SetCountType(CountAsJackalKiller ? CountTypes.Jackal : CountTypes.Crew);
     }
     public override bool CanVentMoving(PlayerPhysics physics, int ventId) => CanVentMove.GetBool();
     public override void ApplyGameOptions(IGameOptions opt)
@@ -124,8 +123,7 @@ public sealed class JackalDoll : RoleBase
         }
 
         var state = PlayerState.GetByPlayerId(doll.PlayerId);
-        if (CountAsJackalKiller)
-            state.SetCountType(CountTypes.Jackal);
+        state.SetCountType(CountAsJackalKiller ? CountTypes.Jackal : CountTypes.Crew);
 
         if (owner.Is(CustomRoles.Jackal))
         {
