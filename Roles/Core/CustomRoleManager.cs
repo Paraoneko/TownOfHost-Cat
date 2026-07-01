@@ -871,6 +871,7 @@ public enum CustomRoles
     EvilSanta,
     EvilLinker,
     MassMurder,
+    EvilStandMaster,
     //DEBUG only Impostor
     //Madmate
     MadGuardian,

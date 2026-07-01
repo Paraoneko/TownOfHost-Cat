@@ -466,7 +466,7 @@ public sealed class Stand : RoleBase, ILNKiller
             "st",
             "#8B4513",
             (6, 4),
-            countType: CountTypes.OutOfGame,
+            countType: CountTypes.StandMaster,
             from: From.TownOfHost_Pko
         );
 
