@@ -54,7 +54,7 @@ AmongUsバージョン : **17.3.0**~<br>
 勧誘部屋に遭遇した場合は勧誘先に無闇に参加せずまずは開発者にお知らせください。厳正に対処いたします。<br>
 
 ## TOH-Pkoでの処罰、利用不可について
-v.5.1.61.1以降より[SuperNewRoles](https://github.com/SuperNewRoles/SuperNewRoles/)様等一部のModに搭載されていた<br>
+TOHK v.5.1.61.1 (Pkoではv1.0.0.0)以降より[SuperNewRoles](https://github.com/SuperNewRoles/SuperNewRoles/)様等一部のModに搭載されていた<br>
 ブラックリストをTown Of Host-Pkoでも適応するようにいたしました。<br>
 
 > [!note]
