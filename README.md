@@ -1,17 +1,16 @@
-# Town Of Host-Pko
+# Town Of Host-Cat
 
 ## この Mod について
 
 この Mod は非公式のものであり、この Mod の開発に関して Among Us の開発元である"Innersloth"は一切関与していません。<br>
 この Mod の問題などに関して公式に問い合わせないでください。<br>
 
-この Mod はTOH,TOHKに役職や機能など追加したModです
-TOH-Pkoで起きたバグは本家や他MODには報告しないでまずはTOH-Pkoに報告してください。<br>
-
-また、TOH-Pkoに関する質問、バグ報告は基本、[DiscordServer](https://discord.gg/PQ5CrVHC25)でのみ受け付けております。<br>
+この Mod はTOH,TOHK,TOHPに役職や機能など追加したModです
+TOH-Catで起きたバグは本家や他MODには報告しないください。<br>
 
 [本家TOHはこちら](https://github.com/tukasa0001/TownOfHost)<br>
 [TOHKはこちら](https://github.com/KYMario/TownOfHost-K)<br>
+[TOHPはこちら](https://github.com/satokazoku/TownOfHost-Pko/)<br>
 
 ## リリース
 AmongUsバージョン : **17.3.0**~<br>
@@ -46,7 +45,6 @@ AmongUsバージョン : **17.3.0**~<br>
 **禁止されない行為**
 > [**Note**]
 > - Discordや村のオープンチャットで非公開ルームのコードを伝え身内間でMod部屋を開催
-> - Town Of Host-Pkoのマッチメイキングでの募集
 > - Youtubeなどの配信サイトで上記の禁止行為に該当しない参加型/身内村配信<br>
 
 =>　要するに**Modだと認知していない野良のプレイヤーが交わる可能性がある**とアウトです。<br>
@@ -90,28 +88,13 @@ Modが使えなくなるよ!<br>
 ※本家TownOfHost,TownOfHost_K様の開発者はここでは省略させていただきます
 #### クレジット
 [Town Of Host](https://github.com/tukasa0001/TownOfHost)<br>
-　Fork元の本家です。<br>TownOfHost様にある機能はTownOfHost-Pkoでも大体実装されています<br>
+　Fork元の本家です。<br>TownOfHost様にある機能はTownOfHost-Catでも大体実装されています<br>
 
 [Town Of Host_K](https://github.com/KYMario/TownOfHost-K)<br>
-　Fork元です。<br>TownOfHost_K様にある機能はTownOfHost-Pkoでも大体実装されています<br>
+　Fork元です。<br>TownOfHost_K様にある機能はTownOfHost-Catでも大体実装されています<br>
 
-[Town Of Host_Y](https://github.com/Yumenopai/TownOfHost_Y)<br>
-　会議時の役職表示、会議拡張、ワーカホリック,ラビット,チェイサー,ニムロッド,鬼,弁護士(追跡者),決闘者,海賊,属性名、一部役職を参考/移植させて頂きました！<br>
-
-[Town Of Host For E](https://github.com/AsumuAkaguma/TownOfHost_ForE) <br>
-　機能やコメント取得一部処理の参考にさせて頂きました！<br>
-
-[Town Of Host_Enhanced](https://github.com/EnhancedNetwork/TownofHost-Enhanced)<br>
-　Swooperを移植させて頂きました！<br>
-
-[Endless Host Roles](https://github.com/Gurge44/EndlessHostRoles) <br>
-　ペットの自動付与、タスクターン中のチャット表示を参考にさせて頂きました！<br>
-
-[Revolutionary Host Roles](https://github.com/sansaaaaai/Revolutionary-host-roles)<br>
-　カスタムボタンの参考、リローダー、スタッフ、インセンダーを移行させていただきました！<br>
-
-[Town Of Host-H](https://github.com/Hyz-sui/TownOfHost-H) <br>
-　10.24アプデの対応で参考にさせていただきました！<br>
+[TOHPはこちら](https://github.com/satokazoku/TownOfHost-Pko/)<br>
+　Fork元です。<br>TownOfHost_Pko様にある機能はTownOfHost-Catでも大体導入されています<br>
 
 [SuperNewRoles](https://github.com/ykundesu/SuperNewRoles) <br>
 　ナイス赤ずきん、ポーカーフェイス、三匹の子豚、ミニマリスト、ナイステレポーター、テレポーター、さつまといも、ムービング、イビルムービング、ロケット、自殺願望者、爆ぜ師、ジャッカルシーア、侍、パブロフの犬、モイラ、キューピッド、スペランカー、神、フリーター、マグロ、陰陽師、忘却者、波動砲ジャッカル、弾、波動砲、ダブルキラー、自爆魔、サンタ、村長、天秤、ミーティングシェリフ、トイレファン、イビルギャンブラー、ペンギン、マッドスーサイドを移植/参考<br>
