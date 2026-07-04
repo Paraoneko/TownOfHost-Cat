@@ -81,11 +81,10 @@ Modが使えなくなるよ!<br>
 その処罰に値する利用方法をしないよ！！<br>
 ってことです。
 
-**TownOfHost-Pkoの開発者**<br>
-　しぇとこch<br>
-　　[Youtube](https://youtube.com/channel/UCM1gs89uwjOJF3EcVc1ZEOA?si=a1ffdwsBjGbJKig6)<br>
+**TownOfHost-Catの開発者**<br>
+　パラオ猫<br>
 
-※本家TownOfHost,TownOfHost_K様の開発者はここでは省略させていただきます
+※本家TownOfHost,TownOfHost_K,TownOfHost_Pko様の開発者はここでは省略させていただきます
 #### クレジット
 [Town Of Host](https://github.com/tukasa0001/TownOfHost)<br>
 　Fork元の本家です。<br>TownOfHost様にある機能はTownOfHost-Catでも大体実装されています<br>
