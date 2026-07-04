@@ -51,9 +51,9 @@ AmongUsバージョン : **17.3.0**~<br>
 <br>
 勧誘部屋に遭遇した場合は勧誘先に無闇に参加せずまずは開発者にお知らせください。厳正に対処いたします。<br>
 
-## TOH-Pkoでの処罰、利用不可について
-TOHK v.5.1.61.1 (Pkoではv1.0.0.0)以降より[SuperNewRoles](https://github.com/SuperNewRoles/SuperNewRoles/)様等一部のModに搭載されていた<br>
-ブラックリストをTown Of Host-Pkoでも適応するようにいたしました。<br>
+## TOH-Catでの処罰、利用不可について
+TOHK v.5.1.61.1以降より[SuperNewRoles](https://github.com/SuperNewRoles/SuperNewRoles/)様等一部のModに搭載されていた<br>
+ブラックリストをTown Of Host-Catでも適応するようにいたしました。<br>
 
 > [!note]
 > - 【処罰に値する利用方法】
@@ -68,7 +68,7 @@ TOHK v.5.1.61.1 (Pkoではv1.0.0.0)以降より[SuperNewRoles](https://github.co
 -----------------------------------------------
 
 **【絶対に読むんだ】**<br>
-Town Of Host-Pkoの利用をもって"処罰に値する利用方法"内で記載されている<br>
+Town Of Host-Catの利用をもって"処罰に値する利用方法"内で記載されている<br>
 行動をしないと誓い,<br>
 処罰に値する利用を行った場合はいかなる場合でも処罰を受け入れるものとします。<br>
 
