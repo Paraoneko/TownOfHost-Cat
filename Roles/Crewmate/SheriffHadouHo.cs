@@ -97,7 +97,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         OptionCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.Cooldown, OptionBaseCoolTime, 30f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionChargeTime = FloatOptionItem.Create(RoleInfo, 11, OptionName.SheriffHadouHoChargeTime,
-            new(0.5f, 10f, 0.5f), 3f, false).SetValueFormat(OptionFormat.Seconds);
+            new(0f, 10f, 0.25f), 3f, false).SetValueFormat(OptionFormat.Seconds);
         OptionShotLimit = IntegerOptionItem.Create(RoleInfo, 12, OptionName.SheriffHadouHoShotLimit,
             new(1, 15, 1), 3, false).SetValueFormat(OptionFormat.Times);
         OptionSelfDestructOnMiss = BooleanOptionItem.Create(RoleInfo, 13, OptionName.SheriffHadouHoSelfDestruct, false, false);

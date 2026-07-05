@@ -166,9 +166,9 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
             .SetValueFormat(OptionFormat.Seconds);
         OptionCoolDown = FloatOptionItem.Create(RoleInfo, 11, GeneralOption.Cooldown, OptionBaseCoolTime, 30f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionChargeTime = FloatOptionItem.Create(RoleInfo, 12, OptionName.JackalHadouHoChargeTime, new(0.5f, 10f, 0.5f), 3f, false)
+        OptionChargeTime = FloatOptionItem.Create(RoleInfo, 12, OptionName.JackalHadouHoChargeTime, new(0f, 10f, 0.25f), 3f, false)
             .SetValueFormat(OptionFormat.Seconds);
-        OptionSuperChargeTime = FloatOptionItem.Create(RoleInfo, 13, OptionName.JackalHadouHoSuperChargeTime, new(0.5f, 15f, 0.5f), 5f, false)
+        OptionSuperChargeTime = FloatOptionItem.Create(RoleInfo, 13, OptionName.JackalHadouHoSuperChargeTime, new(0f, 15f, 0.25f), 5f, false)
             .SetValueFormat(OptionFormat.Seconds);
         OptionSelfDestructOnMiss = BooleanOptionItem.Create(RoleInfo, 15, OptionName.JackalHadouHoSelfDestruct, false, false);
         OptionKillJackal = BooleanOptionItem.Create(RoleInfo, 16, OptionName.JackalHadouHoKillJackal, false, false);

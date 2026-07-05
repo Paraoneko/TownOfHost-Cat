@@ -31,7 +31,7 @@ namespace TownOfHost
         // modの名前 / Mod Name (Default: Town Of Host)
         public static readonly string ModName = "Town Of Host-Cat";
         // modの色 / Mod Color (Default: #00bfff)
-        public static readonly string ModColor = "#FF9631";
+        public static readonly string ModColor = "#b8cdd7";
         // 公開ルームを許可する / Allow Public Room (Default: true)
         public static readonly bool AllowPublicRoom = false;
         // フォークID / ForkId (Default: OriginalTOH)
