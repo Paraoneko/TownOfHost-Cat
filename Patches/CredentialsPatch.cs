@@ -75,7 +75,7 @@ namespace TownOfHost
                         if (DebugModeManager.IsDebugMode)
                         {
                             sb.Append("\r\n");
-                            sb.Append(DebugModeManager.EnableTOHPDebugMode.OptionMeGetBool() ? "<#0066de>DebugMode</color>" : Utils.ColorString(Color.green, "デバッグモード"));
+                            sb.Append(DebugModeManager.EnableTOHCDebugMode.OptionMeGetBool() ? "<#0066de>DebugMode</color>" : Utils.ColorString(Color.green, "デバッグモード"));
                         }
 
                         exSb.Clear();

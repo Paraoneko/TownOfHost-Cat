@@ -6,9 +6,9 @@
 		<Description>fork by Town Of Host</Description>
 		<Authors>tukasa0001(EmptyBottle), integral0131</Authors>
 		<langVersion>preview</langVersion>
-		<AssemblyName>TownOfHost-Pko</AssemblyName>
+		<AssemblyName>TownOfHost-Cat</AssemblyName>
 		<NoWarn>MSB3246</NoWarn>
-		<AmongUs>C:\Program Files (x86)\Steam\steamapps\common\Among Us tohp</AmongUs>
+		<AmongUs>C:\Program Files (x86)\Steam\steamapps\common\Among Us TOHC</AmongUs>
 	</PropertyGroup>
 
 	<ItemGroup>

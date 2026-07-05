@@ -29,7 +29,6 @@ namespace TownOfHost
         public static SimpleButton UpdateButton2;
         private static SimpleButton gitHubButton;
         private static SimpleButton TwitterXButton;
-        private static SimpleButton TOHPBOTButton;
         private static SimpleButton RoleInfoButton;
         private static SimpleButton betaversionchange;
         public static TextMeshPro Statistics_TMP;
@@ -76,11 +75,11 @@ namespace TownOfHost
                     new(-0.8f, -1f, 1f),//-1f
                     new(153, 153, 153, byte.MaxValue),
                     new(209, 209, 209, byte.MaxValue),
-                    () => Application.OpenURL("https://github.com/satokazoku/TownOfHost-Pko"),
+                    () => Application.OpenURL("https://github.com/Paraoneko/TownOfHost-Cat"),
                     "GitHub");
             }
 
-            // Youtubeボタンを生成
+            /* Youtubeボタンを生成
             if (SimpleButton.IsNullOrDestroyed(TwitterXButton))
             {
                 TwitterXButton = CreateButton(
@@ -90,18 +89,7 @@ namespace TownOfHost
                     new(60, 255, 255, byte.MaxValue),
                     () => Application.OpenURL("https://youtube.com/@toh-pko?si=P6vdE1t4MHoA_C6F"),
                     "Youtube");
-            }
-            // TOHPBOTボタンを生成
-            if (SimpleButton.IsNullOrDestroyed(TOHPBOTButton))
-            {
-                TOHPBOTButton = CreateButton(
-                    "TOHPBOTButton",
-                    new(2.6f, -1f, 1f),
-                    new(0, 201, 87, byte.MaxValue),
-                    new(60, 201, 87, byte.MaxValue),
-                    () => Application.OpenURL("https://discord.com/"),
-                    "TOHPBOT");
-            }
+            }*/
             if (SimpleButton.IsNullOrDestroyed(StatisticsButton))
             {
                 StatisticsButton = CreateButton(
@@ -183,7 +171,7 @@ namespace TownOfHost
                         updatea.name = "Update Detail";
                         updatea.gameObject.SetActive(true);
                         updatea.AnnouncementListSlider.SetActive(false);
-                        updatea.Title.text = "TOH-P " + ModUpdater.latestTitle;
+                        updatea.Title.text = "TOH-C " + ModUpdater.latestTitle;
                         updatea.AnnouncementBodyText.text = Regex.Replace(ModUpdater.body.Replace("#", "").Replace("**", ""), @"\[(.*?)\]\(.*?\)", "$1");
                         updatea.DateString.text = "Latest Release";
                         updatea.SubTitle.text = "";

@@ -512,8 +512,6 @@ namespace TownOfHost
         public static OptionItem OptionCommandMyrole;
         public static OptionItem OptionCommandMeetinginfo;
         public static OptionItem OptionCommandNumberDNumber;
-        public static OptionItem OptionCommand8ball;
-        public static OptionItem OptionCommandPko;
         public static OptionItem OptionCommandRename;
         public static OptionItem OptionCommandRule;
         public static OptionItem OptionCommandLastresult;
@@ -1336,16 +1334,6 @@ namespace TownOfHost
                 .SetParent(OptionCommandSetting)
                 .SetColorcode("#00c1ff")
                 .SetOptionName(() => "/(number)d(number) - 乱数を振れます");
-
-            OptionCommand8ball = BooleanOptionItem.Create(1_601_180, "DisableCommand8ball", false, TabGroup.MainSettings, true)
-                .SetParent(OptionCommandSetting)
-                .SetColorcode("#00c1ff")
-                .SetOptionName(() => "/8ball - 8ballができます");
-
-            OptionCommandPko = BooleanOptionItem.Create(1_601_190, "DisableCommandPko", false, TabGroup.MainSettings, true)
-                .SetParent(OptionCommandSetting)
-                .SetColorcode("#00c1ff")
-                .SetOptionName(() => "/pko - ぴけおAIとチャットができます");
 
             OptionCommandRename = BooleanOptionItem.Create(1_601_200, "DisableCommandRename", false, TabGroup.MainSettings, true)
                 .SetParent(OptionCommandSetting)

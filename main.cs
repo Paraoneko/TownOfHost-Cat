@@ -19,7 +19,7 @@ using static Unity.Services.LevelPlay.LevelPlayBannerPosition;
 [assembly: AssemblyInformationalVersionAttribute(TownOfHost.Main.PluginVersion)]
 namespace TownOfHost
 {
-    [BepInPlugin(PluginGuid, "Town Of Host-Pko", BepInExPluginVersion)]
+    [BepInPlugin(PluginGuid, "Town Of Host-Cat", BepInExPluginVersion)]
     [BepInIncompatibility("jp.ykundesu.supernewrolesnext")]
     [BepInIncompatibility("jp.ykundesu.supernewroles")]
     [BepInIncompatibility("me.yukieiji.extremeroles")]
@@ -29,18 +29,18 @@ namespace TownOfHost
     {
         // == プログラム設定 / Program Config ==
         // modの名前 / Mod Name (Default: Town Of Host)
-        public static readonly string ModName = "Town Of Host-Pko";
+        public static readonly string ModName = "Town Of Host-Cat";
         // modの色 / Mod Color (Default: #00bfff)
         public static readonly string ModColor = "#FF9631";
         // 公開ルームを許可する / Allow Public Room (Default: true)
-        public static readonly bool AllowPublicRoom = true;
+        public static readonly bool AllowPublicRoom = false;
         // フォークID / ForkId (Default: OriginalTOH)
-        public static readonly string ForkId = "TOH-PKO";
+        public static readonly string ForkId = "TOH-CAT";
         // Discordボタンを表示するか / Show Discord Button (Default: true)
         public static readonly bool ShowDiscordButton = true;
         // Discordサーバーの招待リンク / Discord Server Invite URL (Default: https://discord.gg/PQ5CrVHC25)
         public static readonly string DiscordInviteUrl = "https://discord.gg/PQ5CrVHC25";
-        public static readonly string MatchmakingRelayUrl = "https://tohp-relay.oyasai0831ohyasai.workers.dev/";
+        public static readonly string MatchmakingRelayUrl = "null";
         public static readonly string MatchmakingRelaySecret = "6rVp2N8xK5mQ9wA1zL4jS7tB3hG0eD9Y";
         // ==========
         public const string OriginalForkId = "OriginalTOH"; // Don't Change The Value. / この値を変更しないでください。
@@ -58,14 +58,14 @@ namespace TownOfHost
         public static ConfigEntry<string> DebugKeyInput { get; private set; }
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
-        public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
+        public const string PluginGuid = "com.Paraoneko.TownOfHost-Cat";
         public const string BepInExPluginVersion = "4.32.17+86";
-        public const string PluginVersion = "4.32.17.86";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.32.17.86";
-        public const string ModVersion = ".17.86";//リリースver用バージョン変更dc9b79
+        public const string PluginVersion = "1.43.86.10";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "1.43.86.10";
+        public const string ModVersion = ".86.10";//リリースver用バージョン変更dc9b79
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
-        public static bool DebugVersion = false;
+        public static bool DebugVersion = true;
 
         // サポートされている最低のAmongUsバージョン(Readmeも変える)
         public static readonly string LowestSupportedVersion = "2026.3.31";
@@ -183,14 +183,14 @@ namespace TownOfHost
         public static string BaseDirectory
             => Path.GetFullPath(Path.Combine(
                 string.IsNullOrEmpty(BepInEx.Paths.BepInExRootPath) ? Application.persistentDataPath : BepInEx.Paths.BepInExRootPath,
-                "../TOHP_DATA"));
+                "../TOHC_DATA"));
         public override void Load()
         {
             GameCount = 0;
             Instance = this;
 
             //Client Options
-            HideName = Config.Bind("Client Options", "Hide Game Code Name", "Town Of Host-Pko");
+            HideName = Config.Bind("Client Options", "Hide Game Code Name", "Town Of Host-Cat");
             HideColor = Config.Bind("Client Options", "Hide Game Code Color", $"{ModColor}");
             ForceJapanese = Config.Bind("Client Options", "Force Japanese", false);
             JapaneseRoleName = Config.Bind("Client Options", "Japanese Role Name", true);
@@ -216,7 +216,7 @@ namespace TownOfHost
             DebugKeyInput = Config.Bind("Authentication", "Debug Key", "");
             ExplosionKeyInput = Config.Bind("Authentication", "Explosion Key", "");
 
-            Logger = BepInEx.Logging.Logger.CreateLogSource("TownOfHost-Pko");
+            Logger = BepInEx.Logging.Logger.CreateLogSource("TownOfHost-Cat");
             TownOfHost.Logger.Enable();
             TownOfHost.Logger.Disable("NotifyRoles");
             TownOfHost.Logger.Disable("SendRPC");

@@ -170,7 +170,7 @@ namespace TownOfHost
                 RoleSettingsButton.gameObject.SetActive(false);
 
                 ModSettingsButton.gameObject.name = "TownOfHostSetting";
-                ModSettingsButton.buttonText.text = "TownOfHost-Pko";
+                ModSettingsButton.buttonText.text = "TownOfHost-Cat";
                 var activeSprite = ModSettingsButton.activeSprites.GetComponent<SpriteRenderer>();
                 var selectedSprite = ModSettingsButton.selectedSprites.GetComponent<SpriteRenderer>();
                 activeSprite.color = StringHelper.CodeColor(Main.ModColor);

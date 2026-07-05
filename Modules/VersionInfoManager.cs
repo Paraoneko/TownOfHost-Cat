@@ -278,7 +278,7 @@ class VersionInfoManager
         try
         {
             UnityWebRequest request = UnityWebRequest.Get(URL);
-            request.SetRequestHeader("User-Agent", "TownOfHost-Pko VersionChecker");
+            request.SetRequestHeader("User-Agent", "TownOfHost-Cat VersionChecker");
 
             var co = request.SendWebRequest();
             while (!co.isDone) { System.Threading.Thread.Sleep(10); }

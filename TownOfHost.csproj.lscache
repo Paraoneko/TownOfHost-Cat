@@ -13,7 +13,7 @@ primary
 lastDtbSucceeded
 
 [properties]
-AssemblyName=TownOfHost-Pko
+AssemblyName=TownOfHost-Cat
 CommandLineArgsForDesignTimeEvaluation=-langversion:preview -define:TRACE
 CompilerGeneratedFilesOutputPath=
 MaxSupportedLangVersion=10.0
@@ -23,8 +23,8 @@ RunAnalyzers=
 RunAnalyzersDuringLiveAnalysis=
 SolutionPath=<PATH>TownOfHost.sln
 TargetFrameworkIdentifier=.NETCoreApp
-TargetPath=<PATH>bin/Debug/net6.0/TownOfHost-Pko.dll
-TargetRefPath=<PATH>obj/Debug/net6.0/ref/TownOfHost-Pko.dll
+TargetPath=<PATH>bin/Debug/net6.0/TownOfHost-Cat.dll
+TargetRefPath=<PATH>obj/Debug/net6.0/ref/TownOfHost-Cat.dll
 TemporaryDependencyNodeTargetIdentifier=net6.0
 
 [commandLineArguments]
@@ -42,8 +42,8 @@ TemporaryDependencyNodeTargetIdentifier=net6.0
 /debug:portable
 /filealign:512
 /optimize-
-/out:obj\Debug\net6.0\TownOfHost-Pko.dll
-/refout:obj\Debug\net6.0\refint\TownOfHost-Pko.dll
+/out:obj\Debug\net6.0\TownOfHost-Cat.dll
+/refout:obj\Debug\net6.0\refint\TownOfHost-Cat.dll
 /target:library
 /warnaserror-
 /utf8output

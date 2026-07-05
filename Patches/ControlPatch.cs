@@ -70,7 +70,7 @@ namespace TownOfHost
                 {
                     if (CredentialsPatch.TOHPLogo)
                     {
-                        CredentialsPatch.TOHPLogo.sprite = UtilsSprite.LoadSprite("TownOfHost.Resources.TownOfHost-Pko_A.png", 300f);
+                        CredentialsPatch.TOHPLogo.sprite = UtilsSprite.LoadSprite("TownOfHost.Resources.TownOfHost-Cat_A.png", 300f);
                     }
                 }
             }
@@ -271,7 +271,7 @@ namespace TownOfHost
                 Logger.isAlsoInGame = !Logger.isAlsoInGame;
                 Logger.seeingame($"ログのゲーム内出力: {Logger.isAlsoInGame}");
             }
-            if (Input.GetKeyDown(KeyCode.R) && GameStates.IsCountDown && DebugModeManager.EnableTOHPDebugMode.GetBool())
+            if (Input.GetKeyDown(KeyCode.R) && GameStates.IsCountDown && DebugModeManager.EnableTOHCDebugMode.GetBool())
             {
                 Logger.Info("Impostor set to 0", "KeyCommand");
                 Main.NormalOptions.NumImpostors = 0;

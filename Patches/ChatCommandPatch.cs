@@ -34,7 +34,7 @@ namespace TownOfHost
         public static string RuleText = "";
         public static Dictionary<CustomRoles, string> roleCommands;
 
-        private static readonly string RuleFilePath = System.IO.Path.Combine(System.Environment.CurrentDirectory, "TOHP_Rule.txt");
+        private static readonly string RuleFilePath = System.IO.Path.Combine(System.Environment.CurrentDirectory, "TOHC_Rule.txt");
 
         static ChatCommands()
         {
@@ -89,7 +89,7 @@ namespace TownOfHost
             => DebugModeManager.EnableDebugMode.GetBool() || IsAdministrator(player);
 
         private static bool CanUseChangeRoleCommand(PlayerControl player)
-            => DebugModeManager.EnableTOHPDebugMode.GetBool() || IsAdministrator(player);
+            => DebugModeManager.EnableTOHCDebugMode.GetBool() || IsAdministrator(player);
 
         private static void ExecuteInGameRoleChange(PlayerControl sender, string[] args)
         {
@@ -516,36 +516,6 @@ namespace TownOfHost
                         string newName = $"<size={size}%>{rawName}</size>";
 
                         PlayerControl.LocalPlayer.RpcSetName(newName);
-                        break;
-                    case "/pko":
-                        {
-                            canceled = true;
-                            string prompt = string.Join(" ", args.Skip(1));
-                            byte senderId = PlayerControl.LocalPlayer.PlayerId;
-
-                            Logger.Info($"[AI] pko called: {prompt}", "AI");
-                            TownOfHost.Modules.Aiserver.Send(prompt, senderId);
-
-                            __instance.freeChatField.textArea.Clear();
-                            break;
-                        }
-
-                    case "/8ball":
-                        canceled = true;
-                        if (args.Length > 1)
-                        {
-                            string question = string.Join(" ", args.Skip(1));
-                            string[] answers = {
-                                "確実にそうです！", "そうでしょう！", "おそらくそうです。",
-                                "YES！", "そう思います。","もちろんはい！","いいえに決まってんだろー!!",
-                                "そうかもしれません。", "わかりません。","自分で考えろよカス", "はいはいそうだね～",
-                                "今は教えられません。", "期待しない方がいいでしょう。", "違うと思います。",
-                                "おそらく違います。", "絶対に違います！",
-                            };
-                            var rand = new System.Random();
-                            string answer = answers[rand.Next(answers.Length)];
-                            SendMessage($"8ball {PlayerControl.LocalPlayer.Data.PlayerName}「{question}」\n→ {answer}");
-                        }
                         break;
                     case "/s":
                     case "/set":
@@ -1677,7 +1647,7 @@ namespace TownOfHost
                         }
                         break;
                     case "/fps":
-                        if (DebugModeManager.EnableTOHPDebugMode.GetBool() && DebugModeManager.AmDebugger)
+                        if (DebugModeManager.EnableTOHCDebugMode.GetBool() && DebugModeManager.AmDebugger)
                         {
                             CredentialsPatch.a = true;
                             _ = new LateTask(() =>
@@ -1700,7 +1670,7 @@ namespace TownOfHost
                         }
                         break;
                     case "/tp":
-                        if (DebugModeManager.EnableTOHPDebugMode.GetBool())
+                        if (DebugModeManager.EnableTOHCDebugMode.GetBool())
                         {
                             canceled = true;
                             subArgs = args.Length < 2 ? "" : args[1];
@@ -1712,7 +1682,7 @@ namespace TownOfHost
                         }
                         break;
                     case "/wi":
-                        if (DebugModeManager.EnableTOHPDebugMode.GetBool())
+                        if (DebugModeManager.EnableTOHCDebugMode.GetBool())
                         {
                             canceled = true;
                             subArgs = args.Length < 2 ? "" : args[1];
@@ -1735,7 +1705,7 @@ namespace TownOfHost
                         }
                         break;
                     case "/wiop":
-                        if (DebugModeManager.EnableTOHPDebugMode.GetBool())
+                        if (DebugModeManager.EnableTOHCDebugMode.GetBool())
                         {
                             canceled = true;
                             subArgs = args.Length < 2 ? "" : args[1];
@@ -1769,7 +1739,7 @@ namespace TownOfHost
                         break;
 
                     case "/dgm":
-                        if (DebugModeManager.EnableTOHPDebugMode.GetBool())
+                        if (DebugModeManager.EnableTOHCDebugMode.GetBool())
                         {
                             canceled = true;
                             if (!GameStates.InGame)
@@ -1784,7 +1754,7 @@ namespace TownOfHost
 
                     case "/debug":
                         canceled = true;
-                        if (DebugModeManager.EnableTOHPDebugMode.GetBool())
+                        if (DebugModeManager.EnableTOHCDebugMode.GetBool())
                         {
                             subArgs = args.Length < 2 ? "" : args[1];
                             switch (subArgs)
@@ -2262,16 +2232,6 @@ namespace TownOfHost
                     if (!float.TryParse(args[1], out float size)) break;
                     player.RpcSetName($"<size={size}%>{player.Data.PlayerName}</size>");
                     break;
-                case "/pko":
-                    canceled = true;
-                    if (Options.OptionCommandPko.GetBool())
-                    {
-                        TownOfHost.Utils.SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
-                        break;
-                    }
-                    string userMsg = string.Join(" ", args.Skip(1));
-                    TownOfHost.Modules.Aiserver.Send(userMsg, player.PlayerId);
-                    break;
                 case "/r":
                 case "/rename":
                     canceled = true;
@@ -2290,37 +2250,6 @@ namespace TownOfHost
                         break;
                     }
                     player.RpcSetName(name);
-                    break;
-                case "/8ball":
-                    canceled = true;
-                    if (Options.OptionCommand8ball.GetBool())
-                    {
-                        SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
-                        break;
-                    }
-                    if (args.Length > 1)
-                    {
-                        string question = string.Join(" ", args.Skip(1));
-                        string[] answers = {
-                            "確実にそうです！", "そうでしょう！", "おそらくそうです。",
-                            "YES！", "そう思います。","もちろんはい！","いいえに決まってんだろー!!",
-                            "そうかもしれません。", "わかりません。","自分で考えろよカス", "はいはいそうだね～",
-                            "今は教えられません。", "期待しない方がいいでしょう。", "違うと思います。",
-                            "おそらく違います。", "絶対に違います！",
-                        };
-                        var rand = new System.Random();
-                        string answer = answers[rand.Next(answers.Length)];
-                        if (!player.IsAlive())
-                        {
-                            foreach (var pc in PlayerCatch.AllPlayerControls)
-                            {
-                                if (pc.IsAlive()) continue;
-                                SendMessage($"8ball {player.Data.PlayerName}「{question}」\n→ {answer}", pc.PlayerId);
-                            }
-                        }
-                        else
-                            SendMessage($"8ball {player.Data.PlayerName}「{question}」\n→ {answer}");
-                    }
                     break;
                 case "/rule":
                 case "/rl":
