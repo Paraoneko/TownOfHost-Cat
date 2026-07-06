@@ -90,7 +90,7 @@ class VersionInfoManager
         {
             var announceText = new GameObject("ModAnnounceText").AddComponent<TextMeshPro>();
 
-            announceText.transform.SetParent(CredentialsPatch.TOHPLogo.transform);
+            announceText.transform.SetParent(CredentialsPatch.TOHCLogo.transform);
             announceText.transform.localPosition = new(0f, 1f, 0f);
             announceText.fontSize =
             announceText.fontSizeMax =

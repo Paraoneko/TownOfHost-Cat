@@ -26,7 +26,7 @@ namespace TownOfHost
                     () =>
                     {
                         SetOpenMenu();
-                        CredentialsPatch.TOHPLogo.gameObject.SetActive(false);
+                        CredentialsPatch.TOHCLogo.gameObject.SetActive(false);
                     },
                     "Stream"
                     );

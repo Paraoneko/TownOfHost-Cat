@@ -239,7 +239,7 @@ class RoleInfoShower
                         var numItems = 0;
                         List<CustomRoles> rolelist = new();
                         CustomRoleManager.SortCustomRoles.DoIf(r => r.IsStartedRole(), r => rolelist.Add(r));
-                        var achievementmedal = UtilsSprite.LoadSprite("TownOfHost.Resources.TOHP.Label.AchievementMedal.png");
+                        var achievementmedal = UtilsSprite.LoadSprite("TownOfHost.Resources.TOHC.Label.AchievementMedal.png");
                         foreach (var customrole in rolelist.OrderBy(role => role.IsVanilla() is false))
                         {
                             if (!Event.CheckRole(customrole)) continue;
@@ -263,7 +263,7 @@ class RoleInfoShower
                                 achievementtext.gameObject.SetActive(false);
                                 pilldown.gameObject.SetActive(false);
                                 tabbuttons.Do(button => button.gameObject.SetActive(false));
-                                var marksprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHP.Label.{customrole}.png");
+                                var marksprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHC.Label.{customrole}.png");
                                 if (marksprite is not null)
                                 {
                                     RoleSprite.sprite = marksprite;
@@ -545,7 +545,7 @@ class RoleInfoShower
                 catch (System.Exception ex) { Logger.Error($"{ex}", "RoleInfo"); }
             }
         }
-        //Show 
+        //Show
         CustomBackground.gameObject.SetActive(true);
         Scrollbargameobject.gameObject.SetActive(true);
     }

@@ -23,7 +23,7 @@ namespace TownOfHost.Patches
         public static Sprite GetRoleIcon(CustomRoles role)
         {
             if (role.IsVanilla()) return RoleManager.Instance.GetRole(role.GetRoleTypes()).RoleIconSolid;
-            return UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHP.Label.{role}.png", 30);
+            return UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHC.Label.{role}.png", 30);
         }
         public static string GetRoleText(CustomRoles role) => role.GetCombinationName(false).RemoveColorTags();
         public static int GetParentCount(OptionItem opt)
@@ -159,7 +159,7 @@ namespace TownOfHost.Patches
 
             IEnumerator DrawSubOptions(List<OptionItem> subOptions)
             {
-                //サブオプション持ちの処理 
+                //サブオプション持ちの処理
                 for (var index = 0; index < subOptions.Count; ++index)
                 {
                     var option = subOptions[index];

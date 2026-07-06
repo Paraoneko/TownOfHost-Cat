@@ -99,7 +99,7 @@ namespace TownOfHost
                     new(255, 248, 173, byte.MaxValue),
                     () =>
                     {
-                        CredentialsPatch.TOHPLogo.gameObject.SetActive(false);
+                        CredentialsPatch.TOHCLogo.gameObject.SetActive(false);
                         __instance.screenTint.enabled = true;
                         Statistics_TMP.gameObject.SetActive(true);
                         Statistics_TMP.text = $"<size=60%>{SaveStatistics.ShowText()}";
@@ -191,7 +191,7 @@ namespace TownOfHost
                     new(60, 255, 183, byte.MaxValue),
                     () =>
                     {
-                        CredentialsPatch.TOHPLogo.gameObject.SetActive(false);
+                        CredentialsPatch.TOHCLogo.gameObject.SetActive(false);
                         __instance.screenTint.enabled = true;
                         if (betaVersionMenu != null)
                         {
@@ -299,7 +299,7 @@ namespace TownOfHost
             bool isActive = true,
             Transform transform = null)
         {
-            var button = new SimpleButton(transform == null ? CredentialsPatch.TOHPLogo.transform : transform, name, localPosition, normalColor, hoverColor, action, label, isActive);
+            var button = new SimpleButton(transform == null ? CredentialsPatch.TOHCLogo.transform : transform, name, localPosition, normalColor, hoverColor, action, label, isActive);
             if (scale.HasValue)
             {
                 button.Scale = scale.Value;
@@ -433,9 +433,9 @@ namespace TownOfHost
                 //    createbutton.GetComponent<BoxCollider2D>().offset = new(100f, 100);
             }
 
-            if (CredentialsPatch.TOHPLogo != null)
+            if (CredentialsPatch.TOHCLogo != null)
             {
-                CredentialsPatch.TOHPLogo.gameObject.SetActive(false);
+                CredentialsPatch.TOHCLogo.gameObject.SetActive(false);
             }
             if (VersionMenu != null)
                 VersionMenu.SetActive(false);
@@ -465,9 +465,9 @@ namespace TownOfHost
         public static void ResetScreenPostfix(MainMenuManager __instance)
         {
             CancelAutoCreateGame();
-            if (CredentialsPatch.TOHPLogo != null)
+            if (CredentialsPatch.TOHCLogo != null)
             {
-                CredentialsPatch.TOHPLogo?.gameObject?.SetActive(true);
+                CredentialsPatch.TOHCLogo?.gameObject?.SetActive(true);
             }
             if (VersionMenu != null)
                 VersionMenu.SetActive(false);
@@ -586,7 +586,7 @@ namespace TownOfHost
             {
                 var allrole = CustomRolesHelper.AllStandardRoles;
                 var role = allrole[IRandom.Instance.Next(allrole.Count())];
-                var sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHP.Label.{role}.png", size);
+                var sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHC.Label.{role}.png", size);
                 if (sprite is null) return;
                 part.myRend.material.shader = shader;
                 part.myRend.sharedMaterial.shader = shader;
@@ -596,11 +596,11 @@ namespace TownOfHost
             {
                 var allrole = CustomRolesHelper.AllRoles;
                 var role = allrole[IRandom.Instance.Next(allrole.Count())];
-                var sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHP.Button.{role}_Ability.png", size);
+                var sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHC.Button.{role}_Ability.png", size);
                 if (sprite is null)
-                    sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHP.Button.{role}_Kill.png", size);
+                    sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHC.Button.{role}_Kill.png", size);
                 if (sprite is null)
-                    sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHP.Button.{role}_Vent.png", size);
+                    sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.TOHC.Button.{role}_Vent.png", size);
                 if (sprite is null) return;
                 part.myRend.material.shader = shader;
                 part.myRend.sharedMaterial.shader = shader;

@@ -3131,7 +3131,7 @@
 "## その他"
 "DefaultSystemMessageTitle","【===== System Message =====】","【===== システムメッセージ ======】","【===== 系统信息 ======】","【===== 系統訊息 ======】","【=== Системное сообщение ===】","【===== Mensagem do Sistema ======】",""
 "MessageFromTheHost","【Message From The Host】","【ホストからの伝言】","【房主消息】","【房主訊息】","【Сообщение от Хоста】","【Mensagem do Anfitrião】",""
-"TabGroup.MainSettings","<#00c1ff><b>Main Settings","<#00c1ff><b>TOWNOFHOST-P Setting</color>","<#00c1ff>主要设置</color>","<#00c1ff>主要設定</color>","Основная настройка","Configurações Principais",""
+"TabGroup.MainSettings","<#00c1ff><b>Main Settings","<#00c1ff><b>TOWNOFHOST-C Setting</color>","<#00c1ff>主要设置</color>","<#00c1ff>主要設定</color>","Основная настройка","Configurações Principais",""
 "TabGroup.CrewmateRoles","<#8cffff><b>Crewmate Roles</color>","<#8cffff><b>Crewmate Roles</color>","<#8cffff>船员阵营职业</color>","<#8cffff>船員職業</color>","Роли Членов Экипажа","Classes de Tripulante",""
 "TabGroup.NeutralRoles","<#ababab><b>Neutral Roles</color>","<#ababab><b>Neutral Roles</color>","<#ababab>独立阵营职业</color>","<#ababab>中立職業設定</color>","Нейтральные Роли","Classes Neutras",""
 "TabGroup.ImpostorRoles","<#ff1919><b>Impostor Roles</color>","<#ff1919><b>Impostor Roles</color>","<#ff1919>内鬼阵营职业</color>","<#ff1919>偽裝者職業設定</color>","Роли Предателей","Classes de Impostor",""

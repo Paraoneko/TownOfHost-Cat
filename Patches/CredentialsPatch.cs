@@ -16,7 +16,7 @@ namespace TownOfHost
     [HarmonyPatch]
     public static class CredentialsPatch
     {
-        public static SpriteRenderer TOHPLogo { get; private set; }
+        public static SpriteRenderer TOHCLogo { get; private set; }
         private static TextMeshPro pingTrackerCredential = null;
         private static AspectPosition pingTrackerCredentialAspectPos = null;
         private static float deltaTime = 0.0f;
@@ -149,14 +149,14 @@ namespace TownOfHost
                 }
 #endif
 
-                if (SpecialEventText == null && TOHPLogo != null)
+                if (SpecialEventText == null && TOHCLogo != null)
                 {
                     SpecialEventText = TMPTemplate.Create(
                         "SpecialEventText",
                         "",
                         Color.white,
                         alignment: TextAlignmentOptions.Center,
-                        parent: TOHPLogo.transform);
+                        parent: TOHCLogo.transform);
                     SpecialEventText.name = "SpecialEventText";
                     SpecialEventText.fontSizeMin = 3f;
                     SpecialEventText.transform.localPosition = new Vector3(0f, 0.8f, 0f);
@@ -235,13 +235,13 @@ namespace TownOfHost
                 amongUsLogo = GameObject.Find("LOGO-AU");
 
                 var rightpanel = __instance.gameModeButtons.transform.parent;
-                var logoObject = new GameObject("titleLogo_TOHP");
+                var logoObject = new GameObject("titleLogo_TOHC");
                 var logoTransform = logoObject.transform;
-                TOHPLogo = logoObject.AddComponent<SpriteRenderer>();
+                TOHCLogo = logoObject.AddComponent<SpriteRenderer>();
                 logoTransform.parent = rightpanel;
                 logoTransform.localPosition = new(0f, 0.15f, 1f);
                 logoTransform.localScale *= 1.0f;
-                TOHPLogo.sprite = UtilsSprite.LoadSprite(Event.April || Event.Special ? "TownOfHost.Resources.TownOfHost-PKO-logo2.png" : "TownOfHost.Resources.TownOfHost-PKO-logo.png", 175f);
+                TOHCLogo.sprite = UtilsSprite.LoadSprite(Event.April || Event.Special ? "TownOfHost.Resources.TownOfHost-Cat-logo2.png" : "TownOfHost.Resources.TownOfHost-Cat-logo.png", 175f);
             }
         }
         [HarmonyPatch(typeof(ModManager), nameof(ModManager.LateUpdate))]

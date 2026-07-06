@@ -68,9 +68,9 @@ namespace TownOfHost
                 Event.Special = GameStates.IsNotJoined;
                 if (Event.Special)
                 {
-                    if (CredentialsPatch.TOHPLogo)
+                    if (CredentialsPatch.TOHCLogo)
                     {
-                        CredentialsPatch.TOHPLogo.sprite = UtilsSprite.LoadSprite("TownOfHost.Resources.TownOfHost-Cat_A.png", 300f);
+                        CredentialsPatch.TOHCLogo.sprite = UtilsSprite.LoadSprite("TownOfHost.Resources.TownOfHost-Cat_A.png", 300f);
                     }
                 }
             }

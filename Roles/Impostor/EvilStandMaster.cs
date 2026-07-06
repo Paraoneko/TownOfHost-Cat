@@ -1,5 +1,4 @@
-// ★ CustomRoles に EvilStandMaster を追加してください
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
@@ -206,3 +205,4 @@ public sealed class EvilStandMaster : RoleBase, IImpostor, IUsePhantomButton
             : $"{size}<color=#888888>ワープ対象なし（キルCD短縮待機中）</color>";
     }
 }
+*/

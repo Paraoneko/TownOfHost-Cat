@@ -87,7 +87,7 @@ class ShowRandomSpawnOption
                     Mapimage.sprite = UtilsSprite.LoadSprite($"TownOfHost.Resources.AmongUs.Map_{map}.png");
                     Mapimage.gameObject.SetActive(true);
 
-                    var pinsprite = UtilsSprite.LoadSprite("TownOfHost.Resources.TOHP.pin.png");
+                    var pinsprite = UtilsSprite.LoadSprite("TownOfHost.Resources.TOHC.pin.png");
                     var id = 103000 + ((int)map * 100);
                     List<(ToggleButtonBehaviour button, OptionItem opt)> buttons = new();
                     var options = OptionItem.AllOptions.Where(option => option.Id < id + 100 && id < option.Id);
@@ -185,7 +185,7 @@ class ShowRandomSpawnOption
                 catch (System.Exception ex) { Logger.Error(ex.ToString(), "eerrre"); }
             }
         }
-        //Show 
+        //Show
         CustomBackground.gameObject.SetActive(true);
     }
     public static bool CallEsc(bool IsPrefix = false)
