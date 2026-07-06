@@ -133,11 +133,13 @@ public sealed class Jumper : RoleBase, IImpostor, IUsePhantomButton
             {
                 _ = new LateTask(() =>
                 {
-                    if (!GameStates.IsMeeting && player.IsAlive())
+                if (!GameStates.IsMeeting && player.IsAlive())
+                {
+                    foreach (var target in PlayerCatch.AllAlivePlayerControls)
                     {
                         foreach (var target in PlayerCatch.AllAlivePlayerControls)
                         {
-                            if (target.Is(CustomRoles.King) || target.PlayerId == player.PlayerId) continue;
+                            if (target.Is(CustomRoles.King) || target.Is(CustomRoles.Autocrat) || target.PlayerId == player.PlayerId) continue;
 
                             float Distance = Vector2.Distance(player.transform.position, target.transform.position);
                             if (Distance <= (junpdis.TryGetValue(Jumpdistance, out var dis) ? dis : 0))

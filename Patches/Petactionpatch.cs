@@ -1,3 +1,5 @@
+// ペットの自動破棄機能はK対応来るまで一時的にこうしてます。対応が来たらTOHK処理に戻します。
+
 using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
@@ -117,6 +119,7 @@ public static class PetsHelper
 
     public static void RemovePet(PlayerControl pc)
     {
+        // Data.IsDeadは会議中にアンチブラックアウトで偽装されるため、PlayerState由来のIsAliveで判定する
         if (pc?.Data == null || pc.IsAlive()) return;
         if (pc.CurrentOutfit.PetId == "") return;
 

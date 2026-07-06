@@ -59,10 +59,10 @@ namespace TownOfHost
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
         public const string PluginGuid = "com.Paraoneko.TownOfHost-Cat";
-        public const string BepInExPluginVersion = "4.32.17+86";
-        public const string PluginVersion = "1.43.86.10";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "1.43.86.10";
-        public const string ModVersion = ".86.10";//リリースver用バージョン変更dc9b79
+        public const string BepInExPluginVersion = "1.43.88+11";
+        public const string PluginVersion = "1.43.88.11";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "1.43.88.11";
+        public const string ModVersion = ".88.11";//リリースver用バージョン変更dc9b79
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
         public static bool DebugVersion = true;
@@ -393,6 +393,8 @@ namespace TownOfHost
         Poisoned,
         Launch,
         Compression,
+        Evaporation,
+        Retaliation,
         etc = -1
     }
     //WinData
@@ -459,6 +461,8 @@ namespace TownOfHost
         PokerFace = CustomRoles.PokerFace,
         Lawyer = CustomRoles.Lawyer,
         Pirate = CustomRoles.Pirate,
+        Victim = CustomRoles.Victim,
+        Amateras = CustomRoles.Amateras,
 
         HASTroll = CustomRoles.HASTroll,
         TaskPlayerB = CustomRoles.TaskPlayerB,
@@ -502,6 +506,7 @@ namespace TownOfHost
         DriverandBraid,
         FoolandNue,
         VegaandAltair,
+        AbuserandVictim,
         PokerFace,
         TheThreeLittlePigs
     }

@@ -70,7 +70,7 @@ namespace TownOfHost
                     //shapeshifter.RpcShapeshift(shapeshifter, false);
                     var min = mpdistance.OrderBy(c => c.Value).FirstOrDefault();//一番値が小さい
                     PlayerControl targetm = min.Key;
-                    if (!targetm.Is(CustomRoles.King) && !targetm.Is(CustomRoles.Merlin))
+                    if (!targetm.Is(CustomRoles.King) && !targetm.Is(CustomRoles.Autocrat) && !targetm.Is(CustomRoles.Merlin))
                     {
                         var source = shapeshifter.Is(CustomRoles.Egoist) || targetRole is CustomRoles.Jackaldoll
                             ? Walkure.RoleChangeSource.Jackal

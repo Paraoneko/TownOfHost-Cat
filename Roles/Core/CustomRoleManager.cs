@@ -893,6 +893,7 @@ public enum CustomRoles
     Nue,
     MadHacker,
     MadSheriff,
+    BlackCat,
     //DEBUG only Madmate
     //Crewmate(Vanilla)
     Engineer,
@@ -928,7 +929,6 @@ public enum CustomRoles
     MagicalGirl,
     Walkure,
     SuspiciousTeller,
-    NiceNekomata,
     //TOH-K
     Gasp,
     VentMaster,
@@ -973,6 +973,7 @@ public enum CustomRoles
     //TOH-P
     NiceGuesser,
     Pukupuku,
+    NiceNekomata,
     Medium,
     SheriffHadouHo,
     Hitchhiker,
@@ -1006,6 +1007,7 @@ public enum CustomRoles
     Cupid,
     Oblivion,
     Eater,
+    Autocrat,
     Spelunker,
     PavlovDog,
     PavlovOwner,
@@ -1076,6 +1078,9 @@ public enum CustomRoles
     Braid,
     Vega,
     Altair,
+    Amateras,
+    Abuser,
+    Victim,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,

@@ -1,5 +1,4 @@
-/*
-using AmongUs.GameOptions;
+/*using AmongUs.GameOptions;
 using Hazel;
 using TownOfHost.Roles.Core;
 using System.Collections.Generic;
@@ -17,7 +16,7 @@ public sealed class NiceredridingHood : RoleBase
             CustomRoles.NiceRedRidingHood,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            362000,
+            37200,
             SetupOptionItem,
             "nrrh",
             "#fa8072",
@@ -199,5 +198,4 @@ public sealed class NiceredridingHood : RoleBase
         isRevivable = reader.ReadBoolean();
         killerPlayerId = reader.ReadByte();
     }
-}
-*/
+}*/

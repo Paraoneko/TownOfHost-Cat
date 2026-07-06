@@ -1,4 +1,4 @@
-using System.Linq;
+/*using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
 using TownOfHost.Roles.Core;
@@ -147,8 +147,8 @@ public sealed class Ogre : RoleBase, IKiller, IAdditionalWinner
     {
         nowKillRate = reader.ReadInt32();
     }
-
+s
     public override void AfterMeetingTasks()
     {
     }
-}
+}*/
