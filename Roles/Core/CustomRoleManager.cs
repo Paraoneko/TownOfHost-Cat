@@ -1005,6 +1005,7 @@ public enum CustomRoles
     Cupid,
     Oblivion,
     Eater,
+    Autocrat,
     Spelunker,
     PavlovDog,
     PavlovOwner,
@@ -1074,6 +1075,9 @@ public enum CustomRoles
     Braid,
     Vega,
     Altair,
+    Amateras,
+    Abuser,
+    Victim,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,

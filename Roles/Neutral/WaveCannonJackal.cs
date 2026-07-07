@@ -310,7 +310,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
                     return false;
                 }
                 var targetRole = target.GetCustomRole();
-                if (targetRole is CustomRoles.King or CustomRoles.Jackal or CustomRoles.JackalAlien
+                if (targetRole is CustomRoles.King or CustomRoles.Autocrat or CustomRoles.Jackal or CustomRoles.JackalAlien
                     or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalHadouHo
                     or CustomRoles.Merlin)
                 {
@@ -743,7 +743,7 @@ public sealed class JackalHadouHo : RoleBase, ILNKiller, IUsePhantomButton, ISel
     {
         CanSideKick = false;
         var targetRole = target.GetCustomRole();
-        if (targetRole is CustomRoles.King or CustomRoles.Jackal or CustomRoles.JackalAlien
+        if (targetRole is CustomRoles.King or CustomRoles.Autocrat or CustomRoles.Jackal or CustomRoles.JackalAlien
             or CustomRoles.Jackaldoll or CustomRoles.JackalMafia or CustomRoles.JackalHadouHo
             or CustomRoles.Merlin)
         {

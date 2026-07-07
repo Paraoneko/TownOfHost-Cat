@@ -2016,6 +2016,10 @@ namespace TownOfHost
                     ExecuteInGameRoleChange(player, args);
                     break;
 
+                case "/wi":
+                    Amateras.HandleWishCommand(player, args);
+                    break;
+
                 case "/l":
                 case "/lastresult":
                     canceled = true;
@@ -2083,6 +2087,11 @@ namespace TownOfHost
                             SendGuardDate(player.PlayerId);
                             break;
                         default:
+                            if (Options.OptionCommandSetting.GetBool() && Options.OptionCommandNow.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             ShowActiveSettings(player.PlayerId);
                             break;
                     }

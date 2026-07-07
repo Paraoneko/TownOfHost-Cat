@@ -33,6 +33,7 @@ class ColorLovers
         CustomRoles.Madonna,
         CustomRoles.Cupid,
         CustomRoles.King,
+        CustomRoles.Autocrat,
         CustomRoles.GM,
         CustomRoles.Vega,
         CustomRoles.Altair
