@@ -3512,7 +3512,8 @@
 "BeginnerImpostorTrainButton","Train","鍛錬"
 "BeginnerImpostorDummyName","Training Dummy","鍛錬用ダミー"
 "GodWinText","God Descends","神降臨"
-"Amateras","Amateras","???"
+
+"Amateras","Amateras","アマテラス"
 "AmaterasInfo","I will grant your wish.","あなたの願いを叶えて差し上げます。"
 "AmaterasInfoLong","Choose a player by self-voting in a meeting, let them choose a wish with /cmd wi, then complete your tasks to grant it at the next meeting. Grant the required number of wishes to win.","会議で自投票した後、願いを叶えてあげたいプレイヤーに投票する。\n選ばれたプレイヤーは /cmd wi <番号> で願いを選ぶ。\nアマテラスはタスクを完了し、次の会議開始時にその願いを叶える。\n設定数の願いを叶えると勝利できる。"
 "AmaterasWinText","Amateras Descends","天照降臨"
@@ -3545,6 +3546,7 @@
 "AmaterasDebuffRemoved","{0} was removed.","{0}が消去されました。"
 "AmaterasNoDebuffFound","No debuff add-on was found.","消去できるデバフ属性がありませんでした。"
 "Command.wi","Choose Amateras wish","アマテラスの願いを選ぶ"
+
 "Abuser","Abuser","加虐者"
 "Victim","Victim","被虐者"
 "AbuserandVictim","Abuser and Victim","<#8f1d2c>加虐者</color>と<#6f8fa8>被虐者</color>"

@@ -879,8 +879,6 @@ public enum CustomRoles
     MadSnitch,
     MadAvenger,
     SKMadmate,
-    BlackCat,
-    //TOH-K
     MadJester,
     MadTeller,
     MadBait,
