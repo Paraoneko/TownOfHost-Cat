@@ -137,8 +137,6 @@ public sealed class Jumper : RoleBase, IImpostor, IUsePhantomButton
                 {
                     foreach (var target in PlayerCatch.AllAlivePlayerControls)
                     {
-                        foreach (var target in PlayerCatch.AllAlivePlayerControls)
-                        {
                             if (target.Is(CustomRoles.King) || target.Is(CustomRoles.Autocrat) || target.PlayerId == player.PlayerId) continue;
 
                             float Distance = Vector2.Distance(player.transform.position, target.transform.position);
