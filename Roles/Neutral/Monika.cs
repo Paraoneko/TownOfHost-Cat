@@ -14,12 +14,6 @@ using static TownOfHost.UtilsRoleText;
 
 namespace TownOfHost.Roles.Neutral;
 
-/// <summary>
-/// モニカ (Neutral / キルボタン持ち)
-/// ・キルボタン「抹消」で対象を新レイヤー「ゴミ箱」(半死亡)に送る
-/// ・ゴミ箱に居ない生存者が2名になると特殊会議で追加勝者を選択
-/// ・ゴミ箱に居ない生存者が0～1名になるとモニカ+残り全員が勝利
-/// </summary>
 public sealed class Monika : RoleBase, ILNKiller
 {
     public static readonly SimpleRoleInfo RoleInfo =
@@ -34,25 +28,21 @@ public sealed class Monika : RoleBase, ILNKiller
             "mon",
             "#e5a497",
             (5, 7),
-            true,                              // isDesyncImpostor (キルボタン持ち)
-            countType: CountTypes.Monika,      // ★ モニカはキル勢としてカウント
+            true,
+            countType: CountTypes.Monika,
             from: From.ExtremeRoles
         );
 
-    // ─── ゴミ箱レイヤー（全インスタンス共有・ホスト権威）───────────
     public static readonly HashSet<byte> MonikaTrashLayer = new();
 
     public static bool IsTrashed(byte playerId) => MonikaTrashLayer.Contains(playerId);
     public static bool IsTrashed(PlayerControl pc) => pc != null && MonikaTrashLayer.Contains(pc.PlayerId);
 
-    // ─── 特殊会議（勝者追加選択）管理（静的・ニムロッド流）───────
-    // byte.MaxValue = 非選択会議中
     private static byte SelectMeetingMonikaId = byte.MaxValue;
     private static bool PendingSelectMeeting = false;
 
     public static bool IsSelectMeeting() => SelectMeetingMonikaId != byte.MaxValue;
 
-    // ─── オプション ──────────────────────────────────────
     static OptionItem OptionHasCustomVision;
     static OptionItem OptionVision;
     static OptionItem OptionCanVent;
@@ -99,7 +89,6 @@ public sealed class Monika : RoleBase, ILNKiller
         KillCooldownValue = OptionKillCooldown.GetFloat();
     }
 
-    // ─── IKiller / ILNKiller ─────────────────────────────
     public float CalculateKillCooldown() => KillCooldownValue;
     public bool CanUseKillButton() => Player.IsAlive() && !IsTrashed(Player);
     public bool CanUseImpostorVentButton() => OptionCanVent.GetBool() && !IsTrashed(Player);
@@ -115,10 +104,6 @@ public sealed class Monika : RoleBase, ILNKiller
         MonikaTrashLayer.Clear();
         SelectMeetingMonikaId = byte.MaxValue;
         PendingSelectMeeting = false;
-
-        // ★ ゴミ箱プレイヤーの名前マークを全員に見せる（ウィッチ/毒入りパン屋と同じ手法）
-        //    CustomRoleManager.MarkOthers に登録すると、seer(見る側)に関係なく
-        //    全プレイヤーの名前表示にマークが反映される。
         CustomRoleManager.MarkOthers.Add(GetTrashMarkOthers);
     }
 
@@ -130,16 +115,11 @@ public sealed class Monika : RoleBase, ILNKiller
         CustomRoleManager.MarkOthers.Remove(GetTrashMarkOthers);
     }
 
-    /// <summary>
-    /// ゴミ箱レイヤーのプレイヤーの名前に付けるマーク（全員に見える）。
-    /// ・会議中のみ 名前の「右」にモニカ色の × を付ける（タスクターン中は表示しない）。
-    /// （NotifyRoles の名前構造 {RoleText}{Name}{DeathReason+Mark+Suffix} により Mark は名前直後に入る）
-    /// </summary>
     public static string GetTrashMarkOthers(PlayerControl seer, PlayerControl seen = null, bool isForMeeting = false)
     {
         seen ??= seer;
         if (seen == null) return "";
-        if (!isForMeeting) return "";                 // ★ 会議中のみ表示（タスクターン中は非表示）
+        if (!isForMeeting) return "";
         if (!IsTrashed(seen.PlayerId)) return "";
         return ColorString(GetRoleColor(CustomRoles.Monika), "×");
     }
@@ -154,9 +134,6 @@ public sealed class Monika : RoleBase, ILNKiller
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 抹消（キルボタン）: 対象をゴミ箱レイヤーに送る
-    // ═══════════════════════════════════════════════════════
     public void OnCheckMurderAsKiller(MurderInfo info)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -165,17 +142,14 @@ public sealed class Monika : RoleBase, ILNKiller
         (_, var target) = info.AttemptTuple;
         if (target == null) { info.DoKill = false; return; }
 
-        // ★ 通常キルは行わない（抹消はゴミ箱送り）
         info.DoKill = false;
 
-        // 既にゴミ箱の相手には効果なし（クールダウンは戻す）
         if (IsTrashed(target))
         {
             Player.SetKillCooldown();
             return;
         }
 
-        // 抹消エフェクト（ガード演出）
         Player.RpcProtectedMurderPlayer(target);
         Player.RpcProtectedMurderPlayer(Player);
 
@@ -183,7 +157,6 @@ public sealed class Monika : RoleBase, ILNKiller
         Player.SetKillCooldown();
     }
 
-    /// <summary>対象をゴミ箱レイヤーに追加（ホストのみ）</summary>
     public static void SendToTrash(PlayerControl target)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -203,7 +176,6 @@ public sealed class Monika : RoleBase, ILNKiller
         UtilsNotifyRoles.NotifyRoles(NoCache: true);
     }
 
-    /// <summary>ゴミ箱プレイヤーが実際に死亡→レイヤー解除（死亡者扱いに移行）</summary>
     public static void OnPlayerActuallyDied(byte playerId)
     {
         if (MonikaTrashLayer.Remove(playerId))
@@ -213,9 +185,6 @@ public sealed class Monika : RoleBase, ILNKiller
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 緊急会議ボタン消費オプション
-    // ═══════════════════════════════════════════════════════
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
     public static class MonikaEmergencyConsumePatch
     {
@@ -223,10 +192,9 @@ public sealed class Monika : RoleBase, ILNKiller
         {
             if (!AmongUsClient.Instance.AmHost) return;
             if (!ConsumeButton) return;
-            if (target != null) return;                 // 死体通報は対象外（ボタンのみ）
+            if (target != null) return;
             if (__instance == null || !__instance.Is(CustomRoles.Monika)) return;
 
-            // 緊急会議を起こせる（＝本来の緊急会議回数を持つ）非インポスター・非ゴミ箱を候補に
             var candidates = AllAlivePlayerControls
                 .Where(pc => pc.PlayerId != __instance.PlayerId
                           && !pc.GetCustomRole().IsImpostor()
@@ -237,7 +205,6 @@ public sealed class Monika : RoleBase, ILNKiller
             if (candidates.Count == 0) return;
             var victim = candidates[IRandom.Instance.Next(candidates.Count)];
 
-            // 本来追加されている緊急会議回数のみ消費（能力増加分は消費しない）
             var state = PlayerState.GetByPlayerId(victim.PlayerId);
             if (state != null && state.NumberOfRemainingButtons > 0)
                 state.NumberOfRemainingButtons--;
@@ -248,7 +215,6 @@ public sealed class Monika : RoleBase, ILNKiller
                 ColorString(GetRoleColor(CustomRoles.Monika), GetString("Monika")));
         }
 
-        // 緊急会議を起こせない役職はボタンを持たない → 消費対象外
         static bool CanEmergencyMeeting(PlayerControl pc)
         {
             var state = PlayerState.GetByPlayerId(pc.PlayerId);
@@ -256,9 +222,6 @@ public sealed class Monika : RoleBase, ILNKiller
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 勝利条件チェック（ホストのタスクフェーズ中）
-    // ═══════════════════════════════════════════════════════
     public override void OnFixedUpdate(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -273,21 +236,16 @@ public sealed class Monika : RoleBase, ILNKiller
 
     private void CheckWinConditions()
     {
-        // ゴミ箱に居ないモニカが1人でなければ判定しない
         var aliveMonikas = AllAlivePlayerControls
             .Where(pc => pc.Is(CustomRoles.Monika) && !IsTrashed(pc))
             .ToList();
         if (aliveMonikas.Count != 1) return;
         if (aliveMonikas[0].PlayerId != Player.PlayerId) return;
 
-        // ゴミ箱に居ない生存者（モニカ以外・無害/キル持ち両方含む）
         var nonTrashAlive = AllAlivePlayerControls
             .Where(pc => !IsTrashed(pc) && !pc.Is(CustomRoles.Monika))
             .ToList();
 
-        // ★ 「単独として生き残ってもゲームが続行するか」= false の場合:
-        //    モニカ以外のキルボタン持ち(インポスター等)が全滅し、
-        //    残りが無害な生存者だけになった時点でモニカ+残り全員が勝利する。
         if (!GameContinues && nonTrashAlive.Count >= 2)
         {
             bool anyKiller = nonTrashAlive.Any(pc => IsKillerCount(pc));
@@ -300,19 +258,15 @@ public sealed class Monika : RoleBase, ILNKiller
 
         if (nonTrashAlive.Count >= 2)
         {
-            // ちょうど2名 → 特殊会議で追加勝者を選択
             if (nonTrashAlive.Count == 2)
                 TriggerSelectMeeting(Player);
-            // 3名以上はまだ勝利条件未達（何もしない）
         }
         else
         {
-            // 0～1名 → モニカ + 残り全員が即勝利
             ExecuteWin(Player, nonTrashAlive);
         }
     }
 
-    /// <summary>キルボタンを持つ陣営（モニカにとっての脅威）かどうか</summary>
     private static bool IsKillerCount(PlayerControl pc)
     {
         return pc.GetCountTypes() switch
@@ -329,17 +283,12 @@ public sealed class Monika : RoleBase, ILNKiller
         };
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 特殊会議（ニムロッド流用: モニカが会議を発生させ、モニカの投票で勝者を選ぶ）
-    // ═══════════════════════════════════════════════════════
     private static void TriggerSelectMeeting(PlayerControl monika)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (IsSelectMeeting() || PendingSelectMeeting) return;
         if (monika == null || !monika.IsAlive() || IsTrashed(monika)) return;
 
-        // ★ 会議発生をこの時点で確定させておく（次フレーム以降の OnFixedUpdate で二重に走らないよう
-        //    先に SelectMeetingMonikaId を立てる。IsSelectMeeting()==true になるので OnFixedUpdate は抜ける）
         PendingSelectMeeting = true;
         SelectMeetingMonikaId = monika.PlayerId;
         SendRpcStatic();
@@ -347,7 +296,6 @@ public sealed class Monika : RoleBase, ILNKiller
         UtilsGameLog.AddGameLog("Monika",
             $"{UtilsName.GetPlayerColor(monika)} の勝利条件達成。追加勝者選択の特殊会議を発生");
 
-        // ニムロッド流: フラッシュ演出 → 少し待ってから強制会議
         _ = new LateTask(() => Utils.AllPlayerKillFlash(), 0.4f, "Monika.SelectFlash", true);
 
         _ = new LateTask(() =>
@@ -368,7 +316,6 @@ public sealed class Monika : RoleBase, ILNKiller
 
             PendingSelectMeeting = false;
 
-            // モニカが通報者となって会議を強制発生（Cancelcheck=false で残ボタン数に関係なく発生）
             ReportDeadBodyPatch.ExReportDeadBody(
                 monika, null, false,
                 GetString("MonikaSelectMeetingTitle"),
@@ -386,7 +333,6 @@ public sealed class Monika : RoleBase, ILNKiller
                $"<size=70%>{GetString("MonikaSelectMeetingText")}</size>\n";
     }
 
-    // モニカの投票 = 追加勝者の選択
     public override (byte? votedForId, int? numVotes, bool doVote) ModifyVote(byte voterId, byte sourceVotedForId, bool isIntentional)
     {
         var baseVote = base.ModifyVote(voterId, sourceVotedForId, isIntentional);
@@ -394,7 +340,6 @@ public sealed class Monika : RoleBase, ILNKiller
         if (!IsSelectMeeting() || SelectMeetingMonikaId != Player.PlayerId) return baseVote;
         if (voterId != Player.PlayerId) return baseVote;
 
-        // スキップ(sourceVotedForId >= 15)以外なら追加勝者を確定
         PlayerControl ally = null;
         if (sourceVotedForId < 15)
         {
@@ -409,7 +354,6 @@ public sealed class Monika : RoleBase, ILNKiller
         SelectMeetingMonikaId = byte.MaxValue;
         SendRpcStatic();
 
-        // 会議を即終了させて勝利処理
         MeetingVoteManager.Instance?.ClearAndExile(Player.PlayerId, sourceVotedForId);
         ExecuteWin(Player, allies);
 
@@ -418,7 +362,6 @@ public sealed class Monika : RoleBase, ILNKiller
 
     public override void OnStartMeeting()
     {
-        // 会議開始時、選択会議でなければフラグをクリア
         if (!AmongUsClient.Instance.AmHost) return;
         if (!IsSelectMeeting())
         {
@@ -426,9 +369,6 @@ public sealed class Monika : RoleBase, ILNKiller
         }
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 勝利確定
-    // ═══════════════════════════════════════════════════════
     private static void ExecuteWin(PlayerControl monika, List<PlayerControl> allies)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -454,26 +394,19 @@ public sealed class Monika : RoleBase, ILNKiller
         PendingSelectMeeting = false;
         SendRpcStatic();
 
-        // 通常の終了処理に委譲
         GameEndCheck();
     }
 
     static void GameEndCheck()
     {
-        // 勝者は既に CustomWinnerHolder にセット済み。
-        // 終了判定を明示的に走らせて GameEndChecker.Prefix にゲーム終了させる。
         if (GameManager.Instance != null)
             GameManager.Instance.LogicFlow.CheckEndCriteria();
     }
 
     public override void CheckWinner(GameOverReason reason)
     {
-        // モニカ単独勝利以外では特別処理なし
     }
 
-    // ═══════════════════════════════════════════════════════
-    // RPC（ゴミ箱レイヤー & 選択会議状態の同期）
-    // ═══════════════════════════════════════════════════════
     static void SendRpcStatic()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -497,9 +430,6 @@ public sealed class Monika : RoleBase, ILNKiller
         for (int i = 0; i < count; i++) MonikaTrashLayer.Add(reader.ReadByte());
     }
 
-    // ═══════════════════════════════════════════════════════
-    // 表示
-    // ═══════════════════════════════════════════════════════
     public override string GetProgressText(bool comms = false, bool GameLog = false)
     {
         if (!Player.IsAlive()) return "";
@@ -524,13 +454,6 @@ public sealed class Monika : RoleBase, ILNKiller
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-// ★ ゴミ箱の × は「名前の右」だけ（Monika.GetTrashMarkOthers / MarkOthers が担当）。
-//    会議中のみ表示・タスクターン中は非表示。左 × は付けない。
-// ══════════════════════════════════════════════════════════════
-// ★ ゴミ箱プレイヤーの投票ブロック（発言権・投票権の剥奪）
-//    ただしゴミ箱の人「への」投票は許可（srcのみ判定）
-// ══════════════════════════════════════════════════════════════
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
 public static class MonikaTrashedVoteBlockPatch
 {
@@ -543,9 +466,6 @@ public static class MonikaTrashedVoteBlockPatch
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-// ★ ゴミ箱プレイヤーの死体通報・緊急ボタンブロック
-// ══════════════════════════════════════════════════════════════
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 public static class MonikaTrashedReportBlockPatch
 {
@@ -559,9 +479,6 @@ public static class MonikaTrashedReportBlockPatch
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-// ★ ゴミ箱プレイヤーが実際に死亡した時、ゴミ箱レイヤーを解除（死亡者へ移行）
-// ══════════════════════════════════════════════════════════════
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Die))]
 public static class MonikaTrashDeathPatch
 {
@@ -572,12 +489,6 @@ public static class MonikaTrashDeathPatch
     }
 }
 
-// ══════════════════════════════════════════════════════════════
-// ★ 視認制御:「モニカがゴミ箱のプレイヤーを見ることができるか」= オフ の場合、
-//    モニカのクライアント上でのみ、タスクフェーズ中のゴミ箱プレイヤーの
-//    プレイヤー本体を非表示にする（ローカルのみ・他クライアントには影響しない）。
-//    ※プレイヤー実体のローカル可視制御(InvisiblePatch と同じ手法)を流用。
-// ══════════════════════════════════════════════════════════════
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
 public static class MonikaTrashVisibilityPatch
 {
@@ -587,8 +498,6 @@ public static class MonikaTrashVisibilityPatch
         var local = PlayerControl.LocalPlayer;
         if (local == null || !local.Is(CustomRoles.Monika)) return;
 
-        // オプションがオン（見える）なら常に表示に戻す
-        // オフ（見えない）でも、会議中やロビー中は名前・投票に必要なので通常表示
         bool shouldHide =
             !Monika.CanSeeTrashOpt
             && GameStates.IsInTask
@@ -596,26 +505,24 @@ public static class MonikaTrashVisibilityPatch
             && Monika.IsTrashed(__instance.PlayerId)
             && __instance.PlayerId != local.PlayerId;
 
-        var body = __instance.cosmetics?.currentBodySprite?.BodySprite;
-        if (body == null) return;
+        if (__instance.cosmetics == null || __instance.cosmetics.currentBodySprite == null) return;
 
-        // このパッチが隠したプレイヤーを記録し、復帰も自分の責務のみに限定する
-        //（他役職の透明化と競合しないため）
         if (shouldHide)
         {
-            if (body.enabled)
+            if (!_hiddenByMonika.Contains(__instance.PlayerId))
             {
-                body.enabled = false;
+                __instance.cosmetics.currentBodySprite.BodySprite.enabled = false;
+                __instance.cosmetics.gameObject.SetActive(false);
                 __instance.cosmetics.ToggleNameVisible(false);
                 _hiddenByMonika.Add(__instance.PlayerId);
             }
         }
         else
         {
-            // 会議入り / CanSeeTrashオン / ゴミ箱解除 → Monikaが隠していたなら元に戻す
             if (_hiddenByMonika.Contains(__instance.PlayerId))
             {
-                body.enabled = true;
+                __instance.cosmetics.currentBodySprite.BodySprite.enabled = true;
+                __instance.cosmetics.gameObject.SetActive(true);
                 __instance.cosmetics.ToggleNameVisible(true);
                 _hiddenByMonika.Remove(__instance.PlayerId);
             }

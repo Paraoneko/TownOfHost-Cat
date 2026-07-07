@@ -229,49 +229,23 @@ namespace TownOfHost
             var text = __instance.freeChatField.textArea.text;
             if (ChatHistory.Count == 0 || ChatHistory[^1] != text) ChatHistory.Add(text);
             ChatControllerUpdatePatch.CurrentHistorySelection = ChatHistory.Count;
+
+            // ★ 追加：ゴミ箱レイヤーの通常チャット（/なし）は先頭に "/cmd mc " を付けて
+            //    強制的にコマンド化する。こうすると /cmd 経路に乗るため通常配信されず、
+            //    mc コマンド側でゴミ箱＋死亡者のみへ秘匿チャットとして送信される。
+            //    ※ もともと "/" で始まる入力（他コマンド）は対象外。
+            if (GameStates.InGame && !GameStates.IsMeeting && !text.StartsWith("/")
+                && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(PlayerControl.LocalPlayer.PlayerId)
+                && !PlayerControl.LocalPlayer.Is(CustomRoles.Monika))
+            {
+                Logger.Info($"{PlayerControl.LocalPlayer.Data.GetLogPlayerName()} : {text}", "TrashChat");
+                text = "/cmd mc " + text;
+            }
+
             string[] args = text/*.ToLower()*/.Split(' ');
             string subArgs = "";
             var canceled = false;
             var cancelVal = "";
-
-            //モニカ用だよお
-            if (GameStates.InGame && !GameStates.IsMeeting && !text.StartsWith("/") && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(PlayerControl.LocalPlayer.PlayerId) && !PlayerControl.LocalPlayer.Is(CustomRoles.Monika))
-            {
-                Logger.Info($"{PlayerControl.LocalPlayer.Data.GetLogPlayerName()} : {text}", "TrashChat");
-
-                if (AmongUsClient.Instance.AmHost)
-                {
-                    foreach (var target in PlayerCatch.AllPlayerControls)
-                    {
-                        if (target == null) continue;
-                        if (target.Is(CustomRoles.Monika)) continue;
-
-                        bool isTrash = TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(target.PlayerId);
-                        bool isDead = !target.IsAlive();
-
-                        if (isTrash || isDead)
-                        {
-                            var clientid = target.GetClientId();
-                            if (clientid == -1) continue;
-
-                            SendMessage(text.Mark(GetRoleColor(CustomRoles.Monika)), target.PlayerId,
-                                ColorString(GetRoleColor(CustomRoles.Monika), $"×{PlayerControl.LocalPlayer.GetPlayerColor()}×"));
-                        }
-                    }
-                }
-                else
-                {
-                    var sender = CustomRpcSender.Create("TrashChatSender")
-                        .AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ClientSendHideMessage)
-                        .Write(text)
-                        .EndRpc();
-                    sender.SendMessage();
-                }
-
-                __instance.freeChatField.textArea.Clear();
-                return false;
-            }
-            // ══════════════════════════════════════════════════════════════
 
             Logger.Info(text, "SendChat");
             ChatManager.SendMessage(PlayerControl.LocalPlayer, text);
@@ -1378,8 +1352,28 @@ namespace TownOfHost
                             }
                         }
                         break;
-
-
+                    case "/mc":
+                        canceled = true;
+                        {
+                            string mcBody = args.Length > 1 ? string.Join(" ", args.Skip(1)) : "";
+                            if (!string.IsNullOrEmpty(mcBody))
+                            {
+                                if (AmongUsClient.Instance.AmHost)
+                                {
+                                    SendTrashSecretChat(PlayerControl.LocalPlayer, mcBody);
+                                }
+                                else
+                                {
+                                    var mcSender = CustomRpcSender.Create("TrashChatSender")
+                                        .AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ClientSendHideMessage)
+                                        .Write(text)
+                                        .EndRpc();
+                                    mcSender.SendMessage();
+                                }
+                            }
+                        }
+                        __instance.freeChatField.textArea.Clear();
+                        return false;
                     case "/t":
                     case "/template":
                         canceled = true;
@@ -1921,6 +1915,31 @@ namespace TownOfHost
             }
             return !canceled;
         }
+        //ゴミ箱プレイヤーの秘匿チャット
+        public static void SendTrashSecretChat(PlayerControl sender, string body)
+        {
+            if (!AmongUsClient.Instance.AmHost) return;
+            if (sender == null || string.IsNullOrEmpty(body)) return;
+
+            Logger.Info($"{sender.Data.GetLogPlayerName()} : {body}", "TrashChat");
+
+            string title = ColorString(GetRoleColor(CustomRoles.Monika), $"×{sender.GetPlayerColor()}×");
+            string sendtext = body.Mark(GetRoleColor(CustomRoles.Monika));
+
+            foreach (var target in PlayerControl.AllPlayerControls)
+            {
+                if (target == null) continue;
+                if (target.Is(CustomRoles.Monika)) continue;
+
+                bool isTrash = TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(target.PlayerId);
+                bool isDead = !target.IsAlive();
+                if (!(isTrash || isDead)) continue;
+                if (target.GetClientId() == -1) continue;
+
+                SendMessage(sendtext, target.PlayerId, title);
+            }
+        }
+
         #region OnReceiveChat
         public static void OnReceiveChat(PlayerControl player, string text, out bool canceled, bool Isclient = false)
         {
@@ -1938,43 +1957,26 @@ namespace TownOfHost
                 }
                 return;
             }
-            //こちらもモニカ用だよ-'w'-
-            if (!text.StartsWith("/") && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(player.PlayerId) && !player.Is(CustomRoles.Monika))
+            //モニカ用ゴミ箱レイヤー専用の秘匿チャット
+            if (TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(player.PlayerId) && !player.Is(CustomRoles.Monika))
             {
-                canceled = true;
-
-                if (!AmongUsClient.Instance.AmHost) return;
-
-                Logger.Info($"{player.Data.GetLogPlayerName()} : {text}", "TrashChat");
-
-                List<PlayerControl> sendplayers = new();
-                foreach (var target in PlayerControl.AllPlayerControls)
+                string trashBody = null;
+                if (text.StartsWith("/cmd mc "))
                 {
-                    if (target == null) continue;
-
-                    if (target.Is(CustomRoles.Monika)) continue;
-
-                    bool isTrash = TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(target.PlayerId);
-                    bool isDead = !target.IsAlive();
-
-                    if (isTrash || isDead)
-                    {
-                        sendplayers.Add(target);
-                    }
+                    trashBody = text.Substring("/cmd mc ".Length);
+                }
+                else if (!text.StartsWith("/"))
+                {
+                    trashBody = text;
                 }
 
-                foreach (var target in sendplayers)
+                if (trashBody != null)
                 {
-                    var clientid = target.GetClientId();
-                    if (clientid == -1) continue;
-
-                    string title = ColorString(GetRoleColor(CustomRoles.Monika), $"×{player.GetPlayerColor()}×");
-                    string sendtext = text.Mark(GetRoleColor(CustomRoles.Monika));
-
-                    SendMessage(sendtext, target.PlayerId, title);
+                    canceled = true; 
+                    if (!AmongUsClient.Instance.AmHost) return;
+                    SendTrashSecretChat(player, trashBody);
+                    return;
                 }
-
-                return;
             }
             // ══════════════════════════════════════════════════════════════
 
@@ -2943,40 +2945,13 @@ namespace TownOfHost
                 return false;
             }
 
-            //ゴミ箱くんは通常チャットだーめ♥
             if (GameStates.InGame && !GameStates.IsMeeting
                 && __instance != null && __instance.PlayerId == PlayerControl.LocalPlayer.PlayerId
                 && !chatText.TrimStart().StartsWith("/")
                 && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(PlayerControl.LocalPlayer.PlayerId)
                 && !PlayerControl.LocalPlayer.Is(CustomRoles.Monika))
             {
-                Logger.Info($"{PlayerControl.LocalPlayer.Data.GetLogPlayerName()} : {chatText}", "TrashChat(Rpc)");
-
-                if (AmongUsClient.Instance.AmHost)
-                {
-                    foreach (var target in PlayerControl.AllPlayerControls)
-                    {
-                        if (target == null) continue;
-                        if (target.Is(CustomRoles.Monika)) continue;
-
-                        bool isTrash = TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(target.PlayerId);
-                        bool isDead = !target.IsAlive();
-                        if (!(isTrash || isDead)) continue;
-                        if (target.GetClientId() == -1) continue;
-
-                        SendMessage(chatText.Mark(GetRoleColor(CustomRoles.Monika)), target.PlayerId,
-                            ColorString(GetRoleColor(CustomRoles.Monika), $"×{PlayerControl.LocalPlayer.GetPlayerColor()}×"));
-                    }
-                }
-                else
-                {
-                    var trashSender = CustomRpcSender.Create("TrashChatSender(Rpc)")
-                        .AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ClientSendHideMessage)
-                        .Write(chatText)
-                        .EndRpc();
-                    trashSender.SendMessage();
-                }
-
+                Logger.Info($"[Monika] ゴミ箱プレイヤーの通常チャットRPCを遮断: {chatText}", "TrashChat(Rpc)");
                 __result = false;
                 return false;
             }
