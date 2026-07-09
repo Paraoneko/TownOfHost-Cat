@@ -394,6 +394,8 @@ namespace TownOfHost
         Poisoned,
         Launch,
         Compression,
+        Evaporation,
+        Retaliation,
         etc = -1
     }
     //WinData
@@ -460,6 +462,8 @@ namespace TownOfHost
         PokerFace = CustomRoles.PokerFace,
         Lawyer = CustomRoles.Lawyer,
         Pirate = CustomRoles.Pirate,
+        Victim = CustomRoles.Victim,
+        Amateras = CustomRoles.Amateras,
 
         HASTroll = CustomRoles.HASTroll,
         TaskPlayerB = CustomRoles.TaskPlayerB,
@@ -503,6 +507,7 @@ namespace TownOfHost
         DriverandBraid,
         FoolandNue,
         VegaandAltair,
+        AbuserandVictim,
         PokerFace,
         TheThreeLittlePigs
     }

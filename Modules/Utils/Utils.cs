@@ -277,8 +277,10 @@ namespace TownOfHost
         {
             var tpinfo = "";
             var text = "";
+            var targetPlayer = PlayerCatch.AllPlayerControls.FirstOrDefault(player => player.PlayerId == to);
+            var isModerator = Moderator.IsModerator(targetPlayer);
 
-            // 禁止コマンドはヘルプに表示しない
+            // ★ 禁止コマンドはヘルプに表示しない
             bool cmdRestricted = Options.OptionCommandSetting?.GetBool() ?? false;
             bool Show(OptionItem opt) => !cmdRestricted || !(opt?.GetBool() ?? false);
 
@@ -310,21 +312,27 @@ namespace TownOfHost
                     + $"\n/cmd set rule(s r) - {GetString("Command.set_rule")}"
                     + $"\n/cmd mod id|name|color - {GetString("Command.modadd")}"
                     + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}"
-                    + $"\n/cmd exempt(ex) - {GetString("Command.exempt")}"
-                    + $"\n/cmd exempt(ex) id|name|color - {GetString("Command.exempt")}"
-                    + $"\n/cmd exempt(ex) delete id|name|color - {GetString("Command.exempt")}"
-                    + $"\n/cmd kp - {GetString("Command.kp")}"
-                    + $"\n/cmd aj - {GetString("Command.aj")}"
-                    + "\n/cmd ws - マッチメイキングのサブテキストをセットします。";
+                    + $"\n/cmd gc - {GetString("Command.globalconnect")}";
+
+                if (Options.OptionStreamerSetting.GetBool())
+                {
+                    text += $"\n/cmd exempt(ex) - {GetString("Command.exempt")}"
+                        + $"\n/cmd exempt(ex) id|name|color - {GetString("Command.exempt")}"
+                        + $"\n/cmd exempt(ex) delete id|name|color - {GetString("Command.exempt")}"
+                        + $"\n/cmd kp - {GetString("Command.kp")}"
+                        + $"\n/cmd aj - {GetString("Command.aj")}";
+                }
+
+                text += "\n/cmd ws - マッチメイキングのサブテキストをセットします。";
 
                 text += $"<size=80%></line-height>\n<#028760>【~~~~~~~{GetString("OnlyClient")}~~~~~~~】</color></size><line-height=1.3pic>"
                     + $"\n/cmd dump - {GetString("Command.dump")}";
             }
 
             //全員
-            text += $"<size=80%></line-height>\n<#918877>【~~~~~~~{GetString("Allplayer")}~~~~~~~】</color></size><line-height=1.3pic>"
-                // /now(n) 自体には対応オプションなし → 常に表示
-                + $"\n/cmd now(n) - {GetString("Command.now")}";
+            text += $"<size=80%></line-height>\n<#918877>【~~~~~~~{GetString("Allplayer")}~~~~~~~】</color></size><line-height=1.3pic>";
+            if (Show(Options.OptionCommandNow))
+                text += $"\n/cmd now(n) - {GetString("Command.now")}";
 
             if (Show(Options.OptionCommandNowRole))
                 text += $"\n/cmd now role(n r) - {GetString("Command.nowrole")}";
@@ -352,8 +360,10 @@ namespace TownOfHost
                 text += $"\n/cmd rule(rl) - {GetString("Command.rule")}";
 
             //条件付きコマンド（制限対象外
-            if (CustomRolesHelper.CheckGuesser() || CustomRoles.Guesser.IsPresent())
+            if (ShouldShowGuesserCommand())
                 text += $"\n/cmd bt - {GetString("Command.bt")}";
+            if (Event.CheckRole(CustomRoles.Amateras) && CustomRoles.Amateras.IsPresent())
+                text += $"\n/cmd wi - {GetString("Command.wi")}";
             if (Options.ImpostorHideChat.GetBool())
                 text += $"\n/cmd ic - {GetString("Command.impchat")}";
             if (Options.JackalHideChat.GetBool())
@@ -387,6 +397,7 @@ namespace TownOfHost
             }
 
             //モデレーターコマンド（制限対象外)
+            if (isModerator)
             {
                 text += $"<size=80%></line-height>\n<#ADE0EE>【~~~~~~~{GetString("ModeratorCommand")}~~~~~~~】</color></size><line-height=1.3pic>"
                     + $"\n/cmd fe - {GetString("Command.fe")}"
@@ -405,6 +416,41 @@ namespace TownOfHost
             SendMessage(text + tpinfo, to, checkl: true);
         }
 
+        private static bool ShouldShowGuesserCommand()
+        {
+            // 試合中は実際の配役・属性と、その配役に有効な付与設定を確認する。
+            if (GameStates.IsInGame)
+            {
+                foreach (var player in PlayerCatch.AllPlayerControls)
+                {
+                    if (player == null) continue;
+                    if (player.Is(CustomRoles.Guesser)
+                        || player.Is(CustomRoles.NiceGuesser)
+                        || player.Is(CustomRoles.EvilGuesser))
+                        return true;
+
+                    var role = player.GetCustomRole();
+                    if (role is CustomRoles.Cakeshop or CustomRoles.SantaClaus or CustomRoles.Fortuner)
+                        return true;
+                    if (RoleAddAddons.GetRoleAddon(role, out var addonOptions, player, subrole: CustomRoles.Guesser)
+                        && addonOptions.GiveGuesser.GetBool())
+                        return true;
+                }
+
+                if (CustomRoles.LastImpostor.IsPresent() && LastImpostor.GiveGuesser.GetBool()) return true;
+                if (CustomRoles.LastNeutral.IsPresent() && LastNeutral.GiveGuesser.GetBool()) return true;
+                return false;
+            }
+
+            // ロビーでは未配役なので、現在のプリセットで出現・付与し得るかを確認する。
+            return CustomRoles.Guesser.IsEnable()
+                || CustomRoles.NiceGuesser.IsEnable()
+                || CustomRoles.EvilGuesser.IsEnable()
+                || CustomRolesHelper.CheckGuesser()
+                || (CustomRoles.LastImpostor.IsEnable() && LastImpostor.GiveGuesser.GetBool())
+                || (CustomRoles.LastNeutral.IsEnable() && LastNeutral.GiveGuesser.GetBool());
+        }
+
         static readonly Regex UnderlineRegex = new(@"<u>(.*?)</u>", RegexOptions.Singleline | RegexOptions.Compiled);
         public static void SendMessage(string text, byte sendTo = byte.MaxValue, string title = "", bool checkl = true, bool isTowSend = false, bool setsize = false)
         {
@@ -419,6 +465,10 @@ namespace TownOfHost
                 var sendtext = "";
                 var alltext = text.Split("\n");
                 (string size, string color, string hi, string b) tag = ("", "", "", "");
+                var sizeTags = new Stack<string>();
+                var colorTags = new Stack<string>();
+                var lineHeightTags = new Stack<string>();
+                var boldTags = new Stack<string>();
                 var oldtext = text;
                 var i = 0;
                 for (i = 0; sendtext.Length < 280 || ((sendtext.Split("\n")?.Count() ?? 0) < 10); i++)
@@ -435,17 +485,48 @@ namespace TownOfHost
                         if (tagtext == "") continue;
                         switch (tagtext.Substring(0, 1))
                         {
-                            case "s": if (!tagtext.Contains("sub")) tag.size = $"<{tagtext.Split(">")[0]}>"; break;
-                            case "c": case "#": tag.color = $"<{tagtext.Split(">")[0]}>"; break;
-                            case "l": tag.hi = $"<{tagtext.Split(">")[0]}>"; break;
-                            case "b": tag.b = $"<{tagtext.Split(">")[0]}>"; break;
+                            case "s":
+                                if (!tagtext.Contains("sub"))
+                                {
+                                    tag.size = $"<{tagtext.Split(">")[0]}>";
+                                    sizeTags.Push(tag.size);
+                                }
+                                break;
+                            case "c":
+                            case "#":
+                                tag.color = $"<{tagtext.Split(">")[0]}>";
+                                colorTags.Push(tag.color);
+                                break;
+                            case "l":
+                                tag.hi = $"<{tagtext.Split(">")[0]}>";
+                                lineHeightTags.Push(tag.hi);
+                                break;
+                            case "b":
+                                tag.b = $"<{tagtext.Split(">")[0]}>";
+                                boldTags.Push(tag.b);
+                                break;
                             case "/":
                                 switch (tagtext.Substring(1, 1))
                                 {
-                                    case "s": if (!tagtext.Contains("sub")) tag.size = ""; break;
-                                    case "c": tag.color = ""; break;
-                                    case "l": tag.hi = ""; break;
-                                    case "b": tag.b = ""; break;
+                                    case "s":
+                                        if (!tagtext.Contains("sub"))
+                                        {
+                                            if (sizeTags.Count > 0) sizeTags.Pop();
+                                            tag.size = sizeTags.Count > 0 ? sizeTags.Peek() : "";
+                                        }
+                                        break;
+                                    case "c":
+                                        if (colorTags.Count > 0) colorTags.Pop();
+                                        tag.color = colorTags.Count > 0 ? colorTags.Peek() : "";
+                                        break;
+                                    case "l":
+                                        if (lineHeightTags.Count > 0) lineHeightTags.Pop();
+                                        tag.hi = lineHeightTags.Count > 0 ? lineHeightTags.Peek() : "";
+                                        break;
+                                    case "b":
+                                        if (boldTags.Count > 0) boldTags.Pop();
+                                        tag.b = boldTags.Count > 0 ? boldTags.Peek() : "";
+                                        break;
                                 }
                                 break;
                         }
@@ -688,11 +769,11 @@ namespace TownOfHost
             bool Ishedder = false;
             CustomRoles[] killLv1 = [CustomRoles.UltraStar, CustomRoles.NekoKabocha , CustomRoles.Puppeteer , CustomRoles.Sniper, CustomRoles.TeleportKiller
             ,CustomRoles.Bomber , CustomRoles.Vampire,CustomRoles.Remotekiller];
-            CustomRoles[] GuardLv1 = [CustomRoles.GuardMaster, CustomRoles.Guarding, CustomRoles.OneWolf, CustomRoles.VentOpener, CustomRoles.Absorb];
+            CustomRoles[] GuardLv1 = [CustomRoles.GuardMaster, CustomRoles.Guarding, CustomRoles.OneWolf, CustomRoles.VentOpener];
             CustomRoles[] killLv2 = [CustomRoles.Ballooner, CustomRoles.FireWorks, CustomRoles.Warlock, CustomRoles.GrimReaper];
             CustomRoles[] GuardLv2 = [CustomRoles.Fox, CustomRoles.MadGuardian];
             CustomRoles[] KillLv3 = [CustomRoles.Jumper];
-            CustomRoles[] GuardLv9 = [CustomRoles.King];
+            CustomRoles[] GuardLv9 = [CustomRoles.King, CustomRoles.Autocrat];
             CustomRoles[] KillLv10 = [CustomRoles.ConnectSaver, CustomRoles.Shyboy, CustomRoles.Limiter, CustomRoles.EarnestWolf, CustomRoles.CurseMaker];
 
             sb.Append($"{GetString("DeathReason.Kill")}{(i is 3 ? "\n" : "　")}");

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using AmongUs.Data;
 using AmongUs.GameOptions;
 using Assets.CoreScripts;
 using HarmonyLib;
@@ -230,10 +231,7 @@ namespace TownOfHost
             if (ChatHistory.Count == 0 || ChatHistory[^1] != text) ChatHistory.Add(text);
             ChatControllerUpdatePatch.CurrentHistorySelection = ChatHistory.Count;
 
-            // ★ 追加：ゴミ箱レイヤーの通常チャット（/なし）は先頭に "/cmd mc " を付けて
-            //    強制的にコマンド化する。こうすると /cmd 経路に乗るため通常配信されず、
-            //    mc コマンド側でゴミ箱＋死亡者のみへ秘匿チャットとして送信される。
-            //    ※ もともと "/" で始まる入力（他コマンド）は対象外。
+            //ゴミ箱用
             if (GameStates.InGame && !GameStates.IsMeeting && !text.StartsWith("/")
                 && TownOfHost.Roles.Neutral.Monika.MonikaTrashLayer.Contains(PlayerControl.LocalPlayer.PlayerId)
                 && !PlayerControl.LocalPlayer.Is(CustomRoles.Monika))
@@ -1374,6 +1372,116 @@ namespace TownOfHost
                         }
                         __instance.freeChatField.textArea.Clear();
                         return false;
+                    //招待制グローバルチャット（部屋リンク）
+                    //    /cmd gc          → 自分の接続IDを表示（配信者モード時はコピーのみ）
+                    //    /cmd gc <相手ID> → 相手の接続IDを入力して相互リンク
+                    case "/gc":
+                        canceled = true;
+                        {
+                            // グローバルチャットの接続はホストが管理する。
+                            if (!AmongUsClient.Instance.AmHost)
+                            {
+                                __instance.AddChat(PlayerControl.LocalPlayer,
+                                    "[グローバルチャット]\n<color=#ff0000>接続の設定はホスト（村主）のみが行えます。</color>\nホストに /cmd gc を実行してもらってください。");
+                                __instance.freeChatField.textArea.Clear();
+                                return false;
+                            }
+                            if (args.Length < 2)
+                            {
+                                //自分のIDを提示
+                                string myLinkId = TownOfHost.Modules.GlobalChatManager.MyLinkId;
+                                ClipboardHelper.PutClipboardString(myLinkId);
+
+                                if (DataManager.Settings.Gameplay.StreamerMode)
+                                {
+                                    // 配信者モードのとき画面にIDを出さずコピーのみ
+                                    __instance.AddChat(PlayerControl.LocalPlayer,
+                                        "[グローバルチャット]\nあなたの接続IDを <color=#00c1ff>クリップボードにコピー</color> しました。\n" +
+                                        "（配信者モードのため画面には表示しません）\n" +
+                                        "繋ぎたい相手に渡し、相手に /cmd gc <ID> で入力してもらってください。");
+                                }
+                                else
+                                {
+                                    __instance.AddChat(PlayerControl.LocalPlayer,
+                                        $"[グローバルチャット]\nあなたの接続ID：\n<color=#00c1ff>{myLinkId}</color>\n" +
+                                        "（クリップボードにもコピーしました）\n" +
+                                        "繋ぎたい相手に渡し、相手に /cmd gc <ID> で入力してもらってください。");
+                                }
+                            }
+                            else
+                            {
+                                //相手のIDを入力して相互リンク
+                                string targetId = TownOfHost.Modules.GlobalChatManager.NormalizeId(args[1]);
+                                if (TownOfHost.Modules.GlobalChatManager.RequestLink(targetId))
+                                {
+                                    __instance.AddChat(PlayerControl.LocalPlayer,
+                                        "[グローバルチャット]\n<color=#00ff00>接続しました。</color>\n" +
+                                        $"現在の接続数：{TownOfHost.Modules.GlobalChatManager.LinkedCount}\n" +
+                                        "メッセージ送信： /cmd gr <本文>");
+                                }
+                                else
+                                {
+                                    __instance.AddChat(PlayerControl.LocalPlayer,
+                                        "[グローバルチャット]\n<color=#ff0000>接続に失敗しました。</color>\nIDが正しいか確認してください（自分自身のIDは指定できません）。");
+                                }
+                            }
+                        }
+                        __instance.freeChatField.textArea.Clear();
+                        return false;
+                    //グローバルチャット送信（リンク済みの相手にのみ届く）
+                    case "/gr":
+                    case "/global":
+                        canceled = true;
+                        {
+                            if (args.Length < 2)
+                            {
+                                __instance.AddChat(PlayerControl.LocalPlayer, "[グローバルチャット]\n使い方: /cmd gr <メッセージ>");
+                            }
+                            else if (AmongUsClient.Instance.AmHost)
+                            {
+                                if (TownOfHost.Modules.GlobalChatManager.LinkedCount <= 0)
+                                {
+                                    __instance.AddChat(PlayerControl.LocalPlayer,
+                                        "[グローバルチャット]\n<color=#ff0000>まだ誰とも接続していません。</color>\n" +
+                                        "/cmd gc で自分のIDを相手に渡すか、/cmd gc <相手ID> で接続してください。");
+                                }
+                                else
+                                {
+                                    string message = string.Join(" ", args.Skip(1));
+                                    TownOfHost.Modules.GlobalChatManager.SendMessage($"{PlayerControl.LocalPlayer.Data.PlayerName}: {message}");
+                                    __instance.AddChat(PlayerControl.LocalPlayer, $"[グローバルチャット(送信)]\n{message}");
+                                }
+                            }
+                            else
+                            {
+                                var grSender = CustomRpcSender.Create("GlobalChatSender")
+                                    .AutoStartRpc(PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.ClientSendHideMessage)
+                                    .Write(text)
+                                    .EndRpc();
+                                grSender.SendMessage();
+                                __instance.AddChat(PlayerControl.LocalPlayer, $"[グローバルチャット(送信)]\n{string.Join(" ", args.Skip(1))}");
+                            }
+                        }
+                        __instance.freeChatField.textArea.Clear();
+                        return false;
+                    //グローバルチャットの受信オン/オフ
+                    case "/grc":
+                        canceled = true;
+                        {
+                            byte gcMyId = PlayerControl.LocalPlayer.PlayerId;
+                            if (TownOfHost.Modules.GlobalChatManager.IgnoreList.Contains(gcMyId))
+                            {
+                                TownOfHost.Modules.GlobalChatManager.IgnoreList.Remove(gcMyId);
+                                __instance.AddChat(PlayerControl.LocalPlayer, "[グローバルチャット]\n受信を <color=#00FF00>【オン】</color> にしました。");
+                            }
+                            else
+                            {
+                                TownOfHost.Modules.GlobalChatManager.IgnoreList.Add(gcMyId);
+                                __instance.AddChat(PlayerControl.LocalPlayer, "[グローバルチャット]\n受信を <color=#FF0000>【オフ】</color> にしました。");
+                            }
+                        }
+                        __instance.freeChatField.textArea.Clear();
+                        return false;
                     case "/t":
                     case "/template":
                         canceled = true;
@@ -2023,6 +2131,10 @@ namespace TownOfHost
                     ExecuteInGameRoleChange(player, args);
                     break;
 
+                case "/wi":
+                    Amateras.HandleWishCommand(player, args);
+                    break;
+
                 case "/l":
                 case "/lastresult":
                     canceled = true;
@@ -2090,6 +2202,11 @@ namespace TownOfHost
                             SendGuardDate(player.PlayerId);
                             break;
                         default:
+                            if (Options.OptionCommandSetting.GetBool() && Options.OptionCommandNow.GetBool())
+                            {
+                                SendMessage("<color=#ff0000>現在このコマンドはホストによって無効化されています。</color>", player.PlayerId);
+                                break;
+                            }
                             ShowActiveSettings(player.PlayerId);
                             break;
                     }
@@ -2235,6 +2352,21 @@ namespace TownOfHost
                         GlobalChatManager.SendMessage($"{player.Data.PlayerName}: {message}", player);
                     }
                     break;*/
+                case "/gr":
+                case "/global":
+                    canceled = true;
+                    if (args.Length < 2) break;
+                    if (!AmongUsClient.Instance.AmHost) break;
+                    if (TownOfHost.Modules.GlobalChatManager.LinkedCount <= 0)
+                    {
+                        SendMessage("[グローバルチャット]\n<color=#ff0000>この村はまだ誰とも接続していません。</color>", player.PlayerId);
+                        break;
+                    }
+                    {
+                        string grMessage = string.Join(" ", args.Skip(1));
+                        TownOfHost.Modules.GlobalChatManager.SendMessage($"{player.Data.PlayerName}: {grMessage}", player);
+                    }
+                    break;
                 case "/nc":
                     canceled = true;
                     if (args.Length < 2) break;

@@ -8,6 +8,16 @@ using InnerNet;
 
 namespace TownOfHost
 {
+    [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.Start))]
+    internal static class SetupDiscordMatchmakingButtonsPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(GameStartManager __instance)
+        {
+            DiscordMatchmakingRelayService.RefreshRecruitmentButtons(__instance);
+        }
+    }
+
     [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.MakePublic))]
     internal static class MakePublicDiscordBotPatch
     {
@@ -290,8 +300,29 @@ namespace TownOfHost
         private static void UpdateRecruitmentButtons(GameStartManager gameStartManager, bool recruiting)
         {
             if (gameStartManager == null) return;
-            gameStartManager.HostPublicButton?.SelectButton(recruiting);
-            gameStartManager.HostPrivateButton?.SelectButton(!recruiting);
+            var statusText = recruiting ? "公開" : "非公開";
+
+            if (gameStartManager.HostPrivateButton != null)
+            {
+                gameStartManager.HostPrivateButton.buttonText.DestroyTranslator();
+                gameStartManager.HostPrivateButton.buttonText.text = statusText;
+            }
+
+            if (gameStartManager.HostPublicButton != null)
+            {
+                gameStartManager.HostPublicButton.buttonText.DestroyTranslator();
+                gameStartManager.HostPublicButton.buttonText.text = statusText;
+            }
+
+        }
+
+        public static void RefreshRecruitmentButtons(GameStartManager gameStartManager)
+        {
+            bool recruiting;
+            lock (Sync)
+                recruiting = _activeRecruitment;
+
+            UpdateRecruitmentButtons(gameStartManager, recruiting);
         }
 
         private static bool TryCollectLobby(out string hostName, out string roomCode, out string state, out int players, out int maxPlayers)

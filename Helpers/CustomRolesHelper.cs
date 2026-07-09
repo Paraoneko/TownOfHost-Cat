@@ -160,6 +160,7 @@ namespace TownOfHost
         CustomRoles.Assassin or CustomRoles.Merlin or
         CustomRoles.Driver or CustomRoles.Braid or
         CustomRoles.Vega or CustomRoles.Altair or
+        CustomRoles.Abuser or CustomRoles.Victim or
         CustomRoles.Fool or CustomRoles.Nue;
         public static CustomRoles GetCombination(this CustomRoles role)
         {
@@ -173,6 +174,8 @@ namespace TownOfHost
                 case CustomRoles.Braid: return CustomRoles.Driver;
                 case CustomRoles.Vega: return CustomRoles.Altair;
                 case CustomRoles.Altair: return CustomRoles.Vega;
+                case CustomRoles.Abuser: return CustomRoles.Victim;
+                case CustomRoles.Victim: return CustomRoles.Abuser;
                 case CustomRoles.Fool: return CustomRoles.Nue;
                 case CustomRoles.Nue: return CustomRoles.Fool;
             }
@@ -382,6 +385,7 @@ namespace TownOfHost
         MilkyWay,
         Pavlov,
         Eater,
+        Victim,
         Monika,
         StandMaster,
         Villain

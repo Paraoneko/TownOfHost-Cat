@@ -1083,6 +1083,7 @@ public enum CustomRoles
     Villain,
     Scratcher,
     HappyJester,
+    Autocrat,
     //DEBUG only Neutral.
     //HideAndSeek
     HASFox,
@@ -1095,6 +1096,9 @@ public enum CustomRoles
     Braid,
     Vega,
     Altair,
+    Amateras,
+    Abuser,
+    Victim,
     // Sub-roll after 500
     NotAssigned = 500,
     LastImpostor,

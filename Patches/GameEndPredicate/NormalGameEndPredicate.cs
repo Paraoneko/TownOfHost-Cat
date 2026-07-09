@@ -264,17 +264,18 @@ namespace TownOfHost
             int MadBetrayer = 0;
             int Pavlov = 0;
             int StandMasterCount = 0;
-            // ★ Monika: ゴミ箱に居ない生存モニカ数（モニカ独自勝利は Monika.cs で処理）
-            int MonikaCount = 0;
+            int EaterCount = 0;
+            int PavlovOwnerAlive = 0;
+            int PavlovOwnerRemaining = 0;
 
             foreach (var pc in PlayerCatch.AllAlivePlayerControls)
             {
-                // ★ Monika: ゴミ箱レイヤーに居るプレイヤーは半死亡扱い。
-                //    「ゴミ箱に居ない生存者」のみをカウント対象にするため、生存カウントから除外する。
-                if (Monika.MonikaTrashLayer.Contains(pc.PlayerId)) continue;
-                // ★ Monika本人はキル勢だが、勝利判定は Monika.cs 側で独自に行うため
-                //    通常の陣営カウントには含めず、生存フラグだけ立てる。
-                if (pc.Is(CustomRoles.Monika)) { MonikaCount++; continue; }
+                if (pc.Is(CustomRoles.PavlovOwner))
+                {
+                    PavlovOwnerAlive++;
+                    if (pc.GetRoleClass() is PavlovOwner owner && owner.HasRemainingImprintCount())
+                        PavlovOwnerRemaining++;
+                }
                 if (pc.GetCustomRole() is CustomRoles.MadBetrayer)
                 {
                     Roles.Madmate.MadBetrayer.CheckCount(ref Crew, ref MadBetrayer);
@@ -291,8 +292,15 @@ namespace TownOfHost
                     case CountTypes.MilkyWay: MilkyWay++; break;
                     case CountTypes.Pavlov: Pavlov++; break;
                     case CountTypes.StandMaster: StandMasterCount++; break;
+                    case CountTypes.Eater: EaterCount++; break;
                 }
             }
+
+            // SNRと同様に、犬がいない間は刷り込み回数が残っているオーナーだけが
+            // ゲーム続行を阻止する。回数を使い切ったオーナーはキラー陣営数に含めない。
+            if (!PavlovDog.HasAliveDog())
+                Pavlov -= PavlovOwnerAlive - PavlovOwnerRemaining;
+
             if (Jackal == 0 && (CustomRoles.Jackal.IsPresent() || CustomRoles.JackalMafia.IsPresent() || CustomRoles.JackalAlien.IsPresent() || CustomRoles.JackalHadouHo.IsPresent() || CustomRoles.JackalWolf.IsPresent()))
                 foreach (var player in PlayerCatch.AllAlivePlayerControls)
                 {
@@ -315,17 +323,42 @@ namespace TownOfHost
             bool standMasterAlive = PlayerCatch.AllAlivePlayerControls
                 .Any(pc => pc.Is(CustomRoles.StandMaster));
 
-            // ★ Monika: モニカが生存している間は、通常の陣営全滅判定でゲームを終わらせない。
-            //    （モニカの勝利/敗北判定は Monika.cs の CheckWinConditions で行う）
-            if (MonikaCount > 0
-                && Imp == 0 && Jackal == 0 && Remotekiller == 0 && GrimReaper == 0
-                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0 && StandMasterCount == 0)
+            foreach (var pc in PlayerCatch.AllAlivePlayerControls)
             {
+                if (pc.GetRoleClass() is Eater eater && eater.TryWinByLastSurvivorRule())
+                {
+                    reason = GameOverReason.ImpostorsByKill;
+                    return true;
+                }
+            }
+
+            // 覚醒した被虐者は、残り2人になった時点で相手の陣営を無視して単独勝利する。
+            // それまでは通常の人数勝利を止める。
+            foreach (var pc in PlayerCatch.AllAlivePlayerControls)
+            {
+                if (pc.GetRoleClass() is Victim victim && victim.TryWinNow())
+                {
+                    reason = GameOverReason.ImpostorsByKill;
+                    return true;
+                }
+            }
+            if (PlayerCatch.AllAlivePlayerControls.Any(pc => pc.GetRoleClass() is Victim victim && victim.IsAwakened))
                 return false;
+
+            // 爆ぜ師の条件達成そのものをゲーム終了トリガーにする。
+            // 死亡後勝利設定にも対応するため、死亡者を含む全プレイヤーを確認する。
+            foreach (var pc in PlayerCatch.AllPlayerControls)
+            {
+                if (pc.GetRoleClass() is LoversBreaker loversBreaker && loversBreaker.TryWinNow())
+                {
+                    reason = GameOverReason.ImpostorsByKill;
+                    return true;
+                }
             }
 
             if (Imp == 0 && FoxAndCrew == 0 && Jackal == 0 && Remotekiller == 0
-                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0 && StandMasterCount == 0) //全滅
+                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0 && StandMasterCount == 0
+                && EaterCount == 0) //全滅
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetWinner(CustomWinner.None);
@@ -334,7 +367,7 @@ namespace TownOfHost
             {
                 reason = GameOverReason.ImpostorsByKill;
             }
-            else if (Imp == 1 && Crew == 0 && GrimReaper == 1)//死神勝利(1)
+            else if (Imp == 1 && Crew == 0 && GrimReaper == 1 && EaterCount == 0)//死神勝利(1)
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.GrimReaper, byte.MaxValue);
@@ -343,13 +376,13 @@ namespace TownOfHost
                     .FirstOrDefault(pc => pc.GetCustomRole() is CustomRoles.GrimReaper)?.PlayerId ?? byte.MaxValue);
             }
             else if (Jackal == 0 && Remotekiller == 0 && MilkyWay == 0 && MadBetrayer == 0
-                && Pavlov == 0 && StandMasterCount == 0 && FoxAndCrew <= Imp) //インポスター勝利
+                && Pavlov == 0 && StandMasterCount == 0 && EaterCount == 0 && FoxAndCrew <= Imp) //インポスター勝利
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.Impostor, byte.MaxValue);
             }
             else if (Imp == 0 && Remotekiller == 0 && MilkyWay == 0 && MadBetrayer == 0
-                && Pavlov == 0 && StandMasterCount == 0 && FoxAndCrew <= Jackal) //ジャッカル勝利
+                && Pavlov == 0 && StandMasterCount == 0 && EaterCount == 0 && FoxAndCrew <= Jackal) //ジャッカル勝利
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.Jackal, byte.MaxValue);
@@ -362,7 +395,7 @@ namespace TownOfHost
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.JackalWolf);
             }
             else if (Imp == 0 && Jackal == 0 && MilkyWay == 0 && MadBetrayer == 0
-                && Pavlov == 0 && StandMasterCount == 0 && FoxAndCrew <= Remotekiller)
+                && Pavlov == 0 && StandMasterCount == 0 && EaterCount == 0 && FoxAndCrew <= Remotekiller)
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.Remotekiller, byte.MaxValue);
@@ -371,7 +404,8 @@ namespace TownOfHost
                     .FirstOrDefault(pc => pc.GetCustomRole() is CustomRoles.Remotekiller)?.PlayerId ?? byte.MaxValue);
             }
             else if (Jackal == 0 && Imp == 0 && GrimReaper == 1 && Remotekiller == 0
-                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0 && StandMasterCount == 0)//死神勝利(2)
+                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0 && StandMasterCount == 0
+                && EaterCount == 0)//死神勝利(2)
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.GrimReaper, byte.MaxValue);
@@ -380,7 +414,7 @@ namespace TownOfHost
                     .FirstOrDefault(pc => pc.GetCustomRole() is CustomRoles.GrimReaper)?.PlayerId ?? byte.MaxValue);
             }
             else if (Imp == 0 && Jackal == 0 && Remotekiller == 0 && MadBetrayer == 0
-                && Pavlov == 0 && StandMasterCount == 0 && FoxAndCrew <= MilkyWay)
+                && Pavlov == 0 && StandMasterCount == 0 && EaterCount == 0 && FoxAndCrew <= MilkyWay)
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.MilkyWay, byte.MaxValue);
@@ -388,14 +422,14 @@ namespace TownOfHost
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.Altair);
             }
             else if (Imp == 0 && Jackal == 0 && Remotekiller == 0 && MilkyWay == 0
-                && Pavlov == 0 && StandMasterCount == 0 && FoxAndCrew <= MadBetrayer)
+                && Pavlov == 0 && StandMasterCount == 0 && EaterCount == 0 && FoxAndCrew <= MadBetrayer)
             {
                 reason = GameOverReason.ImpostorsByKill;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.MadBetrayer, byte.MaxValue);
                 CustomWinnerHolder.WinnerRoles.Add(CustomRoles.MadBetrayer);
             }
             else if (Imp == 0 && Jackal == 0 && Remotekiller == 0 && GrimReaper == 0
-                && MilkyWay == 0 && MadBetrayer == 0 && StandMasterCount == 0
+                && MilkyWay == 0 && MadBetrayer == 0 && StandMasterCount == 0 && EaterCount == 0
                 && FoxAndCrew <= Pavlov && PavlovDog.HasAliveDog())
             {
                 reason = GameOverReason.ImpostorsByKill;
@@ -406,7 +440,7 @@ namespace TownOfHost
             }
             else if (standMasterAlive
                 && Imp == 0 && Jackal == 0 && Remotekiller == 0 && GrimReaper == 0
-                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0
+                && MilkyWay == 0 && MadBetrayer == 0 && Pavlov == 0 && EaterCount == 0
                 && FoxAndCrew <= StandMasterCount)
             {
                 reason = GameOverReason.ImpostorsByKill;
@@ -419,7 +453,8 @@ namespace TownOfHost
                 }
             }
             else if (Jackal == 0 && Remotekiller == 0 && MadBetrayer == 0
-                && MilkyWay == 0 && Pavlov == 0 && StandMasterCount == 0 && Imp == 0) //クルー勝利
+                && MilkyWay == 0 && Pavlov == 0 && StandMasterCount == 0 && Imp == 0
+                && EaterCount == 0) //クルー勝利
             {
                 reason = GameOverReason.CrewmatesByVote;
                 CustomWinnerHolder.ResetAndSetAndChWinner(CustomWinner.Crewmate, byte.MaxValue);

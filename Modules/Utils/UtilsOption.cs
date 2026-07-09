@@ -679,7 +679,7 @@ namespace TownOfHost
                 AddRoleTextData = GetRoleColorCode(missrole);
 
             var AddRoleInfoTitleString = $"{GetString("AddonInfoTitle")}";
-            var AddRoleInfoTitle = $"<{AddRoleTextData}>{AddRoleInfoTitleString}</color>";
+            var AddRoleInfoTitle = $"<{AddRoleTextData}>{AddRoleInfoTitleString}";
             var sb = new StringBuilder();
 
             //バフ

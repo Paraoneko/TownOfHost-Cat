@@ -160,7 +160,7 @@ public sealed class StandMaster : RoleBase, ILNKiller, IUsePhantomButton
     {
         EnableKillAbility = OptionEnableKillAbility.GetBool();
         StandDeathGrantsKill = OptionStandDeathGrantsKill.GetBool();
-        KillCooldown_ = OptionKillCooldown.GetFloat();   // ★
+        KillCooldown_ = OptionKillCooldown.GetFloat();
         StandImpostorVision = OptionStandImpostorVision.GetBool();
         EnableTaskAddon = OptionEnableTaskAddon.GetBool();
         AddonGiveToMaster = OptionAddonGiveToMaster.GetBool();
