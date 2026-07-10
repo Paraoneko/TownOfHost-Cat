@@ -23,9 +23,8 @@ public sealed class Jailer : RoleBase, IUsePhantomButton, IKiller
             SetupOptionItem,
             "jlr",
             "#4488cc",
-            (2, 1),
+            (3, 5),
             true,
-            countType: CountTypes.Crew,
             from: From.TownOfHost_Pko
         );
 

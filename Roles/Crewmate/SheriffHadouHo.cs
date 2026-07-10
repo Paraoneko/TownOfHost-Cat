@@ -226,7 +226,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         if (t == null) return;
         var rt = t.GetComponent<TMPro.TextMeshPro>();
         if (rt == null) return;
-        if (beaming) { rt.text = "<alpha=#00> </alpha>"; t.SetLocalY(0.35f); }
+        if (beaming) { rt.text = "<alpha=#00>　</alpha>"; t.SetLocalY(0.35f); }
         else { rt.enabled = true; t.SetLocalY(0.35f); }
     }
 
@@ -429,7 +429,7 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
             bool fl = seer.PlayerId == Player.PlayerId
                 ? Player.cosmetics.FlipX : BeamFacingLeft;
             string bigStar = $"<size=800%><color={myColor}>★</color></size>";
-            string blank = " ";
+            string blank = "　　　";
             name = "<line-height=1200%>\n"
                  + (fl ? bigStar + blank : blank + bigStar)
                  + "</line-height>";
@@ -440,7 +440,10 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
             && (IsCharging || ShowBeamMark))
         {
             if (ShowBeamMark && seen.PlayerId == Player.PlayerId)
-            { BuildBeamName(ref name, myColor, false); NoMarker = true; return true; }
+            {
+                BuildBeamName(ref name, myColor, false);
+                NoMarker = true; return true;
+            }
             return false;
         }
 
@@ -460,12 +463,13 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
         bool fl = BeamFacingLeft;
         string star = $"<voffset=0.35em><size=800%><color={myColor}>★</color></size></voffset>";
         string beam = BuildBeamBlock();
-        string blank = "<size=1200%> </size>";
+        string blank = "<size=1200%>　</size>";
         string sB = fl ? star + blank : blank + star;
         string longBeam = fl ? beam + beam + sB : sB + beam + beam;
-        string hugeBlank = "<alpha=#00>" + new string(' ', 10) + "</alpha>";
+        string hugeBlank = "<alpha=#00>　　　　　　　　　　</alpha>";
         string ls = wider ? "<line-height=5300%>\n" : "<line-height=4300%>\n";
         string ss = "<size=5000%>", se = "</size></line-height>";
+
         name = fl
             ? ls + $"{ss}{longBeam}{se}{ss}{hugeBlank}{se}"
             : ls + $"{ss}{hugeBlank}{se}{ss}{longBeam}{se}";
@@ -474,14 +478,8 @@ public sealed class SheriffHadouHo : RoleBase, IUsePhantomButton
     string BuildBeamBlock()
     {
         if ((BeamColorMode)BeamColorModeValue == BeamColorMode.Yellow)
-            return "<color=#f8cd46>━</color><color=#f8cd46>━</color>"
-                 + "<color=#f8cd46>━</color><color=#f8cd46>━</color>"
-                 + "<color=#f8cd46>━</color><color=#f8cd46>━</color>"
-                 + "<color=#f8cd46>━</color>";
-        return "<color=#00CFFF>━</color><color=#00CFFF>━</color>"
-             + "<color=#00CFFF>━</color><color=#00CFFF>━</color>"
-             + "<color=#00CFFF>━</color><color=#00CFFF>━</color>"
-             + "<color=#00CFFF>━</color>";
+            return "<color=#f8cd46>━━━━━━━</color>";
+        return "<color=#00CFFF>━━━━━━━</color>";
     }
 
     public override string GetLowerText(PlayerControl seer, PlayerControl seen = null,
