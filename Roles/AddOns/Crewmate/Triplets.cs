@@ -30,12 +30,13 @@ class Triplets
         foreach (var pc in PlayerCatch.AllPlayerControls)
         {
             var role = pc.GetCustomRole();
-            if (role is CustomRoles.GM or CustomRoles.BakeCat || role.IsImpostor()) continue;
-            if (pc.IsNeutralKiller()) continue;
+            if (role is CustomRoles.GM or CustomRoles.BakeCat) continue;
             if (pc.Is(CustomRoles.Twins)) continue;
 
-            if (role.IsNeutral() && !OptionCanAssingCantKillNeutral.GetBool()) continue;
+            if (role.IsImpostor() && !OptionCanAssingImpostor.GetBool()) continue;
             if (role.IsMadmate() && !OptionCanAssingMadmate.GetBool()) continue;
+            if (role.IsNeutral() && !OptionCanAssingCantKillNeutral.GetBool()) continue;
+            if (role.IsNeutral() && !OptionCanAssingCanKillNeutral.GetBool()) continue;
 
             AssingPlayers.Add(pc);
         }
@@ -104,16 +105,22 @@ class Triplets
     }
 
     #region  Options
+    public static OptionItem OptionCanAssingImpostor;
     public static OptionItem OptionCanAssingMadmate;
     public static OptionItem OptionCanAssingCantKillNeutral;
+    public static OptionItem OptionCanAssingCanKillNeutral;
     public static OptionItem OptionTripletsDiefollow;
     public static OptionItem OptionTripletsAddWin;
     public static void SetUpTripletsOptions()
     {
         SetupRoleOptions(77950, TabGroup.Combinations, CustomRoles.Triplets, new(1, 7, 1));
-        OptionCanAssingMadmate = BooleanOptionItem.Create(77960, "CanAssingMadmate", false, TabGroup.Combinations, false)
+        OptionCanAssingImpostor = BooleanOptionItem.Create(77960, "CanAssingImpostor", false, TabGroup.Combinations, false)
             .SetSubRoleOptionItem(CustomRoles.Triplets);
-        OptionCanAssingCantKillNeutral = BooleanOptionItem.Create(77961, "CanAssingCantKillNeutral", false, TabGroup.Combinations, false)
+        OptionCanAssingMadmate = BooleanOptionItem.Create(77961, "CanAssingMadmate", false, TabGroup.Combinations, false)
+            .SetSubRoleOptionItem(CustomRoles.Triplets);
+        OptionCanAssingCanKillNeutral = BooleanOptionItem.Create(77963, "CanAssingCanKillNeutral", false, TabGroup.Combinations, false)
+            .SetSubRoleOptionItem(CustomRoles.Triplets);
+        OptionCanAssingCantKillNeutral = BooleanOptionItem.Create(77962, "CanAssingCantKillNeutral", false, TabGroup.Combinations, false)
             .SetSubRoleOptionItem(CustomRoles.Triplets);
         ObjectOptionitem.Create(77973, "AddonOption", true, "", TabGroup.Combinations).SetOptionName(() => "Role Option").SetSubRoleOptionItem(CustomRoles.Triplets);
         OptionTripletsDiefollow = BooleanOptionItem.Create(77971, "TripletsDiefollow", false, TabGroup.Combinations, false)

@@ -30,11 +30,12 @@ class Twins
         foreach (var pc in PlayerCatch.AllPlayerControls)
         {
             var role = pc.GetCustomRole();
-            if (role is CustomRoles.GM or CustomRoles.BakeCat || role.IsImpostor()) continue;
-            if (pc.IsNeutralKiller()) continue;
+            if (role is CustomRoles.GM or CustomRoles.BakeCat) continue;
 
             if (role.IsNeutral() && !OptionCanAssingCantKillNeutral.GetBool()) continue;
+            if (role.IsNeutralKiller() && !OptionCanAssingCanKillNeutral.GetBool()) continue;
             if (role.IsMadmate() && !OptionCanAssingMadmate.GetBool()) continue;
+            if (role.IsImpostor() && !OptionCanAssingImpostor.GetBool()) continue;
 
             AssingPlayers.Add(pc);
         }
@@ -67,16 +68,22 @@ class Twins
     }
 
     #region  Options
+    public static OptionItem OptionCanAssingImpostor;
     public static OptionItem OptionCanAssingMadmate;
     public static OptionItem OptionCanAssingCantKillNeutral;
+    public static OptionItem OptionCanAssingCanKillNeutral;
     public static OptionItem OptionTwinsDiefollow;
     public static OptionItem OptionTwinsAddWin;
     public static void SetUpTwinsOptions()
     {
         SetupRoleOptions(77900, TabGroup.Combinations, CustomRoles.Twins, new(1, 7, 1));
-        OptionCanAssingMadmate = BooleanOptionItem.Create(77910, "CanAssingMadmate", false, TabGroup.Combinations, false)
+        OptionCanAssingImpostor = BooleanOptionItem.Create(77910, "CanAssingImpostor", false, TabGroup.Combinations, false)
             .SetSubRoleOptionItem(CustomRoles.Twins);
-        OptionCanAssingCantKillNeutral = BooleanOptionItem.Create(77911, "CanAssingCantKillNeutral", false, TabGroup.Combinations, false)
+        OptionCanAssingMadmate = BooleanOptionItem.Create(77911, "CanAssingMadmate", false, TabGroup.Combinations, false)
+            .SetSubRoleOptionItem(CustomRoles.Twins);
+        OptionCanAssingCanKillNeutral = BooleanOptionItem.Create(77913, "CanAssingCanKillNeutral", false, TabGroup.Combinations, false)
+            .SetSubRoleOptionItem(CustomRoles.Twins);
+        OptionCanAssingCantKillNeutral = BooleanOptionItem.Create(77912, "CanAssingCantKillNeutral", false, TabGroup.Combinations, false)
             .SetSubRoleOptionItem(CustomRoles.Twins);
         ObjectOptionitem.Create(77923, "AddonOption", true, "", TabGroup.Combinations).SetOptionName(() => "Role Option").SetSubRoleOptionItem(CustomRoles.Twins);
         OptionTwinsDiefollow = BooleanOptionItem.Create(77921, "TwinsDiefollow", false, TabGroup.Combinations, false)

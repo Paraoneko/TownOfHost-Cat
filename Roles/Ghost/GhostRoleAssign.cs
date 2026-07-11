@@ -140,7 +140,7 @@ namespace TownOfHost.Roles.Ghost
                 var pc = AP[rnd.Next(AP.Count)];
 
                 //ラバー or 天邪鬼の場合、勝利条件がくっっっっっそややこしなるから付与しない
-                if (pc.IsLovers() || pc.Is(CustomRoles.Amanojaku) || (pc.GetRoleClass() as Staff)?.EndedTaskInAlive is false)
+                if (pc.IsLovers() || pc.Is(CustomRoles.Amanojaku) || (pc.GetRoleClass() as Staff)?.EndedTask is false)
                 {
                     AP.Remove(pc);
                     continue;

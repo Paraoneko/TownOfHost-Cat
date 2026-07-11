@@ -307,7 +307,7 @@ public sealed class MagicalGirl : RoleBase, ISelfVoter, IKiller, IUsePhantomButt
             if (reason is GameOverReason.CrewmatesByTask or GameOverReason.CrewmatesByVote
                 && transformedRole is CustomRoles.Staff
                 && addRole is Staff staff
-                && !staff.EndedTaskInAlive)
+                && !staff.EndedTask)
             {
                 CustomWinnerHolder.CantWinPlayerIds.Add(Player.PlayerId);
             }
@@ -335,8 +335,8 @@ public sealed class MagicalGirl : RoleBase, ISelfVoter, IKiller, IUsePhantomButt
         if (!player.Is(CustomRoles.Staff)) return true;
         return player.GetRoleClass() switch
         {
-            Staff staff => staff.EndedTaskInAlive,
-            MagicalGirl { transformedRole: CustomRoles.Staff, addRole: Staff transformedStaff } => transformedStaff.EndedTaskInAlive,
+            Staff staff => staff.EndedTask,
+            MagicalGirl { transformedRole: CustomRoles.Staff, addRole: Staff transformedStaff } => transformedStaff.EndedTask,
             _ => false
         };
     }
