@@ -92,7 +92,7 @@ Modが使えなくなるよ!<br>
 [Town Of Host_K](https://github.com/KYMario/TownOfHost-K)<br>
 　Fork元の本家です。<br>TownOfHost_K様にある機能はTownOfHost-Catでも大体実装されています<br>
 
-[Town Of Host_Pkoは](https://github.com/satokazoku/TownOfHost-Pko/)<br>
+[Town Of Host_Pko](https://github.com/satokazoku/TownOfHost-Pko/)<br>
 　Fork元です。<br>TownOfHost_Pko様にある機能はTownOfHost-Catでも大体導入されています<br>
 [Town Of Host_Y](https://github.com/Yumenopai/TownOfHost_Y)<br>
 　会議時の役職表示、会議拡張、ワーカホリック,ラビット,チェイサー,ニムロッド,鬼,弁護士,決闘者,海賊,属性名、一部役職を参考/移植させて頂きました！<br>
