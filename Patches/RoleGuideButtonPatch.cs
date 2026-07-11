@@ -789,11 +789,11 @@ public static class RoleGuideButtonPatch
 
         if (roles.Count == 0)
         {
-                scrollSnapTargets.Add(0f);
-                var noResult = MakeText(container, "NoSearchResults",
-                new Vector3(ListLeft + 0.1f, y, 0f),
-                "<color=#222222>該当する役職がありません</color>",
-                1.0f, TextAlignmentOptions.TopLeft, new Vector2(ListW - 0.2f, ItemH));
+            scrollSnapTargets.Add(0f);
+            var noResult = MakeText(container, "NoSearchResults",
+            new Vector3(ListLeft + 0.1f, y, 0f),
+            "<color=#222222>該当する役職がありません</color>",
+            1.0f, TextAlignmentOptions.TopLeft, new Vector2(ListW - 0.2f, ItemH));
             scrollEntries.Add(noResult.gameObject);
             y -= ItemH;
         }

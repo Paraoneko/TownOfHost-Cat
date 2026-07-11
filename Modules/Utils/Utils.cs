@@ -312,6 +312,7 @@ namespace TownOfHost
                     + $"\n/cmd set rule(s r) - {GetString("Command.set_rule")}"
                     + $"\n/cmd mod id|name|color - {GetString("Command.modadd")}"
                     + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}";
+                //+ $"\n/cmd gc - {GetString("Command.globalconnect")}";
 
                 if (Options.OptionStreamerSetting.GetBool())
                 {
@@ -349,7 +350,6 @@ namespace TownOfHost
                 text += $"\n/cmd meetinginfo(mi,/day) - {GetString("Command.mi")}";
             if (Show(Options.OptionCommandNumberDNumber))
                 text += $"\n/cmd (number)d(number) - {GetString("Command.(number)d(number)")}";
-            text += $"\n/cmd pko - {GetString("Command.pko")}";
             if (Show(Options.OptionCommandRename))
                 text += $"\n/cmd rename(r) - {GetString("Command.rename")}";
             if (Show(Options.OptionCommandRule))

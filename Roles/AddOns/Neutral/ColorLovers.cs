@@ -250,10 +250,10 @@ class ColorLovers
                 PlayerCatch.AllPlayerControls
                     .Where(p => p.Is(LoverRole))
                     .Do(p =>
-                {
-                    CustomWinnerHolder.WinnerIds.Add(p.PlayerId);
-                    CustomWinnerHolder.CantWinPlayerIds.Remove(p.PlayerId);
-                });
+                    {
+                        CustomWinnerHolder.WinnerIds.Add(p.PlayerId);
+                        CustomWinnerHolder.CantWinPlayerIds.Remove(p.PlayerId);
+                    });
                 reason = GameOverReason.ImpostorsByKill;
             }
         }
@@ -285,10 +285,10 @@ class ColorLovers
                 PlayerCatch.AllPlayerControls
                     .Where(p => p.Is(LoverRole) && p.IsAlive())
                     .Do(p =>
-                        {
-                            CustomWinnerHolder.WinnerIds.Add(p.PlayerId);
-                            CustomWinnerHolder.CantWinPlayerIds.Remove(p.PlayerId);
-                        });
+                    {
+                        CustomWinnerHolder.WinnerIds.Add(p.PlayerId);
+                        CustomWinnerHolder.CantWinPlayerIds.Remove(p.PlayerId);
+                    });
             }
             return true;
         }

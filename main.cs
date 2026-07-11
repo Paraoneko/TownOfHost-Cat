@@ -316,7 +316,9 @@ namespace TownOfHost
             Application.quitting += new Action(SaveStatistics.Save);
             Application.quitting += new Action(AchievementSaver.Save);
             Statistics.NowStatistics = SaveStatistics.Load();
+            //このModをフォークした皆さんできれば下の行(320行)は消してください
             //GlobalChatManager.Initialize("wss://catwalk-skimming-lapel.ngrok-free.dev");
+            //なんか消せと言われたのでコメント化しました(((
             AchievementSaver.Load();
         }
 

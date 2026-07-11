@@ -215,7 +215,6 @@ public sealed class Freeter : RoleBase, IKiller, IAdditionalWinner
     public override void CheckWinner(GameOverReason reason)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if (!Player.IsAlive()) return;
         if (BetTargetId == byte.MaxValue) return;
         if (CustomWinnerHolder.WinnerIds.Contains(Player.PlayerId)) return;
 
