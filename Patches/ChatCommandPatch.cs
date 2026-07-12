@@ -1345,7 +1345,7 @@ namespace TownOfHost
                     //招待制グローバルチャット（部屋リンク）
                     //    /cmd gc          → 自分の接続IDを表示（配信者モード時はコピーのみ）
                     //    /cmd gc <相手ID> → 相手の接続IDを入力して相互リンク
-                    case "/gc":
+                    /*case "/gc":
                         canceled = true;
                         {
                             // グローバルチャットの接続はホストが管理する。
@@ -1451,7 +1451,7 @@ namespace TownOfHost
                             }
                         }
                         __instance.freeChatField.textArea.Clear();
-                        return false;
+                        return false;*/
                     case "/t":
                     case "/template":
                         canceled = true;
@@ -2050,7 +2050,7 @@ namespace TownOfHost
 
                 if (trashBody != null)
                 {
-                    canceled = true; 
+                    canceled = true;
                     if (!AmongUsClient.Instance.AmHost) return;
                     SendTrashSecretChat(player, trashBody);
                     return;
@@ -2321,7 +2321,7 @@ namespace TownOfHost
                         string message = string.Join(" ", args.Skip(1));
                         GlobalChatManager.SendMessage($"{player.Data.PlayerName}: {message}", player);
                     }
-                    break;*/
+                    break;
                 case "/gr":
                 case "/global":
                     canceled = true;
@@ -2336,7 +2336,7 @@ namespace TownOfHost
                         string grMessage = string.Join(" ", args.Skip(1));
                         TownOfHost.Modules.GlobalChatManager.SendMessage($"{player.Data.PlayerName}: {grMessage}", player);
                     }
-                    break;
+                    break;*/
                 case "/nc":
                     canceled = true;
                     if (args.Length < 2) break;

@@ -1922,7 +1922,7 @@
 "SheriffHadouHoShotLimit","HadouHo Ammo","波動砲の使用可能回数"
 "SheriffHadouHoBeamColorMode","Beam color","ビームの色"
 "SheriffHadouHoBeamUnlockTask","Beam Unlock Task","能力を発揮するタスク数"
-"StaffMustBeAliveToWin","Must be alive to win","生存していないと勝利できない"
+"StaffMustBeAliveToWin","","生存中にタスクを完了する必要がある"
 "Yellow","Yellow","黄色"
 "DoctorTaskCompletedBatteryCharge","Battery Duration","充電持続時間","医生每次完成任务增加的设备充能数","醫生完成任務充電秒數","Длительность батарейки","Duração da Bateria",""
 "SnitchEnableTargetArrow","Can See Arrow To Target","ターゲットを示す矢印が見える","告密者完成任务后可以通过箭头确认所有被发现目标","告密者完成任務後可以看到指向目標的箭頭","Может видеть стрелку цели","Pode Ver Seta Para o Alvo",""
@@ -3621,10 +3621,6 @@
 "BeginnerImpostorTrainButton","Train","鍛錬"
 "BeginnerImpostorDummyName","Training Dummy","鍛錬用ダミー"
 "GodWinText","God Descends","神降臨"
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/main
 "Amateras","Amateras","アマテラス"
 "AmaterasInfo","I will grant your wish.","あなたの願いを叶えて差し上げます。"
 "AmaterasInfoLong","Choose a player by self-voting in a meeting, let them choose a wish with /cmd wi, then complete your tasks to grant it at the next meeting. Grant the required number of wishes to win.","会議で自投票した後、願いを叶えてあげたいプレイヤーに投票する。\n選ばれたプレイヤーは /cmd wi <番号> で願いを選ぶ。\nアマテラスはタスクを完了し、次の会議開始時にその願いを叶える。\n設定数の願いを叶えると勝利できる。"
@@ -3658,10 +3654,6 @@
 "AmaterasDebuffRemoved","{0} was removed.","{0}が消去されました。"
 "AmaterasNoDebuffFound","No debuff add-on was found.","消去できるデバフ属性がありませんでした。"
 "Command.wi","Choose Amateras wish","アマテラスの願いを選ぶ"
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/main
 "Abuser","Abuser","加虐者"
 "Victim","Victim","被虐者"
 "AbuserandVictim","Abuser and Victim","<#8f1d2c>加虐者</color>と<#6f8fa8>被虐者</color>"
