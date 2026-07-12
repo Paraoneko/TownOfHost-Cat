@@ -610,8 +610,8 @@ public class ModNewsHistory
                 {
                     Number = 100096,
                     Title = "中途半端だがアップデート",
-                    SubTitle = "<color=#FF9631>●TOH-Pko v5.33.18.87</color>",
-                    ShortTitle = "<color=#FF9631>●TOH-Pko v5.33.18.87</color>",
+                    SubTitle = "<color=#FF9631>●TOH-Pko v5.33.18.89</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v5.33.18.89</color>",
                     Text = "・死亡していてもスクラッチできるバグを修正\n"
                     + "・スクラッチャーその他のバグ修正\n"
                     + "・神バグ修正\n"
@@ -650,6 +650,25 @@ public class ModNewsHistory
                     + "・TOH-Kのアプデに対応\n"
                     ,
                     Date = "2026-7-10"
+                };
+                AllModNews.Add(news);
+            }
+            {
+                var news = new ModNews
+                {
+                    Number = 100097,
+                    Title = "これから追加よりバグ修正を優先していきまつ",
+                    SubTitle = "<color=#FF9631>●TOH-Pko v5.33.18.90</color>",
+                    ShortTitle = "<color=#FF9631>●TOH-Pko v5.33.18.90</color>",
+                    Text = "・死亡していてもスクラッチできるバグを修正\n"
+                    + "・牛乳屋が配達モードで死亡するとタスクできないバグを修正\n"
+                    + "・神の役職説明が説明不十分だったので補足\n"
+                    + "・神にオプションを追加\n"
+                    + "・重複がない秘匿チャットをひとつにまとめた\n"
+                    + "・meetinginfoを個別で送信できるように変更、複数選択のオプションでも子オプションを出来るように変更(?)\n"
+                    + "・↑これにより牛乳屋仕様変更\n"
+                    ,
+                    Date = "2026-7-12"
                 };
                 AllModNews.Add(news);
             }

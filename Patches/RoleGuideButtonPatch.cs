@@ -50,7 +50,7 @@ public static class RoleGuideButtonPatch
     public static bool HasGuideButton => _btnRenderer != null && _btnRenderer.gameObject.activeInHierarchy;
     private static float _btnAnimTimer = 0f;
     private static bool _btnAnimActive = false;
-    private const float GuideButtonScale = 0.36f;
+    private const float GuideButtonScale = 0.28f;
     private const float GuideFrameGap = 0.42f;
 
     // パネル定数
