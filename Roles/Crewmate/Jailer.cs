@@ -58,6 +58,7 @@ public sealed class Jailer : RoleBase, IUsePhantomButton, IKiller
 
     enum OptionName
     {
+        JailerKillCooldown,
         JailerImprisonType,
         JailerImprisonTurns,
         JailerImprisonSeconds,
@@ -102,7 +103,7 @@ public sealed class Jailer : RoleBase, IUsePhantomButton, IKiller
 
     static void SetupOptionItem()
     {
-        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, GeneralOption.KillCooldown,
+        OptionKillCooldown = FloatOptionItem.Create(RoleInfo, 10, OptionName.JailerKillCooldown,
                 new(2.5f, 60f, 2.5f), 25f, false)
             .SetValueFormat(OptionFormat.Seconds);
 
