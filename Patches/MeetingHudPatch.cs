@@ -17,6 +17,7 @@ using TownOfHost.Roles.Core.Interfaces;
 using TownOfHost.Roles.AddOns.Impostor;
 using TownOfHost.Roles.AddOns.Neutral;
 using TownOfHost.Roles.AddOns.Common;
+using TownOfHost.Roles.Madmate;
 using static TownOfHost.Translator;
 using TownOfHost.Modules.ChatManager;
 using System;
@@ -97,7 +98,7 @@ public static class MeetingHudPatch
                         return false;
                     }
             }
-            if (voter.GetRoleClass() is ISelfVoter selfVoter && Amnesia.CheckAbility(voter))
+            if (MagicalGirl.TryGetEffectiveRole<ISelfVoter>(voter, out var selfVoter) && Amnesia.CheckAbility(voter))
             {
                 if (selfVoter.CanUseVoted())
                 {
@@ -199,6 +200,10 @@ public static class MeetingHudPatch
                 {
                     if (targetid == pc.PlayerId) roleTextMeeting.text = UtilsRoleText.GetRoleColorAndtext(CustomRoles.Twins) + roleTextMeeting.text;
                 }
+                if (Triplets.IsTripletWith(PlayerControl.LocalPlayer.PlayerId, pc.PlayerId))
+                {
+                    roleTextMeeting.text = UtilsRoleText.GetRoleColorAndtext(CustomRoles.Triplets) + roleTextMeeting.text;
+                }
 
                 var suffixTextMeeting = UnityEngine.Object.Instantiate(pva.NameText);
                 suffixTextMeeting.transform.SetParent(pva.PlayerIcon.transform);
@@ -241,50 +246,14 @@ public static class MeetingHudPatch
                 if (meetinginfoplayer.PlayerId == pc.PlayerId)
                 {
                     MeetingInfo.enabled = true;
-                    var capturedMeetingInfo = MeetingInfo;
-                    // 個別テキストも含めて組み立てるローカル関数(遅延再適用でRPC取りこぼしを防ぐ)
-                    void BuildMeetingInfoText()
-                    {
-                        if (capturedMeetingInfo == null) return;
-                        string personal = "";
-                        if (ReportDeadBodyPatch.PersonalMeetingText.TryGetValue(
-                                PlayerControl.LocalPlayer.PlayerId, out var ptxt)
-                            && !string.IsNullOrEmpty(ptxt))
-                            personal = $"\n{ptxt}";
-
-                        var t = $"<#ffffff><line-height=95%>" + $"Day.{UtilsGameLog.day}".Color(Palette.Orange) + Bakery.BakeryMark() + $"\n{UtilsNotifyRoles.ExtendedMeetingText}" + personal;
-                        if (CustomRolesHelper.CheckGuesser() || PlayerCatch.AllPlayerControls.Any(pc => pc.Is(CustomRoles.Guesser)))
-                        {
-                            t = $"<size=50%>\n </size>{t}\n<size=50%><#999900>{GetString("GuessInfo")}</color></size>";
-                        }
-                        t += "<line-height=0%>\n</line-height></line-height><line-height=300%>\n</line-height></color> ";
-                        capturedMeetingInfo.text = t;
-                    }
-                    BuildMeetingInfoText();
-                    // 個別MeetingInfoのRPCが少し遅れて届く場合に備えて再適用
-                    _ = new LateTask(BuildMeetingInfoText, 0.5f, "RebuildMeetingInfo", true);
-                    _ = new LateTask(BuildMeetingInfoText, 1.5f, "RebuildMeetingInfo2", true);
+                    MeetingInfo.text = $"<#ffffff><line-height=95%>" + $"Day.{UtilsGameLog.day}".Color(Palette.Orange) + Bakery.BakeryMark() + $"\n{UtilsNotifyRoles.ExtendedMeetingText}";
+                    MeetingInfo.text = $"<size=50%>\n </size>{MeetingInfo.text}\n<size=50%><#999900>{GetString("GuessInfo")}</color></size>";
+                    MeetingInfo.text += "<line-height=0%>\n</line-height></line-height><line-height=300%>\n</line-height></color> ";
                 }
             }
             CustomRoleManager.AllActiveRoles.Values.Do(role => role.OnStartMeeting());
             RoomTaskAssign.AllRoomTasker.Values.Do(tasker => tasker.OnStartMeeting());
             SlowStarter.OnStartMeeting();
-
-            // 各役職の個別MeetingInfoテキストを収集し、持ち主にだけ送信する[ホストのみ]
-            if (AmongUsClient.Instance.AmHost)
-            {
-                ReportDeadBodyPatch.ClearPersonalMeetingInfo();
-                foreach (var roleClass in CustomRoleManager.AllActiveRoles.Values)
-                {
-                    var owner = roleClass.Player;
-                    if (owner == null) continue;
-                    string infoText;
-                    try { infoText = roleClass.MeetingInfoText(); }
-                    catch (System.Exception e) { Logger.Exception(e, "MeetingInfoText"); continue; }
-                    if (string.IsNullOrEmpty(infoText)) continue;
-                    ReportDeadBodyPatch.SetPersonalMeetingInfoFor(owner, infoText);
-                }
-            }
             Send = "<size=80%>";
             Title = "";
 
@@ -417,9 +386,12 @@ public static class MeetingHudPatch
                             if (MeetingStates.FirstMeeting) UtilsShowOption.SendRoleInfo(pc);
                             else if (Utils.RoleSendList.Contains(pva.TargetPlayerId)) UtilsShowOption.SendRoleInfo(pc);
 
-                            var addrole = pc.GetRoleClass()?.HaveAddRole() ?? CustomRoles.NotAssigned;
-                            if (addrole is not CustomRoles.NotAssigned)
-                                Utils.SendMessage(addrole.GetRoleInfo()?.Description?.FullFormatHelp ?? $"", pc.PlayerId, Utils.ColorString(pc.GetRoleColor(), GetString("AddRoleInfoTitle")), checkl: true);
+                            if (MeetingStates.FirstMeeting || Utils.RoleSendList.Contains(pva.TargetPlayerId))
+                            {
+                                var addrole = pc.GetRoleClass()?.HaveAddRole() ?? CustomRoles.NotAssigned;
+                                if (addrole is not CustomRoles.NotAssigned)
+                                    Utils.SendMessage(addrole.GetRoleInfo()?.Description?.FullFormatHelp ?? $"", pc.PlayerId, Utils.ColorString(pc.GetRoleColor(), GetString("AddRoleInfoTitle")), checkl: true);
+                            }
                         }
                     }, 1, "sendroleinfo");
                 }, 3f, "Send to Chat", true);
@@ -710,7 +682,7 @@ public static class MeetingHudPatch
         if (deathReason != CustomDeathReason.Vote) return null;
 
         if (Amnesia.CheckAbility(exiledplayer))
-            if (exiledplayer.GetRoleClass() is INekomata nekomata)
+            if (MagicalGirl.TryGetEffectiveRole<INekomata>(exiledplayer, out var nekomata))
             {
                 // 道連れしない状態ならnull
                 if (!nekomata.DoRevenge(deathReason))
@@ -723,9 +695,9 @@ public static class MeetingHudPatch
             {
                 var role = exiledplayer.GetCustomRole();
                 var isMadmate =
-                    role.IsMadmate() ||
+                    SatsumatoImo.UsesMadmateCommonSettings(role) ||
                     // マッド属性化時に削除
-                    (exiledplayer.GetRoleClass() is SchrodingerCat schrodingerCat && schrodingerCat.AmMadmate);
+                    (MagicalGirl.TryGetEffectiveRole<SchrodingerCat>(exiledplayer, out var schrodingerCat) && schrodingerCat.AmMadmate);
                 foreach (var candidate in PlayerCatch.AllAlivePlayerControls)
                 {
                     if (candidate == exiledplayer || Main.AfterMeetingDeathPlayers.ContainsKey(candidate.PlayerId)) continue;
@@ -784,6 +756,12 @@ public static class MeetingHudPatch
         var rand = IRandom.Instance;
         var target = TargetList[rand.Next(TargetList.Count)];
         return target;
+    }
+
+    private static bool HasGuesserAbility(PlayerControl pc)
+    {
+        return pc.Is(CustomRoles.Guesser)
+            || (RoleAddAddons.GetRoleAddon(pc.GetCustomRole(), out var data, pc, subrole: CustomRoles.Guesser) && data.GiveGuesser.GetBool());
     }
 }
 

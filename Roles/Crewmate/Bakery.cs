@@ -18,7 +18,7 @@ public sealed class Bakery : RoleBase
             CustomRoles.Bakery,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Crewmate,
-            173300,
+            30600,
             SetupOptionItem,
             "bak",
             "#8f6121",
@@ -26,7 +26,7 @@ public sealed class Bakery : RoleBase
             introSound: () => GetIntroSound(RoleTypes.Crewmate)
         );
 
-    private static OptionItem PoisonedBakeryChanceOption;
+    internal static OptionItem PoisonedBakeryChanceOption;
 
     public Bakery(PlayerControl player)
     : base(RoleInfo, player)
@@ -66,14 +66,13 @@ public sealed class Bakery : RoleBase
         if (bakerycount > 1) IsOnlyNomalMessage = true;
     }
 
-    // 配達システムは会議画面上部の MeetingInfo に本人にだけ個別表示する
-    public override string MeetingInfoText()
+    public override string MeetingAddMessage()
     {
         if (AddOns.Common.Amnesia.CheckAbilityreturn(Player)) return "";
         if (Player.IsAlive())
         {
-            string BakeryTitle = $"<size=80%><color=#8f6121>{GetString("Message.BakeryTitle")}</color></size>";
-            return BakeryTitle + "\n<size=65%><color=#d9b382>" + BakeryMeg() + "</color></size>";
+            string BakeryTitle = $"<size=90%><color=#8f6121>{GetString("Message.BakeryTitle")}</size></color>";
+            return BakeryTitle + "\n<size=70%>" + BakeryMeg() + "</size>\n";
         }
         return "";
     }
@@ -178,7 +177,7 @@ public sealed class PoisonedBakery : RoleBase
             CustomRoles.PoisonedBakery,
             () => RoleTypes.Crewmate,
             CustomRoleTypes.Neutral,
-            173400,
+            53800,
             SetupOptionItem,
             "poisoned_bak",
             "#FF4A5A",
@@ -193,7 +192,12 @@ public sealed class PoisonedBakery : RoleBase
 
     private static void SetupOptionItem()
     {
-        SoloWinOption.Create(RoleInfo, 9, defo: 50);
+        SoloWinOption.Create(
+            RoleInfo.ConfigId + 9,
+            Bakery.RoleInfo.Tab,
+            CustomRoles.PoisonedBakery,
+            defo: 0,
+            parent: Bakery.PoisonedBakeryChanceOption);
         HideRoleOptions(CustomRoles.PoisonedBakery);
     }
 

@@ -844,7 +844,7 @@ public enum CustomRoles
     Evolver,
     Conjurer,
     Swooper,
-    BeginnerImpostor,
+    Spider,
     //TOH-K
     Bomber,
     TeleportKiller,
@@ -891,6 +891,7 @@ public enum CustomRoles
     EvilLinker,
     MassMurder,
     EvilStandMaster,
+    BeginnerImpostor,
     //DEBUG only Impostor
     //Madmate
     MadGuardian,
