@@ -262,12 +262,12 @@ namespace TownOfHost
                 }
                 if (Event.Tanabata)
                 {
-                res = str switch
-                {
-                    "LoversBreakerInfo" => "二つの星が重なる時、終焉の火花が咲く。",
-                    "ModSettingInfo2" => "今年は織姫と彦星../nあともう一人やってきてるみたいだよ!",
-                    _ => res
-                };
+                    res = str switch
+                    {
+                        "LoversBreakerInfo" => "二つの星が重なる時、終焉の火花が咲く。",
+                        "ModSettingInfo2" => "今年は織姫と彦星../nあともう一人やってきてるみたいだよ!",
+                        _ => res
+                    };
                 }
             }
             if (!translateMaps.ContainsKey(str)) //translateMapsにない場合、StringNamesにあれば取得する

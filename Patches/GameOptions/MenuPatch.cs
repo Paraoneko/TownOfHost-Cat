@@ -33,6 +33,7 @@ namespace TownOfHost
         }
         public static void Postfix()
         {
+            NumericOptionInput.Close(false);
             if (ShowFilter.CallEsc()) return;
             if (ShowRandomSpawnOption.CallEsc()) return;
             ModSettingsButton = null;
@@ -701,6 +702,7 @@ namespace TownOfHost
                         var transform = stringOption.ValueText.transform;
                         var pos = transform.localPosition;
                         transform.localPosition = new Vector3(pos.x + 0.7322f, pos.y, pos.z);
+                        NumericOptionInput.Attach(option, stringOption);
                         stringOption.SetClickMask(optionsMenu.ButtonClickMask);
                         option.OptionBehaviour = stringOption;
                     }
@@ -936,6 +938,7 @@ namespace TownOfHost
                         var transform = stringOption.ValueText.transform;
                         var pos = transform.localPosition;
                         transform.localPosition = new Vector3((pos.x + 0.7322f), pos.y, pos.z);
+                        NumericOptionInput.Attach(option, stringOption);
                         stringOption.SetClickMask(optionsMenu.ButtonClickMask);
                         option.OptionBehaviour = stringOption;
                     }

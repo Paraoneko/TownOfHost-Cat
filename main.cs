@@ -59,10 +59,10 @@ namespace TownOfHost
         public static ConfigEntry<string> ExplosionKeyInput { get; private set; }
 
         public const string PluginGuid = "com.satokazoku.TownOfHost-Pko";
-        public const string BepInExPluginVersion = "4.32.17+88";
-        public const string PluginVersion = "4.32.17.88";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
-        public const string PluginShowVersion = "4.32.17.88";
-        public const string ModVersion = ".17.88";//リリースver用バージョン変更dc9b79
+        public const string BepInExPluginVersion = "5.33.18.90";
+        public const string PluginVersion = "5.33.18.90";//ほんとはx.y.z表記にしたかったけどx.y.z.km.ks表記だと警告だされる
+        public const string PluginShowVersion = "5.33.18.90";
+        public const string ModVersion = ".18.90";//リリースver用バージョン変更dc9b79
 
         /// 配布するデバッグ版なのであればtrue。リリース時にはfalseにすること。
         public static bool DebugVersion = false;
@@ -316,7 +316,6 @@ namespace TownOfHost
             Application.quitting += new Action(SaveStatistics.Save);
             Application.quitting += new Action(AchievementSaver.Save);
             Statistics.NowStatistics = SaveStatistics.Load();
-            //GlobalChatManager.Initialize("wss://catwalk-skimming-lapel.ngrok-free.dev");
             AchievementSaver.Load();
         }
 
@@ -406,6 +405,7 @@ namespace TownOfHost
         Impostor = CustomRoles.Impostor,
         Crewmate = CustomRoles.Crewmate,
         Jester = CustomRoles.Jester,
+        HappyJester = CustomRoles.HappyJester,
         PlagueDoctor = CustomRoles.PlagueDoctor,
         Terrorist = CustomRoles.Terrorist,
         Lovers = CustomRoles.Lovers,

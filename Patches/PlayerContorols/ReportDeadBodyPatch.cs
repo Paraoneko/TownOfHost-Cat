@@ -430,6 +430,58 @@ namespace TownOfHost
             AmongUsClient.Instance.FinishRpcImmediately(writer);
         }
 
+        /// <summary>
+        /// 会議画面の Day 表示欄(MeetingInfo)に、プレイヤーごとに異なる個別テキストを表示するための保持領域。<br/>
+        /// キー: 表示先プレイヤーId / 値: そのプレイヤーにだけ見える追加テキスト。<br/>
+        /// ExtendedMeetingText(全員共通) の下に追記される。
+        /// </summary>
+        public static Dictionary<byte, string> PersonalMeetingText = new();
+
+        /// <summary>
+        /// ホストが特定プレイヤーにだけ会議情報テキストを送る。<br/>
+        /// ホスト自身宛の場合は直接 PersonalMeetingText に格納する。<br/>
+        /// [ホストのみ]
+        /// </summary>
+        public static void SetPersonalMeetingInfoFor(PlayerControl target, string text)
+        {
+            if (!AmongUsClient.Instance.AmHost || target == null) return;
+            text ??= "";
+
+            // ホスト自身宛
+            if (target.AmOwner)
+            {
+                if (string.IsNullOrEmpty(text)) PersonalMeetingText.Remove(target.PlayerId);
+                else PersonalMeetingText[target.PlayerId] = text;
+                return;
+            }
+
+            if (!PlayerCatch.AnyModClient()) return;
+
+            var writer = AmongUsClient.Instance.StartRpcImmediately(
+                PlayerControl.LocalPlayer.NetId, (byte)CustomRPC.PersonalMeetingInfo,
+                Hazel.SendOption.Reliable, target.GetClientId());
+            writer.Write(target.PlayerId);
+            writer.Write(text);
+            AmongUsClient.Instance.FinishRpcImmediately(writer);
+        }
+
+        /// <summary>会議情報の個別テキストをクリアする(全員分)。会議開始時に呼ぶ。[ホストのみ]</summary>
+        public static void ClearPersonalMeetingInfo()
+        {
+            PersonalMeetingText.Clear();
+        }
+
+        public static void SetPersonalMeetingInfo(Hazel.MessageReader reader)
+        {
+            if (AmongUsClient.Instance.AmHost) return;
+
+            var targetId = reader.ReadByte();
+            var text = reader.ReadString();
+
+            if (string.IsNullOrEmpty(text)) PersonalMeetingText.Remove(targetId);
+            else PersonalMeetingText[targetId] = text;
+        }
+
         public static void CancelMeeting(Hazel.MessageReader reader)
         {
             if (AmongUsClient.Instance.AmHost) return;

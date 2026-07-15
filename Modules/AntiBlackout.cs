@@ -321,26 +321,26 @@ namespace TownOfHost
                 Player.RpcSetRoleDesync(Options.SkMadCanUseVent.GetBool() ? RoleTypes.Engineer : RoleTypes.Crewmate, Player.GetClientId());
             }
             _ = new LateTask(() =>
+            {
+                Player.SetKillCooldown(force: true, delay: true);
+                Player.RpcResetAbilityCooldown();
+                if (Player.IsAlive() && !(Player.PlayerId == PlayerControl.LocalPlayer.PlayerId && Options.EnableGM.GetBool()))
                 {
-                    Player.SetKillCooldown(force: true, delay: true);
-                    Player.RpcResetAbilityCooldown();
-                    if (Player.IsAlive() && !(Player.PlayerId == PlayerControl.LocalPlayer.PlayerId && Options.EnableGM.GetBool()))
+                    var roleclass = Player.GetRoleClass();
+                    (roleclass as IUsePhantomButton)?.Init(Player);
+                }
+                else
+                {
+                    Player.Exiled();
+                    //Player.RpcExileV3();
+                    if (Player.PlayerId == PlayerControl.LocalPlayer.PlayerId && Player.IsGhostRole())
                     {
-                        var roleclass = Player.GetRoleClass();
-                        (roleclass as IUsePhantomButton)?.Init(Player);
+                        Player.RpcSetRole(RoleTypes.GuardianAngel, true);
+                        Player.RpcResetAbilityCooldown();
+                        Player.GetPlayerState().NowRoleType = RoleTypes.GuardianAngel;
                     }
-                    else
-                    {
-                        Player.Exiled();
-                        //Player.RpcExileV3();
-                        if (Player.PlayerId == PlayerControl.LocalPlayer.PlayerId && Player.IsGhostRole())
-                        {
-                            Player.RpcSetRole(RoleTypes.GuardianAngel, true);
-                            Player.RpcResetAbilityCooldown();
-                            Player.GetPlayerState().NowRoleType = RoleTypes.GuardianAngel;
-                        }
-                    }
-                }, Main.LagTime, "Re-SetRole", true);
+                }
+            }, Main.LagTime, "Re-SetRole", true);
 
             {
                 Twins.TwinsSuicide(true);

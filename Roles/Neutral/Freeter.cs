@@ -92,6 +92,23 @@ public sealed class Freeter : RoleBase, IKiller, IAdditionalWinner
         addon = true;
     }
 
+    public override void OverrideDisplayRoleNameAsSeen(
+        PlayerControl seer,
+        ref bool enabled,
+        ref Color roleColor,
+        ref string roleText,
+        ref bool addon)
+    {
+        if (BetTargetId == byte.MaxValue) return;
+        if (seer.PlayerId != BetTargetId) return;
+
+        enabled = true;
+        roleText = UtilsRoleText.GetRoleName(CustomRoles.Freeter);
+        if (ColorUtility.TryParseHtmlString(RoleInfo.RoleColorCode, out var c))
+            roleColor = c;
+        addon = false;
+    }
+
     public void OnCheckMurderAsKiller(MurderInfo info)
     {
         var (freeter, target) = info.AttemptTuple;

@@ -21,6 +21,7 @@ namespace TownOfHost
         SuddenDeath,//= 0x05
         MurderMystery,//= 0x06
         DummyBattleRoyale,//= 0x07
+        ShuffleRole,//= 0x08
         All = int.MaxValue
     }
 
@@ -33,6 +34,7 @@ namespace TownOfHost
         SuddenDeath,//サドンデス(Sta)
         MurderMystery,
         DummyBattleRoyale,
+        ShuffleRole,
         StandardHAS,//役職入りかくれんぼ(Sta)
         Role,//役職設定
         GameOption,//ゲーム設定
@@ -56,7 +58,7 @@ namespace TownOfHost
             Main.DebugSendAmout.Value = false;
             Main.DebugTours.Value = false;
             Main.ShowDistance.Value = false;
-            Main.DebugChatopen.Value  =false;
+            Main.DebugChatopen.Value = false;
 #endif
             //taskOptionsLoad = Task.Run(Load);
             try

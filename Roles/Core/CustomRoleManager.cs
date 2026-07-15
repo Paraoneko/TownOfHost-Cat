@@ -120,6 +120,18 @@ public static class CustomRoleManager
                     GuardreasonNumber = 1;
                     info.GuardPower = 1;
                 }
+                //アブソーブチェック
+                if (info.KillPower > info.GuardPower && Absorb.IsAchive())
+                {
+                    if (Absorb.AbsorbGuard.TryGetValue(attemptTarget.PlayerId, out var count))
+                    {
+                        if (count > 0)
+                        {
+                            GuardreasonNumber = 4;
+                            info.GuardPower = 1;
+                        }
+                    }
+                }
                 //属性ガードのチェック
                 if (info.KillPower > info.GuardPower)//消費する必要がある
                 {
@@ -196,6 +208,10 @@ public static class CustomRoleManager
                         + ":  " + string.Format(Translator.GetString("GuardMaster.Guard"), UtilsName.GetPlayerColor(attemptKiller, true)));
                         break;
                     case 3://Role
+                        break;
+                    case 4:
+                        Logger.Info($"AbsorbGuard : {--Absorb.AbsorbGuard[attemptTarget.PlayerId]}", "Absorb");
+                        UtilsGameLog.AddGameLog($"Guard", UtilsName.GetPlayerColor(attemptTarget) + ":  " + string.Format(Translator.GetString("GuardMaster.Guard"), UtilsName.GetPlayerColor(attemptKiller, true)));
                         break;
                     default:
                         break;
@@ -535,6 +551,7 @@ public static class CustomRoleManager
                 case CustomRoles.Autopsy: Autopsy.Add(pc.PlayerId); break;
                 case CustomRoles.MagicHand: MagicHand.Add(pc.PlayerId); break;
                 case CustomRoles.Powerful: Powerful.Add(pc.PlayerId); break;
+                case CustomRoles.Absorb: Absorb.Add(pc.PlayerId); break;
 
                 case CustomRoles.SlowStarter: SlowStarter.Add(pc.PlayerId); break;
                 case CustomRoles.Notvoter: Notvoter.Add(pc.PlayerId); break;
@@ -557,6 +574,8 @@ public static class CustomRoleManager
                 case CustomRoles.Stack: Stack.Add(pc.PlayerId); break;
 
                 case CustomRoles.Ghostbuttoner: Ghostbuttoner.Add(pc.PlayerId); break;
+                case CustomRoles.GhostFloodlight: GhostFloodlight.Add(pc.PlayerId); break;
+                case CustomRoles.GhostSaboteur: GhostSaboteur.Add(pc.PlayerId); break;
                 case CustomRoles.GhostNoiseSender: GhostNoiseSender.Add(pc.PlayerId); break;
                 case CustomRoles.GhostReseter: GhostReseter.Add(pc.PlayerId); break;
                 case CustomRoles.GhostRumour: GhostRumour.Add(pc.PlayerId); break;
@@ -825,7 +844,6 @@ public enum CustomRoles
     Evolver,
     Conjurer,
     Swooper,
-
     BeginnerImpostor,
     //TOH-K
     Bomber,
@@ -871,6 +889,8 @@ public enum CustomRoles
     Reverser,
     EvilSanta,
     EvilLinker,
+    MassMurder,
+    EvilStandMaster,
     //DEBUG only Impostor
     //Madmate
     MadGuardian,
@@ -878,6 +898,7 @@ public enum CustomRoles
     MadSnitch,
     MadAvenger,
     SKMadmate,
+    BlackCat,
     //TOH-K
     MadJester,
     MadTeller,
@@ -891,7 +912,6 @@ public enum CustomRoles
     Nue,
     MadHacker,
     MadSheriff,
-    BlackCat,
     //DEBUG only Madmate
     //Crewmate(Vanilla)
     Engineer,
@@ -927,6 +947,7 @@ public enum CustomRoles
     MagicalGirl,
     Walkure,
     SuspiciousTeller,
+    NiceNekomata,
     //TOH-K
     Gasp,
     VentMaster,
@@ -971,7 +992,6 @@ public enum CustomRoles
     //TOH-P
     NiceGuesser,
     Pukupuku,
-    NiceNekomata,
     Medium,
     SheriffHadouHo,
     Hitchhiker,
@@ -981,6 +1001,7 @@ public enum CustomRoles
     Milkman,
     Police,
     NiceWorkaholic,
+    Jailer,
     //DEBUG only Crewmate
     Analyzer,
     //Neutral
@@ -1063,6 +1084,7 @@ public enum CustomRoles
     Stand,
     Villain,
     Scratcher,
+    HappyJester,
     //DEBUG only Neutral.
     //HideAndSeek
     HASFox,
@@ -1111,6 +1133,8 @@ public enum CustomRoles
     Moon,
     Guarding,
     MagicHand,
+    Absorb,
+    VoteTracker,
     //デバフ
     Amnesia,
     Notvoter,
@@ -1141,6 +1165,9 @@ public enum CustomRoles
     GhostReseter,
     GuardianAngel,
     GhostRumour,
+    //Pko
+    GhostFloodlight,
+    GhostSaboteur,
     //NeutralGhost
     AsistingAngel,
     Securer,

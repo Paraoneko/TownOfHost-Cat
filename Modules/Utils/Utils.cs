@@ -311,7 +311,8 @@ namespace TownOfHost
                     + $"\n/cmd addwhite(aw) - {GetString("Command.addwhite")}"
                     + $"\n/cmd set rule(s r) - {GetString("Command.set_rule")}"
                     + $"\n/cmd mod id|name|color - {GetString("Command.modadd")}"
-                    + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}";
+                    + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}"
+                    + $"\n/cmd gc - {GetString("Command.globalconnect")}";
 
                 if (Options.OptionStreamerSetting.GetBool())
                 {
@@ -364,9 +365,9 @@ namespace TownOfHost
             if (Event.CheckRole(CustomRoles.Amateras) && CustomRoles.Amateras.IsPresent())
                 text += $"\n/cmd wi - {GetString("Command.wi")}";
             if (Options.ImpostorHideChat.GetBool())
-                text += $"\n/cmd ic - {GetString("Command.impchat")}";
+                text += $"\n/cmd sc - {GetString("Command.impchat")}";
             if (Options.JackalHideChat.GetBool())
-                text += $"\n/cmd jc - {GetString("Command.jacchat")}";
+                text += $"\n/cmd sc - {GetString("Command.jacchat")}";
             if (Options.LoversHideChat.GetBool())
                 text += $"\n/cmd lc - {GetString("Command.LoverChat")}";
             if (Options.CupidHideChat.GetBool())
@@ -376,9 +377,9 @@ namespace TownOfHost
             if (Options.TwinsHideChat.GetBool())
                 text += $"\n/cmd tc - {GetString("Command.TwinsChat")}";
             if (Options.OnmyojiHideChat.GetBool())
-                text += $"\n/cmd oc - {GetString("Command.OnmyojiChat")}";
+                text += $"\n/cmd sc - {GetString("Command.OnmyojiChat")}";
             if (Options.PavlovHideChat.GetBool())
-                text += $"\n/cmd pc - {GetString("Command.PavlovChat")}";
+                text += $"\n/cmd sc - {GetString("Command.PavlovChat")}";
             if (Options.StandHideChat.GetBool())
                 text += $"\n/cmd sc - {GetString("Command.StandChat")}";
             if (Options.FreeterHideChat.GetBool())
@@ -1202,6 +1203,7 @@ namespace TownOfHost
             CustomButtonHud.CantJikakuIsPresent = null;
             RoleSendList.Clear();
             UtilsNotifyRoles.ExtendedMeetingText = "";
+            ReportDeadBodyPatch.PersonalMeetingText.Clear();
             Roles.Madmate.MadAvenger.Skill = false;
             Roles.Neutral.JackalDoll.NowSideKickCount = 0;
             Balancer.Id = 255;
