@@ -885,6 +885,7 @@ public enum CustomRoles
     EvilGuesser,
     TimeSleeper,
     EvilBlender,
+    EvilJester,
     DummySpawner,
     Reverser,
     EvilSanta,

@@ -22,7 +22,7 @@ public sealed class Spider : RoleBase, IImpostor, IUsePhantomButton
             185000,
             SetupOptionItem,
             "sdr",
-            OptionSort: (2, 12),
+            OptionSort: (3, -1),
             from: From.SuperNewRoles
         );
 

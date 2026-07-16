@@ -939,6 +939,7 @@ namespace TownOfHost
                 case From.Speyrp: Fromtext = $"<#7fffbf>From:Yoran★</color>"; break;
                 case From.TownOfHost_Enhanced: Fromtext += $"<#ffc0cb>TownOfHost Enhanced</color>"; break;
                 case From.TownOfHost_Pko: Fromtext += $"<#FF9631>TownOfHost Pko</color>"; break;
+                case From.TownOfHost_Cat: Fromtext += $"<#b8cdd7>TownOfHost Cat</color>"; break;
                 case From.RevolutionaryHostRoles: Fromtext += $"<#3cb371>RevolutionaryHostRoles</color>"; break;
                 case From.Love_Couple_Mod: Fromtext += "<#ff6be4>Love Couple Mod</color>"; break;
             }

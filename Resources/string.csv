@@ -96,6 +96,7 @@
 "MassMurder","Mass Murderer","マスマーダー"
 "EvilStandMaster","EvilStandMaster","イビルスタンドマスター","","","",""
 "Spider","Spider","スパイダー"
+"EvilJester","EvilJester","イビルジェスター"
 "#ImpostorName"
 
 "# マッドメイト系役職"
@@ -485,6 +486,7 @@
 "EvolverInfo","Evolve by eating bodies","死体を喰らい進化せよ"
 "SwooperInfo","Become invisible and kill the crew","透明状態になってクルーを殺ろう!"
 "MassMurderInfo","","君の死に場所はここだ!"
+"EvilJesterInfo","","吊られるのが私の役目"
 "#ImpostorInfo"
 
 "# マッドメイト系役職"
@@ -890,7 +892,7 @@
 "FortunerInfoLong","After completing all tasks, the Kill button becomes usable.\nUsing the Kill button on a target will grant them a random attribute at the start of the next meeting.\n\nIf 'Grant one attribute per use' is ON, or if no overwrite attributes are configured, one random attribute is applied.\nOtherwise, all configured attributes are applied.","タスクを全て完了させた後、キルボタンが使用できるようになる。\nキルボタンを使用した相手に次会議開始時、ランダムで属性を付与する。\n\n'1回使用で属性を1つ渡す'がON、または上書きする付与属性が未設定の場合は、ランダムで1つ。\nそれ以外の場合は設定した属性が全て付与される。"
 "NiceAddoerInfoLong","Add-ons are granted","ナイスアドナー専用で属性が付与される。\n同じ属性が重複している場合、重複した属性はナイスアドナーの設定が優先される。"
 "InSenderInfoLong","When killed, he reports his own corpse.","キルされた時に、自身が自身の死体をレポートする。"
-"StaffInfoLong","If a match ends with a staff member not completing a task while the staff member is still alive, the staff member cannot win as a crewmate team. \n staff tasks are not included in the crewmate tasks.","スタッフが生存中にタスクを終えていない状態で試合が終了した場合、スタッフはクルーメイト陣営として勝利することができない。\nスタッフのタスクはクルーメイトのタスクには含まれない。\nベントを使用する事ができる。(設定あり)"
+"StaffInfoLong","If a match ends with a staff member not completing a task while the staff member is still alive, the staff member cannot win as a crewmate team. \n staff tasks are not included in the crewmate tasks.","スタッフがタスクを終えていない状態で試合が終了した場合、スタッフはクルーメイト陣営として勝利することができない。\nスタッフのタスクはクルーメイトのタスクには含まれない。\nベントを使用する事ができる。(設定あり)"
 "SwitchSheriffInfoLong","By entering the vent, the user can switch between task mode and sheriff mode. \nThe kill ability of the sheriff cannot be used while in the task mode. \nTasks cannot be performed while in the sheriff mode.","ベントに入ることでタスクモードとシェリフモードを切り替えることが出来る。\nタスクモード中にはシェリフのキル能力が使用できない。\nシェリフモードではタスクが行えない。"
 "NiceLoggerInfoLong","Using the one-click button allows you to place a sensor on the nearest door. \nThe sensor detects players near the door where it is placed, enabling them to receive notifications during meetings. \nAfter the meeting, the sensor must be re-installed. \nWhen the sensor detects a player, a cooldown period occurs before it can detect again.","ワンクリックボタンを使用することで一番近くにあるドアにセンサーを設置することが出来る。\nセンサーを設置したドアの付近にいるプレイヤーを検知し、会議時に通知を受け取ることが可能。\n会議後、センサーは再設置する必要がある。\nセンサーがプレイヤーを検知すると、次の検知までに一定時間クールタイムが発生する"
 "AndroidInfoLong","Performing tasks allows you to charge the battery.\n The maximum time inside vents and vent cool-down times vary based on remaining battery charge.\n You cannot enter vents while sabotage is active. The battery cannot be charged beyond 100%.","タスクを行うことでバッテリーをチャージすることが出来る。\nバッテリー残量によって、ベントクールダウン,ベント内での最大時間が変動する。\nサボタージュの発動中はベントに入ることが出来ない。\n100%以上に充電されることはない。"
@@ -1818,6 +1820,7 @@
 "SpiderTrapCooldown","Trap Cooldown","罠設置クールタイム"
 "SpiderTrapArmTime","Trap Arm Time","罠が起動するまでの時間"
 "SpiderTrapCatchDuration","Catch Duration","捕獲時間"
+"EvillJesterKillCount","EvilJester Kill Count","勝利できるキル数"
 
 "## MadMate Role Setting"
 "MadmateOption","MadMate Options","マッドメイト系役職の設定"
