@@ -1318,7 +1318,7 @@ namespace TownOfHost
                     //招待制グローバルチャット（部屋リンク）
                     //    /cmd gc          → 自分の接続IDを表示（配信者モード時はコピーのみ）
                     //    /cmd gc <相手ID> → 相手の接続IDを入力して相互リンク
-                    /*case "/gc":
+                    case "/gc":
                         canceled = true;
                         {
                             // グローバルチャットの接続はホストが管理する。
@@ -1424,7 +1424,7 @@ namespace TownOfHost
                             }
                         }
                         __instance.freeChatField.textArea.Clear();
-                        return false;*/
+                        return false;
                     case "/t":
                     case "/template":
                         canceled = true;
