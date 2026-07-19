@@ -834,6 +834,7 @@
 "EvolverInfoLong","Evolver is an Impostor that shortens its kill cooldown by eating dead bodies.\n\nPress the kill button near a corpse to start eating. You must stay near the corpse until eating finishes; leaving cancels it.\n\nEach evolution reduces the CURRENT kill cooldown by the set reduction rate, so the more you evolve, the shorter it gets. The reduction rate itself grows each evolution by the multiplier. The reduced cooldown is kept across meetings.","エボルバーは死体を捕食することでキルクールタイムが短くなるインポスター。\n\n死体の近くでキルボタンを押すと捕食を開始する。捕食中は死体の近くに居続けなければならず、離れるとキャンセルされる。\n\n進化(捕食)ごとに「現在のキルクール」から設定減少率分だけ短くなるため、進化を重ねるほどキルクールは短くなる。減少率自体も進化ごとに倍率で増加する。短くなったキルクールは会議を挟んでもリセットされない。"
 "SwooperInfoLong","","ベントに入ることで一定時間透明になることができる。"
 "MassMurderInfoLong","","ファントムボタンでワンクリックした場所の部屋を死の床にできます\n部屋以外で撫でた場合は何も起こりません\n\n死の床でキルする事によりキルクールが減少します\n\n死の床以外でのキルで設定数キルクールが増加する"
+"EvilJesterInfoLong","","設定回数キルしてから吊られると勝利できるインポスター。\n設定回数キルを行い会議で追放されるとインポスター陣営が勝利する。"
 "#ImpostorInfoLong"
 
 "# マッドメイト系役職"
