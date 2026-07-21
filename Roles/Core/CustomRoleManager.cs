@@ -568,6 +568,7 @@ public static class CustomRoleManager
                 case CustomRoles.Sunglasses: Sunglasses.Add(pc.PlayerId); break;
                 case CustomRoles.Securer: Securer.Add(pc.PlayerId); break;
                 case CustomRoles.Sealer: Sealer.Add(pc.PlayerId); break;
+                case CustomRoles.SilverBuzzer: SilverBuzzer.Add(pc.PlayerId); break;
 
                 case CustomRoles.Amanojaku: Amanojaku.Add(pc.PlayerId); break;
                 case CustomRoles.OneWolf: OneWolf.Add(pc.PlayerId); break;
@@ -948,6 +949,7 @@ public enum CustomRoles
     MagicalGirl,
     Walkure,
     SuspiciousTeller,
+    NiceNekomata,
     //TOH-K
     Gasp,
     VentMaster,
@@ -992,7 +994,6 @@ public enum CustomRoles
     //TOH-P
     NiceGuesser,
     Pukupuku,
-    NiceNekomata,
     Medium,
     SheriffHadouHo,
     Hitchhiker,
@@ -1099,6 +1100,7 @@ public enum CustomRoles
     Vega,
     Altair,
     Amateras,
+    Ruler,
     Abuser,
     Victim,
     // Sub-roll after 500
@@ -1174,6 +1176,7 @@ public enum CustomRoles
     Securer,
     Sealer,
     Triplets,
+    SilverBuzzer,
 }
 public enum CustomRoleTypes
 {

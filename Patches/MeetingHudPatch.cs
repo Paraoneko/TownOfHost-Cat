@@ -279,6 +279,11 @@ public static class MeetingHudPatch
             {
                 Send += neswmeg + "\n";
             }
+            var silverBuzzerMessage = SilverBuzzer.SendMessage();
+            if (silverBuzzerMessage != "")
+            {
+                Send += silverBuzzerMessage + "\n";
+            }
             if (Options.SyncButtonMode.GetBool())
             {
                 Send += "<#006e54>★" + string.Format(GetString("Message.SyncButtonLeft"), Options.SyncedButtonCount.GetFloat() - Options.UsedButtonCount) + "</color>\n";

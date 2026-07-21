@@ -1,4 +1,5 @@
-/*using AmongUs.GameOptions;
+/*
+using AmongUs.GameOptions;
 using Hazel;
 using TownOfHost.Roles.Core;
 using System.Collections.Generic;
@@ -198,4 +199,5 @@ public sealed class NiceredridingHood : RoleBase
         isRevivable = reader.ReadBoolean();
         killerPlayerId = reader.ReadByte();
     }
-}*/
+}
+*/

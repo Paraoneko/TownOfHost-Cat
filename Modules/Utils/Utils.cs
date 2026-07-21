@@ -311,8 +311,8 @@ namespace TownOfHost
                     + $"\n/cmd addwhite(aw) - {GetString("Command.addwhite")}"
                     + $"\n/cmd set rule(s r) - {GetString("Command.set_rule")}"
                     + $"\n/cmd mod id|name|color - {GetString("Command.modadd")}"
-                    + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}";
-                //+ $"\n/cmd gc - {GetString("Command.globalconnect")}";
+                    + $"\n/cmd mod delete id|name|color - {GetString("Command.moddel")}"
+                    + $"\n/cmd gc - {GetString("Command.globalconnect")}";
 
                 if (Options.OptionStreamerSetting.GetBool())
                 {

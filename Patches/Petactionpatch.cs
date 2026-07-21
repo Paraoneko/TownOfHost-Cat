@@ -1,5 +1,3 @@
-// ペットの自動破棄機能はK対応来るまで一時的にこうしてます。対応が来たらTOHK処理に戻します。
-
 using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
@@ -119,7 +117,6 @@ public static class PetsHelper
 
     public static void RemovePet(PlayerControl pc)
     {
-        // Data.IsDeadは会議中にアンチブラックアウトで偽装されるため、PlayerState由来のIsAliveで判定する
         if (pc?.Data == null || pc.IsAlive()) return;
         if (pc.CurrentOutfit.PetId == "") return;
 
@@ -154,6 +151,7 @@ public static class PetActionManager
     private const string DefaultPetIdForPetAction = "pet_test";
 
     public static readonly Dictionary<byte, System.Action> Handlers = new();
+    public static bool AutoGrantPetEnabled => Options.AutoGrantPet?.GetBool() ?? true;
 
     public static void Register(byte playerId, System.Action action)
     {
@@ -174,6 +172,7 @@ public static class PetActionManager
     public static void EnsureDefaultPet(byte playerId)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (!AutoGrantPetEnabled) return;
         if (!GameStates.IsInGame || GameStates.IsLobby) return;
 
         var pc = PlayerCatch.GetPlayerById(playerId);

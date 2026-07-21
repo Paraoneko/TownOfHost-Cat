@@ -146,13 +146,6 @@ namespace TownOfHost
                 foreach (var victim in CustomRoleManager.AllActiveRoles.Values.OfType<Victim>())
                     victim.EnforceFactionWin();
 
-
-                // 勝者固定経路でも、加虐者・被虐者の個別条件を必ず反映する。
-                foreach (var abuser in CustomRoleManager.AllActiveRoles.Values.OfType<Abuser>())
-                    abuser.EnforceWinRequirement();
-                foreach (var victim in CustomRoleManager.AllActiveRoles.Values.OfType<Victim>())
-                    victim.EnforceFactionWin();
-
                 if (!lockWinner && SuddenDeathMode.NowSuddenDeathTemeMode && !(CustomWinnerHolder.WinnerTeam is CustomWinner.SuddenDeathRed or CustomWinner.SuddenDeathBlue or CustomWinner.SuddenDeathGreen or CustomWinner.SuddenDeathYellow or CustomWinner.PurpleLovers))
                 {
                     SuddenDeathMode.TeamAllWin();
@@ -253,6 +246,8 @@ namespace TownOfHost
                 {
                     CustomWinnerHolder.ResetAndSetWinner(CustomWinner.Draw);
                 }
+
+                Ruler.ApplyGameEndRules();
 
                 if (isSabotageEnd && Options.OptionSabotageFinAllKill.GetBool())
                 {

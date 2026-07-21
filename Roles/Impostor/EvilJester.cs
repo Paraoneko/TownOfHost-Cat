@@ -24,8 +24,11 @@ public sealed class EvilJester : RoleBase, IImpostor
     public EvilJester(PlayerControl player)
         : base(RoleInfo, player)
     {
-
-
+        NotKillCount = false;
+        if (OptionEvillJesterKillCount.GetInt() == 0)
+        {
+            NotKillCount = true;
+        }
         KillCount = 0;
     }
 
@@ -33,6 +36,7 @@ public sealed class EvilJester : RoleBase, IImpostor
     static OptionItem OptionKillCool;
     static float KillCount;
     static bool WinFlag;
+    static bool NotKillCount;
     enum OptionName
     {
         EvillJesterKillCount,
@@ -47,6 +51,10 @@ public sealed class EvilJester : RoleBase, IImpostor
     }
     public override string GetProgressText(bool comms = false, bool GameLog = false)
     {
+        if (OptionEvillJesterKillCount.GetInt() == 0)
+        {
+            return "";
+        }
         var color = KillCount >= OptionEvillJesterKillCount.GetFloat()
             ? Color.red
             : Color.white;

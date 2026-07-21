@@ -1,7 +1,4 @@
-//投票によりこの役職は一度封印。
-//今後調整等をして復活する場合もあります。
-
-/*using AmongUs.GameOptions;
+using AmongUs.GameOptions;
 using UnityEngine;
 
 using TownOfHost.Roles.Core;
@@ -192,4 +189,3 @@ public sealed class Suicider : RoleBase
         return $"<color={color}>({sec}s)</color>";
     }
 }
-*/
